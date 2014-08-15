@@ -1,0 +1,10 @@
+*.egg
+*.egg-info
+*.py[co]
+
+*.egg/
+__pycache__/
+
+dist/
+
+.coverage
