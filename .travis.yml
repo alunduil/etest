@@ -1,0 +1,9 @@
+language: python
+python:
+  - 3.3
+install:
+  - pip install -q flake8
+script:
+  - pip install .
+  - flake8
+  - nosetests
