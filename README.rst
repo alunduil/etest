@@ -48,7 +48,7 @@ The current status of the build is:
 Authors
 =======
 
-* Alex Brandt <alunduil@alunduil.com>
+* Alex Brandt <alunduil@gentoo.org>
 
 Known Issues
 ============

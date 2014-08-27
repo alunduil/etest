@@ -58,10 +58,14 @@ PARAMS['keywords'] = [
 PARAMS['packages'] = find_packages()
 
 PARAMS['install_requires'] = [
+    'click',
 ]
 
 PARAMS['test_suite'] = 'nose.collector'
 PARAMS['tests_require'] = [
+    'coverage'
+    'mock',
+    'nose',
 ]
 
 PARAMS['entry_points'] = {
