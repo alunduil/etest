@@ -31,7 +31,6 @@ def echo_check_verbose(check):
 @click.command()
 @click.option('-d', '--dry-run', is_flag = True, default = False, help = 'report actions but do not run tests')
 @click.option('-f', '--fast', is_flag = True, default = False, help = 'stop at first failure')
-@click.option('-j', '--jobs', default = 1, help = 'number of tests to run simultaneously')
 @click.option('-q', '--quiet', is_flag = True, default = False, help = 'suppress all output')
 @click.option('-v', '--verbose', is_flag = True, default = False, help = 'provide more output')
 @click.version_option(information.VERSION)
@@ -60,6 +59,8 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
         if verbose:
             for check in failures:
                 click.echo()
+                click.echo('=' * click.get_terminal_size[0])
+                click.echo(check)
                 click.echo('-' * click.get_terminal_size[0])
                 click.echo(check.output)
             click.echo('-' * click.get_terminal_size[0])

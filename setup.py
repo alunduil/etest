@@ -59,6 +59,8 @@ PARAMS['packages'] = find_packages()
 
 PARAMS['install_requires'] = [
     'click',
+    'docker-py',
+    'ply',
 ]
 
 PARAMS['test_suite'] = 'nose.collector'
