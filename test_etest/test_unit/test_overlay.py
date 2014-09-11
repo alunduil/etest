@@ -17,7 +17,9 @@ class TestOverlayWithInvalidOverlay(unittest.TestCase):
     def test_invalid_overlay(self):
         '''overlay.Overlay()—invalid overlay'''
 
-        self.assertRaises(overlay.InvalidOverlayError, overlay.Overlay)
+        self.overlay = overlay.Overlay()
+
+        self.assertRaises(overlay.InvalidOverlayError, getattr, self.overlay, 'directory')
 
 
 class TestOverlayWithEmptyOverlay(unittest.TestCase):

@@ -8,23 +8,25 @@ import unittest
 
 from test_etest.test_fixtures.test_helpers import BASH_TEXTS
 
-from etest.helpers import bash_to_dict, ParseError
+from etest.parsers.bash import BashParser, BashSyntaxError
 
 logger = logging.getLogger(__name__)
 
 
-class TestBashToDict(unittest.TestCase):
+class TestBashParser(unittest.TestCase):
     def setUp(self):
         self.texts = BASH_TEXTS
+        self.parser = BashParser()
+        self.parser.build()
 
     def test_correct(self):
         '''helpers.bash_to_dict()—correct parse'''
 
-        for text in self.texts['CORRECT']:
-            self.assertEqual(text['dictionary'], bash_to_dict(text['bash']))
+        for text in self.texts['correct']:
+            self.assertEqual(text['dictionary'], self.parser.parser.parse(text['bash']))
 
     def test_incorrect(self):
         '''helpers.bash_to_dict()—incorrect parse'''
 
-        for text in self.texts['INCORRECT']:
-            self.assertRaises(ParseError, bash_to_dict, test['bash'])
+        for text in self.texts['incorrect']:
+            self.assertRaises(BashSyntaxError, self.parser.parser.parse, text['bash'])

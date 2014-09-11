@@ -6,7 +6,8 @@
 import logging
 import os
 
-from etest import helpers
+from etest.lexers.bash import BashLexer
+from etest.parsers.bash import BashParser
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,12 @@ class Ebuild(object):
         self.overlay = overlay
 
         self.parsed = False
+
+        self.parser = BashParser()
+        self.parser.build()
+
+        self.lexer = BashLexer()
+        self.lexer.build()
 
     @property
     def name(self):
@@ -47,7 +54,7 @@ class Ebuild(object):
         -------
 
         Dictionary whose keys are variables in the associated ebuild.
-        
+
         '''
 
         if not self.parsed:
@@ -55,8 +62,16 @@ class Ebuild(object):
 
             logger.debug('overlay_path: %s', self.overlay.directory)
 
-            with open(os.path.join(self.overlay.directory, self.path), 'r') as fh:
-                self._parse = helpers.bash_to_dict(fh.read())
+            _ = os.path.join(self.overlay.directory, self.path)
+
+            logger.info('parsing: %s', _)
+
+            with open(_, 'r') as fh:
+                self.parser.parser.parse(
+                    input = fh.read(),
+                    lexer = self.lexer.lexer,
+                )
+                self._parse = self.parser.symbols
 
             self.parsed = True
 

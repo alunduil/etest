@@ -16,17 +16,17 @@ from test_etest.test_fixtures import FIXTURES_DIRECTORY
 logger = logging.getLogger(__name__)
 
 
-class TestEbuildConstructor(unittest.TestCase):
+class TestBaseEbuild(unittest.TestCase):
     def setUp(self):
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
-        os.chdir(os.path.join(FIXTURES_DIRECTORY, 'overlay'))
 
-        logger.debug('FIXTURES_DIRECTORY: %s', FIXTURES_DIRECTORY)
-        logger.debug('PWD: %s', os.getcwd())
+        os.chdir(os.path.join(FIXTURES_DIRECTORY, 'overlay'))
 
         self.mocked_overlay = mock.MagicMock()
         type(self.mocked_overlay).directory = mock.PropertyMock(return_value = os.getcwd())
 
+
+class TestEbuildConstructor(TestBaseEbuild):
     def test_constructor(self):
         '''ebuild.Ebuild()'''
 
@@ -36,16 +36,9 @@ class TestEbuildConstructor(unittest.TestCase):
         )
 
 
-class TestEbuildProperties(unittest.TestCase):
+class TestEbuildProperties(TestBaseEbuild):
     def setUp(self):
-        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
-        os.chdir(os.path.join(FIXTURES_DIRECTORY, 'overlay'))
-
-        logger.debug('FIXTURES_DIRECTORY: %s', FIXTURES_DIRECTORY)
-        logger.debug('PWD: %s', os.getcwd())
-
-        self.mocked_overlay = mock.MagicMock()
-        type(self.mocked_overlay).directory = mock.PropertyMock(return_value = os.getcwd())
+        super(TestEbuildProperties, self).setUp()
 
         self.ebuild = ebuild.Ebuild(
             path = 'app-portage/etest/etest-9999.ebuild',
@@ -58,16 +51,9 @@ class TestEbuildProperties(unittest.TestCase):
         self.assertEqual(0, len(self.ebuild.use_flags))
 
 
-class TestEbuildParse(unittest.TestCase):
+class TestEbuildParse(TestBaseEbuild):
     def setUp(self):
-        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
-        os.chdir(os.path.join(FIXTURES_DIRECTORY, 'overlay'))
-
-        logger.debug('FIXTURES_DIRECTORY: %s', FIXTURES_DIRECTORY)
-        logger.debug('PWD: %s', os.getcwd())
-
-        self.mocked_overlay = mock.MagicMock()
-        type(self.mocked_overlay).directory = mock.PropertyMock(return_value = os.getcwd())
+        super(TestEbuildParse, self).setUp()
 
         self.ebuild = ebuild.Ebuild(
             path = 'app-portage/etest/etest-9999.ebuild',
@@ -76,7 +62,7 @@ class TestEbuildParse(unittest.TestCase):
 
     def test_parse(self):
         '''ebuild.Ebuild().parse()'''
-        
+
         self.assertIsInstance(self.ebuild.parse(), dict)
 
     def test_parse_iuse(self):
