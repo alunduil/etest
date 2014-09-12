@@ -37,8 +37,6 @@ class BashLexer(object):
     def build(self, *args, **kwargs):
         self.lexer = ply.lex.lex(
             module = self,
-            optimize = 1,
-            lextab = 'bashtab',
             outputdir = os.path.dirname(__file__),
             errorlog = logger,
             *args,

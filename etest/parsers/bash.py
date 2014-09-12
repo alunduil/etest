@@ -25,10 +25,9 @@ class BashParser(object):
     def build(self, *args, **kwargs):
         self.parser = ply.yacc.yacc(
             module = self,
-            tabmodule = 'bashtab',
-            optimize = 1,
             outputdir = os.path.dirname(__file__),
             errorlog = logger,
+            picklefile = os.path.join(os.path.dirname(__file__), 'bash.p'),
             *args,
             **kwargs
         )
