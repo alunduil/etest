@@ -1,4 +1,4 @@
-FROM wking/gentoo
+FROM wking/gentoo:latest
 MAINTAINER Alex Brandt <alunduil@gentoo.org>
 
 ENV ACCEPT_KEYWORDS ~amd64
