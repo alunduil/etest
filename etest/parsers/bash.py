@@ -32,6 +32,10 @@ class BashParser(object):
             **kwargs
         )
 
+    #
+    # Modified Productions from the BASH Grammar
+    #
+
     def p_inputunit_list(self, p):
         '''inputunit_list : inputunit
                           | inputunit_list inputunit
@@ -51,7 +55,10 @@ class BashParser(object):
             logger.debug('inputunit: p[%d]: %s', _, p[_])
 
     def p_word_list_word(self, p):
-        '''word_list : WORD'''
+        '''word_list : WORD
+                     | quoted_word
+
+        '''
 
         for _ in range(len(p)):
             logger.debug('world_list: p[%d]: %s', _, p[_])
@@ -130,7 +137,7 @@ class BashParser(object):
         p[0] = ('WORD', p[1])
 
     def p_simple_command_element_assignment(self, p):
-        '''simple_command_element : ASSIGNMENT_WORD'''
+        '''simple_command_element : assignment_word'''
 
         for _ in range(len(p)):
             logger.debug('simple_command_element: p[%d]: %s', _, p[_])
@@ -475,12 +482,90 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug('timespec: p[%d]: %s', _, p[_])
 
+    #
+    # Additional Productions
+    #
+
+    def p_assignment_word_array(self, p):
+        '''assignment_word : WORD '=' '(' word_list ')' '''
+
+        for _ in range(len(p)):
+            logger.debug('assignment_word: p[%d]: %s', _, p[_])
+
+        if p[1] in self.symbols:
+            logger.warn('re-assignment of %s', p[1])
+
+        self.symbols[p[1]] = p[4]
+
+    def p_assignment_word_number(self, p):
+        '''assignment_word : WORD '=' NUMBER'''
+
+        for _ in range(len(p)):
+            logger.debug('assignment_word: p[%d]: %s', _, p[_])
+
+        if p[1] in self.symbols:
+            logger.warn('re-assignment of %s', p[1])
+
+        self.symbols[p[1]] = int(p[3])
+
+    def p_assignment_word_quoted_word(self, p):
+        '''assignment_word : WORD '=' quoted_word'''
+
+        for _ in range(len(p)):
+            logger.debug('assignment_word: p[%d]: %s', _, p[_])
+
+        self.symbols[p[1]] = p[3]
+
+    def p_assignment_word_word(self, p):
+        '''assignment_word : WORD '=' WORD'''
+
+        for _ in range(len(p)):
+            logger.debug('assignment_word: p[%d]: %s', _, p[_])
+
+        if p[1] in self.symbols:
+            logger.warn('re-assignment of %s', p[1])
+
+        self.symbols[p[1]] = p[3]
+
+    def p_quoted_word(self, p):
+        '''quoted_word : SINGLE_QUOTE WORD SINGLE_QUOTE
+                       | DOUBLE_QUOTE WORD DOUBLE_QUOTE
+
+        '''
+
+        for _ in range(len(p)):
+            logger.debug('world_list: p[%d]: %s', _, p[_])
+
+        p[0] = p[2]
+
     def p_error(self, p):
-        _ = p.lexer.lexdata.rfind('\n', 0, p.lexpos)
+        if p is None:
+            raise BashSyntaxError('did not receive any input')
 
-        if _ < 0:
-            _ = 0
+        logger.debug('p: %s', p)
+        logger.debug('p.type: %s', p.type)
+        logger.debug('p.value: %s', p.value)
 
-        column = (p.lexpos - _) + 1
+        line_start = p.lexer.lexdata.rfind('\n', 0, p.lexpos)
 
-        raise BashSyntaxError('{p.lexer.lineno}: unexpected input: {p} at {0}'.format(column, p = p), p)
+        if line_start < 0:
+            line_start = 0
+
+        column = (p.lexpos - line_start) + 1
+
+        line_end = p.lexer.lexdata.find('\n', p.lexpos)
+
+        if line_end < 0:
+            line_end = p.lexpos
+
+        error_message = '{p.lexer.lineno}: '.format(p = p)
+
+        _ = len(error_message)
+
+        error_message += p.lexer.lexdata[line_start:line_end].strip() + '\n'
+        error_message += ' ' * ( column - 2 + _ ) + '^\n'
+        error_message += 'unexpected token ({p.type}): {p.value}'.format(p = p)
+
+        logger.error('\n' + error_message)
+
+        raise BashSyntaxError(error_message, p)

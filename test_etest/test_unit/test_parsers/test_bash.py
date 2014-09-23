@@ -6,9 +6,10 @@
 import logging
 import unittest
 
-from test_etest.test_fixtures.test_helpers import BASH_TEXTS
+from test_etest.test_fixtures.test_bash import BASH_TEXTS
 
-from etest.parsers.bash import BashParser, BashSyntaxError
+from etest.lexers.bash import BashLexer, BashSyntaxError
+from etest.parsers.bash import BashParser
 
 logger = logging.getLogger(__name__)
 
@@ -16,17 +17,32 @@ logger = logging.getLogger(__name__)
 class TestBashParser(unittest.TestCase):
     def setUp(self):
         self.texts = BASH_TEXTS
+        self.lexer = BashLexer()
         self.parser = BashParser()
-        self.parser.build()
 
     def test_correct(self):
-        '''helpers.bash_to_dict()—correct parse'''
+        '''parsers.bash—correct parse'''
 
         for text in self.texts['correct']:
-            self.assertEqual(text['dictionary'], self.parser.parser.parse(text['bash']))
+            logger.info('name: %s', text['name'])
+
+            self.lexer.build()
+            self.parser.build()
+
+            self.parser.parser.parse(
+                input = text['bash'],
+                lexer = self.lexer.lexer,
+            )
+
+            self.assertEqual(text['dictionary'], self.parser.symbols)
 
     def test_incorrect(self):
-        '''helpers.bash_to_dict()—incorrect parse'''
+        '''parsers.bash—incorrect parse'''
 
         for text in self.texts['incorrect']:
-            self.assertRaises(BashSyntaxError, self.parser.parser.parse, text['bash'])
+            logger.info('name: %s', text['name'])
+
+            self.lexer.build()
+            self.parser.build()
+
+            self.assertRaises(BashSyntaxError, self.parser.parser.parse, input = text['bash'], lexer = self.lexer.lexer)

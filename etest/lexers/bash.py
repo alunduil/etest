@@ -43,19 +43,24 @@ class BashLexer(object):
             **kwargs
         )
 
+    states = (
+        ( 'singlequote', 'exclusive', ),
+        ( 'doublequote', 'exclusive', ),
+    )
+
     tokens = (
         'AND_AND',
         'AND_GREATER',
         'AND_GREATER_GREATER',
         'ARITH_CMD',
         'ARITH_FOR_EXPRS',
-        'ASSIGNMENT_WORD',
         'BANG',
         'BAR_AND',
         'COMMENT',
         'COND_CMD',
         'COND_END',
         'COND_START',
+        'DOUBLE_QUOTE',
         'GREATER_AND',
         'GREATER_BAR',
         'GREATER_GREATER',
@@ -71,6 +76,7 @@ class BashLexer(object):
         'SEMI_AND',
         'SEMI_SEMI',
         'SEMI_SEMI_AND',
+        'SINGLE_QUOTE',
         'TIMEIGN',
         'TIMEOPT',
         'WORD',
@@ -78,6 +84,7 @@ class BashLexer(object):
 
     literals = (
         '<',
+        '=',
         '>',
         '|',
         '-',
@@ -101,10 +108,6 @@ class BashLexer(object):
         r'arith for exprs'
         return t
 
-    def t_ASSIGNMENT_WORD(self, t):
-        r'======'
-        return t
-
     t_BANG = r'!'
     t_BAR_AND = r'\|&'
 
@@ -116,6 +119,28 @@ class BashLexer(object):
 
     t_COND_END = r']]'
     t_COND_START = r'\[\['
+
+    def t_DOUBLE_QUOTE(self, t):
+        r'"'
+
+        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
+
+        if t.lexer.lexstate == 'INITIAL':
+            t.lexer.begin('doublequote')
+
+        return t
+
+    def t_doublequote_DOUBLE_QUOTE(self, t):
+        r'"'
+
+        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
+
+        t.lexer.begin('INITIAL')
+
+        return t
+
+    t_doublequote_WORD = r'([^"]|(\\\\)*\\")+'
+
     t_GREATER_AND = r'>&'
     t_GREATER_BAR = r'>\|'
     t_GREATER_GREATER = r'>>'
@@ -145,11 +170,35 @@ class BashLexer(object):
     t_SEMI_AND = r';&'
     t_SEMI_SEMI = r';;'
     t_SEMI_SEMI_AND = r';;&'
+
+    def t_SINGLE_QUOTE(self, t):
+        r'\''
+
+        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
+
+        if t.lexer.lexstate == 'INITIAL':
+            t.lexer.begin('singlequote')
+
+        return t
+
+    def t_singlequote_SINGLE_QUOTE(self, t):
+        r'\''
+
+        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
+
+        t.lexer.begin('INITIAL')
+
+        return t
+
+    t_singlequote_WORD = r'([^\']|(\\\\)*\\\')+'
+
     t_TIMEIGN = r'--'
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'[a-zA-Z][a-zA-Z_]*'
+        r'[a-zA-Z][\da-zA-Z_-]*'
+
+        logger.info('tokenize WORD')
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()
@@ -157,16 +206,36 @@ class BashLexer(object):
         return t
 
     t_ignore = ' \t'
+    t_doublequote_ignore = ''
+    t_singlequote_ignore = ''
 
     def t_error(self, t):
-        _ = t.lexer.lexdata.rfind('\n', 0, t.lexpos)
+        line_start = t.lexer.lexdata.rfind('\n', 0, t.lexpos)
 
-        if _ < 0:
-            _ = 0
+        if line_start < 0:
+            line_start = 0
 
-        column = (t.lexpos - _) + 1
+        column = (t.lexpos - line_start) + 1
 
-        raise BashSyntaxError('{t.lexer.lineno}: unexpected input: {t.value[0]} at {0}'.format(column, t = t), t)
+        line_end = t.lexer.lexdata.find('\n', t.lexpos)
+
+        if line_end < 0:
+            line_end = t.lexpos
+
+        error_message = '{t.lexer.lineno}: '.format(t = t)
+
+        _ = len(error_message)
+
+        error_message += t.lexer.lexdata[line_start:line_end].strip() + '\n'
+        error_message += ' ' * ( column - 2 + _ ) + '^\n'
+        error_message += 'unexpected token: {t.value}'.format(t = t)
+
+        logger.error('\n' + error_message)
+
+        raise BashSyntaxError(error_message, t)
+
+    t_singlequote_error = t_error
+    t_doublequote_error = t_error
 
 
 class BashSyntaxError(RuntimeError):

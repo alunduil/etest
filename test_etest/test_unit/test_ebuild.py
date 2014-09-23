@@ -45,28 +45,12 @@ class TestEbuildProperties(TestBaseEbuild):
             overlay = self.mocked_overlay,
         )
 
+        self.ebuild.lexer = mock.MagicMock()
+        self.ebuild.parser = mock.MagicMock()
+
     def test_use_flags(self):
         '''ebuild.Ebuild().use_flags'''
 
+        type(self.ebuild.parser).symbols = mock.PropertyMock(return_value = {'IUSE': ()})
+
         self.assertEqual(0, len(self.ebuild.use_flags))
-
-
-class TestEbuildParse(TestBaseEbuild):
-    def setUp(self):
-        super(TestEbuildParse, self).setUp()
-
-        self.ebuild = ebuild.Ebuild(
-            path = 'app-portage/etest/etest-9999.ebuild',
-            overlay = self.mocked_overlay,
-        )
-
-    def test_parse(self):
-        '''ebuild.Ebuild().parse()'''
-
-        self.assertIsInstance(self.ebuild.parse(), dict)
-
-    def test_parse_iuse(self):
-        '''ebuild.Ebuild.parse()['IUSE']'''
-
-        self.assertIn('IUSE', self.ebuild.parse())
-        self.assertEqual(['test'], self.ebuild.parse()['IUSE'])
