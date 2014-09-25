@@ -17,6 +17,12 @@ class BashParser(object):
 
     start = 'inputunit_list'
 
+    precedence = (
+        ('left', '&', ';', 'NEWLINE', ),
+        ('left', 'AND_AND', 'OR_OR', ),
+        ('right', '|', 'BAR_AND', ),
+    )
+
     def __init__(self):
         self.parser = None
 
@@ -397,26 +403,22 @@ class BashParser(object):
             logger.debug('compound_list: p[%d]: %s', _, p[_])
 
     def p_list0(self, p):
-        '''list0 : pipeline_command list1'''
+        '''list0 : list1 NEWLINE newline_list
+                 | list1 '&' newline_list
+                 | list1 ';' newline_list
+
+        '''
 
         for _ in range(len(p)):
             logger.debug('list0: p[%d]: %s', _, p[_])
 
     def p_list1(self, p):
-        '''list1 : AND_AND newline_list list0
-                 | OR_OR newline_list list0
-                 | list2 list0
-                 | list2
-
-        '''
-
-        for _ in range(len(p)):
-            logger.debug('list1: p[%d]: %s', _, p[_])
-
-    def p_list2(self, p):
-        '''list2 : NEWLINE newline_list
-                 | '&' newline_list
-                 | ';' newline_list
+        '''list1 : list1 AND_AND newline_list list1
+                 | list1 OR_OR newline_list list1
+                 | list1 '&' newline_list list1
+                 | list1 ';' newline_list list1
+                 | list1 NEWLINE newline_list list1
+                 | pipeline_command
 
         '''
 
