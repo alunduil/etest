@@ -17,8 +17,6 @@ logger = logging.getLogger(__name__)
 class TestBashParser(unittest.TestCase):
     def setUp(self):
         self.texts = BASH_TEXTS
-        self.lexer = BashLexer()
-        self.parser = BashParser()
 
     def test_correct(self):
         '''parsers.bash—correct parse'''
@@ -26,10 +24,17 @@ class TestBashParser(unittest.TestCase):
         for text in self.texts['correct']:
             logger.info('name: %s', text['name'])
 
+            self.lexer = BashLexer()
             self.lexer.build()
-            self.parser.build()
+
+            self.parser = BashParser()
+            self.parser.build(
+                debug = True,
+                debuglog = logger,
+            )
 
             self.parser.parser.parse(
+                debug = logger,
                 input = text['bash'],
                 lexer = self.lexer.lexer,
             )
@@ -42,7 +47,13 @@ class TestBashParser(unittest.TestCase):
         for text in self.texts['incorrect']:
             logger.info('name: %s', text['name'])
 
+            self.lexer = BashLexer()
             self.lexer.build()
-            self.parser.build()
+
+            self.parser = BashParser()
+            self.parser.build(
+                debug = True,
+                debuglog = logger,
+            )
 
             self.assertRaises(BashSyntaxError, self.parser.parser.parse, input = text['bash'], lexer = self.lexer.lexer)

@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 class BashParser(object):
     tokens = BashLexer.tokens
 
+    start = 'inputunit_list'
+
     def __init__(self):
-        self.symbols = {}
-
-        self.start = 'inputunit_list'
-
         self.parser = None
+
+        self.symbols = {}
 
     def build(self, *args, **kwargs):
         self.parser = ply.yacc.yacc(
@@ -60,22 +60,18 @@ class BashParser(object):
 
         '''
 
-        for _ in range(len(p)):
-            logger.debug('world_list: p[%d]: %s', _, p[_])
-
         p[0] = (p[1],)
 
-        logger.debug('world_list: p[0]: %s', p[0])
+        for _ in range(len(p)):
+            logger.debug('world_list: p[%d]: %s', _, p[_])
 
     def p_word_list_list(self, p):
         '''word_list : word_list WORD'''
 
-        for _ in range(len(p)):
-            logger.debug('world_list: p[%d]: %s', _, p[_])
-
         p[0] = p[1] + (p[2],)
 
-        logger.debug('word_list: p[0]: %s', p[0])
+        for _ in range(len(p)):
+            logger.debug('world_list: p[%d]: %s', _, p[_])
 
     def p_redirection(self, p):
         '''redirection : '>' WORD
@@ -129,28 +125,31 @@ class BashParser(object):
             logger.debug('redirection: p[%d]: %s', _, p[_])
 
     def p_simple_command_element_word(self, p):
-        '''simple_command_element : WORD'''
+        '''simple_command_element : WORD
+                                  | quoted_word
+
+        '''
+
+        p[0] = ('WORD', p[1])
 
         for _ in range(len(p)):
             logger.debug('simple_command_element: p[%d]: %s', _, p[_])
-
-        p[0] = ('WORD', p[1])
 
     def p_simple_command_element_assignment(self, p):
         '''simple_command_element : assignment_word'''
 
+        p[0] = ('ASSIGNMENT', p[1])
+
         for _ in range(len(p)):
             logger.debug('simple_command_element: p[%d]: %s', _, p[_])
-
-        p[0] = ('ASSIGNMENT', p[1])
 
     def p_simple_command_element_redirection(self, p):
         '''simple_command_element : redirection'''
 
+        p[0] = ('REDIRECTION',)
+
         for _ in range(len(p)):
             logger.debug('simple_command_element: p[%d]: %s', _, p[_])
-
-        p[0] = ('REDIRECTION',)
 
     def p_redirection_list(self, p):
         '''redirection_list : redirection
@@ -178,6 +177,8 @@ class BashParser(object):
                    | coproc
 
         '''
+
+        p[0] = (p[1], )
 
         for _ in range(len(p)):
             logger.debug('command: p[%d]: %s', _, p[_])
@@ -249,12 +250,26 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug('case_command: p[%d]: %s', _, p[_])
 
-    def p_function_def(self, p):
-        '''function_def : WORD '(' ')' newline_list function_body
-                        | FUNCTION WORD '(' ')' newline_list function_body
-                        | FUNCTION WORD newline_list function_body
+    def p_function_def_without_keyword(self, p):
+        '''function_def : WORD '(' ')' newline_list function_body'''
 
-        '''
+        p[0] = ('FUNCTION', p[1], p[5], )
+
+        for _ in range(len(p)):
+            logger.debug('function_def: p[%d]: %s', _, p[_])
+
+    def p_function_def_with_keyword_and_parens(self, p):
+        '''function_def : FUNCTION WORD '(' ')' newline_list function_body'''
+
+        p[0] = (p[1], p[2], p[6], )
+
+        for _ in range(len(p)):
+            logger.debug('function_def: p[%d]: %s', _, p[_])
+
+    def p_function_def(self, p):
+        '''function_def : FUNCTION WORD newline_list function_body'''
+
+        p[0] = (p[1], p[2], p[4], )
 
         for _ in range(len(p)):
             logger.debug('function_def: p[%d]: %s', _, p[_])
@@ -382,6 +397,8 @@ class BashParser(object):
             logger.debug('compound_list: p[%d]: %s', _, p[_])
 
     def p_list0(self, p):
+        '''list0 : pipeline_command list1'''
+
         '''list0 : list1 NEWLINE newline_list
                  | list1 '&' newline_list
                  | list1 ';' newline_list
@@ -392,6 +409,13 @@ class BashParser(object):
             logger.debug('list0: p[%d]: %s', _, p[_])
 
     def p_list1(self, p):
+        '''list1 : AND_AND newline_list list0
+                 | OR_OR newline_list list0
+                 | list2 list0
+                 | list2
+
+        '''
+
         '''list1 : list1 AND_AND newline_list list1
                  | list1 OR_OR newline_list list1
                  | list1 '&' newline_list list1
@@ -403,6 +427,16 @@ class BashParser(object):
 
         for _ in range(len(p)):
             logger.debug('list1: p[%d]: %s', _, p[_])
+
+    def p_list2(self, p):
+        '''list2 : NEWLINE newline_list
+                 | '&' newline_list
+                 | ';' newline_list
+
+        '''
+
+        for _ in range(len(p)):
+            logger.debug('list2: p[%d]: %s', _, p[_])
 
     def p_simple_list_terminator(self, p):
         '''simple_list_terminator : NEWLINE'''
@@ -435,39 +469,77 @@ class BashParser(object):
 
         '''
 
+        p[0] = p[1]
+
         for _ in range(len(p)):
             logger.debug('simple_list: p[%d]: %s', _, p[_])
 
-    def p_simple_list1(self, p):
+    def p_simple_list1_list_with_newlines(self, p):
         '''simple_list1 : simple_list1 AND_AND newline_list simple_list1
                         | simple_list1 OR_OR newline_list simple_list1
-                        | simple_list1 '&' simple_list1
-                        | simple_list1 ';' simple_list1
-                        | pipeline_command
 
         '''
+
+        p[0] = (p[1], p[2], p[4], )
 
         for _ in range(len(p)):
             logger.debug('simple_list1: p[%d]: %s', _, p[_])
 
-    def p_pipeline_command(self, p):
-        '''pipeline_command : pipeline
-                            | BANG pipeline_command
+    def p_simple_list1_list(self, p):
+        '''simple_list1 : simple_list1 '&' simple_list1
+                        | simple_list1 ';' simple_list1
+
+        '''
+
+        p[0] = (p[1], p[2], p[3], )
+
+        for _ in range(len(p)):
+            logger.debug('simple_list1: p[%d]: %s', _, p[_])
+
+    def p_simple_list1_command(self, p):
+        '''simple_list1 : pipeline_command'''
+
+        p[0] = (p[1], )
+
+        for _ in range(len(p)):
+            logger.debug('simple_list1: p[%d]: %s', _, p[_])
+
+    def p_pipeline_command_unmodified(self, p):
+        '''pipeline_command : pipeline'''
+
+        p[0] = (p[1], )
+
+        for _ in range(len(p)):
+            logger.debug('pipeline_command: p[%d]: %s', _, p[_])
+
+    def p_pipeline_command_modified(self, p):
+        '''pipeline_command : BANG pipeline_command
                             | timespec pipeline_command
                             | timespec list_terminator
                             | BANG list_terminator
 
         '''
 
+        p[0] = (p[1], p[2], )
+
         for _ in range(len(p)):
             logger.debug('pipeline_command: p[%d]: %s', _, p[_])
 
-    def p_pipeline(self, p):
+    def p_pipeline_with_pipe(self, p):
         '''pipeline : pipeline '|' newline_list pipeline
                     | pipeline BAR_AND newline_list pipeline
-                    | command
 
         '''
+
+        p[0] = ('PIPE', p[1], p[3], )
+
+        for _ in range(len(p)):
+            logger.debug('pipeline: p[%d]: %s', _, p[_])
+
+    def p_pipeline_with_command(self, p):
+        '''pipeline : command'''
+
+        p[0] = (p[1], )
 
         for _ in range(len(p)):
             logger.debug('pipeline: p[%d]: %s', _, p[_])
@@ -489,43 +561,51 @@ class BashParser(object):
     def p_assignment_word_array(self, p):
         '''assignment_word : WORD '=' '(' word_list ')' '''
 
-        for _ in range(len(p)):
-            logger.debug('assignment_word: p[%d]: %s', _, p[_])
-
         if p[1] in self.symbols:
             logger.warn('re-assignment of %s', p[1])
 
         self.symbols[p[1]] = p[4]
 
-    def p_assignment_word_number(self, p):
-        '''assignment_word : WORD '=' NUMBER'''
+        p[0] = p[1]
 
         for _ in range(len(p)):
             logger.debug('assignment_word: p[%d]: %s', _, p[_])
+
+    def p_assignment_word_number(self, p):
+        '''assignment_word : WORD '=' NUMBER'''
 
         if p[1] in self.symbols:
             logger.warn('re-assignment of %s', p[1])
 
         self.symbols[p[1]] = int(p[3])
 
+        p[0] = p[1]
+
+        for _ in range(len(p)):
+            logger.debug('assignment_word: p[%d]: %s', _, p[_])
+
     def p_assignment_word_quoted_word(self, p):
         '''assignment_word : WORD '=' quoted_word'''
 
+        self.symbols[p[1]] = p[3]
+
+        p[0] = p[1]
+
         for _ in range(len(p)):
             logger.debug('assignment_word: p[%d]: %s', _, p[_])
-
-        self.symbols[p[1]] = p[3]
 
     def p_assignment_word_word(self, p):
         '''assignment_word : WORD '=' WORD'''
-
-        for _ in range(len(p)):
-            logger.debug('assignment_word: p[%d]: %s', _, p[_])
 
         if p[1] in self.symbols:
             logger.warn('re-assignment of %s', p[1])
 
         self.symbols[p[1]] = p[3]
+
+        p[0] = p[1]
+
+        for _ in range(len(p)):
+            logger.debug('assignment_word: p[%d]: %s', _, p[_])
 
     def p_quoted_word(self, p):
         '''quoted_word : SINGLE_QUOTE WORD SINGLE_QUOTE
@@ -533,10 +613,21 @@ class BashParser(object):
 
         '''
 
-        for _ in range(len(p)):
-            logger.debug('world_list: p[%d]: %s', _, p[_])
-
         p[0] = p[2]
+
+        for _ in range(len(p)):
+            logger.debug('quoted_word: p[%d]: %s', _, p[_])
+
+    def p_quoted_empty_word(self, p):
+        '''quoted_word : SINGLE_QUOTE SINGLE_QUOTE
+                       | DOUBLE_QUOTE DOUBLE_QUOTE
+
+        '''
+
+        p[0] = ''
+
+        for _ in range(len(p)):
+            logger.debug('quoted_word: p[%d]: %s', _, p[_])
 
     def p_error(self, p):
         if p is None:

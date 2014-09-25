@@ -123,8 +123,6 @@ class BashLexer(object):
     def t_DOUBLE_QUOTE(self, t):
         r'"'
 
-        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
-
         if t.lexer.lexstate == 'INITIAL':
             t.lexer.begin('doublequote')
 
@@ -132,8 +130,6 @@ class BashLexer(object):
 
     def t_doublequote_DOUBLE_QUOTE(self, t):
         r'"'
-
-        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
 
         t.lexer.begin('INITIAL')
 
@@ -174,8 +170,6 @@ class BashLexer(object):
     def t_SINGLE_QUOTE(self, t):
         r'\''
 
-        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
-
         if t.lexer.lexstate == 'INITIAL':
             t.lexer.begin('singlequote')
 
@@ -183,8 +177,6 @@ class BashLexer(object):
 
     def t_singlequote_SINGLE_QUOTE(self, t):
         r'\''
-
-        logger.info('t.lexer.lexstate: %s', t.lexer.lexstate)
 
         t.lexer.begin('INITIAL')
 
@@ -196,9 +188,7 @@ class BashLexer(object):
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'[a-zA-Z][\da-zA-Z_-]*'
-
-        logger.info('tokenize WORD')
+        r'[a-zA-Z-][\da-zA-Z_-]*'
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()

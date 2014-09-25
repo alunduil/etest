@@ -45,12 +45,7 @@ class TestEbuildProperties(TestBaseEbuild):
             overlay = self.mocked_overlay,
         )
 
-        self.ebuild.lexer = mock.MagicMock()
-        self.ebuild.parser = mock.MagicMock()
-
     def test_use_flags(self):
         '''ebuild.Ebuild().use_flags'''
-
-        type(self.ebuild.parser).symbols = mock.PropertyMock(return_value = {'IUSE': ()})
 
         self.assertEqual(0, len(self.ebuild.use_flags))

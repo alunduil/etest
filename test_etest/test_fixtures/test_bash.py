@@ -90,3 +90,14 @@ BASH_TEXTS.setdefault('all', []).append(_)
 BASH_TEXTS.setdefault('correct', []).append(_)
 BASH_TEXTS.setdefault('correct_parse', []).append(_)
 BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+
+_ = {
+    'name': 'function_def',
+    'bash': script('06_function_def.sh'),
+    'dictionary': {},
+}
+
+BASH_TEXTS.setdefault('all', []).append(_)
+BASH_TEXTS.setdefault('correct', []).append(_)
+BASH_TEXTS.setdefault('correct_parse', []).append(_)
+BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
