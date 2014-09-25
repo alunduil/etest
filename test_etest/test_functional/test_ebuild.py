@@ -48,4 +48,6 @@ class TestEbuildProperties(TestBaseEbuild):
     def test_use_flags(self):
         '''ebuild.Ebuild().use_flags'''
 
-        self.assertEqual(0, len(self.ebuild.use_flags))
+        logger.debug('self.ebuild.use_flags: %s', self.ebuild.use_flags)
+
+        self.assertEqual(1, len(self.ebuild.use_flags))

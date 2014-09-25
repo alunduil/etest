@@ -37,7 +37,7 @@ class Ebuild(object):
     @property
     def use_flags(self):
         if not hasattr(self, '_use_flags'):
-            self._use_flags = self.parse()['IUSE']
+            self._use_flags = self.parse()['IUSE'].split()
 
         return self._use_flags
 

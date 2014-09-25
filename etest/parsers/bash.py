@@ -399,12 +399,6 @@ class BashParser(object):
     def p_list0(self, p):
         '''list0 : pipeline_command list1'''
 
-        '''list0 : list1 NEWLINE newline_list
-                 | list1 '&' newline_list
-                 | list1 ';' newline_list
-
-        '''
-
         for _ in range(len(p)):
             logger.debug('list0: p[%d]: %s', _, p[_])
 
@@ -413,15 +407,6 @@ class BashParser(object):
                  | OR_OR newline_list list0
                  | list2 list0
                  | list2
-
-        '''
-
-        '''list1 : list1 AND_AND newline_list list1
-                 | list1 OR_OR newline_list list1
-                 | list1 '&' newline_list list1
-                 | list1 ';' newline_list list1
-                 | list1 NEWLINE newline_list list1
-                 | pipeline_command
 
         '''
 
