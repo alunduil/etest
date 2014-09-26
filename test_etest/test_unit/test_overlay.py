@@ -3,10 +3,9 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import functools
 import unittest
-import os
-import tempfile
+
+from test_etest.test_common.test_overlay import TestWithEmptyOverlay
 
 from etest import overlay
 
@@ -20,32 +19,7 @@ class TestOverlayWithInvalidOverlay(unittest.TestCase):
         self.assertRaises(overlay.InvalidOverlayError, getattr, self.overlay, 'directory')
 
 
-class TestOverlayWithEmptyOverlay(unittest.TestCase):
-    def setUp(self):
-        self.mocked_directory = tempfile.mkdtemp()
-        self.addCleanup(os.rmdir, self.mocked_directory)
-
-        _ = os.path.join(self.mocked_directory, 'profiles')
-        os.mkdir(_)
-        self.addCleanup(os.rmdir, _)
-
-        _ = os.path.join(self.mocked_directory, 'profiles', 'repo_name')
-        with open(_, 'w') as fh:
-            fh.write('etest')
-        self.addCleanup(os.remove, _)
-
-        _ = os.path.join(self.mocked_directory, 'metadata')
-        os.mkdir(_)
-        self.addCleanup(os.rmdir, _)
-
-        _ = os.path.join(self.mocked_directory, 'metadata', 'layout.conf')
-        with open(_, 'w') as fh:
-            fh.write('masters = gentoo')
-        self.addCleanup(os.remove, _)
-
-        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
-        os.chdir(self.mocked_directory)
-
+class TestOverlayWithEmptyOverlay(TestWithEmptyOverlay):
     def test_empty_overlay_directory_detection(self):
         '''overlay.Overlay().directory—empty overlay'''
 
