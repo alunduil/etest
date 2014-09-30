@@ -35,6 +35,13 @@ class Ebuild(object):
         return self._name
 
     @property
+    def compat(self):
+        if not hasattr(self, '_compat'):
+            self._compat = dict([ (k.replace('_COMPAT', '').lower(), v) for k, v in self.parse().items() if '_COMPAT' in k ])
+
+        return self._compat
+
+    @property
     def use_flags(self):
         if not hasattr(self, '_use_flags'):
             self._use_flags = self.parse()['IUSE'].split()

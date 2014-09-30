@@ -51,3 +51,12 @@ class TestEbuildProperties(TestBaseEbuild):
         logger.debug('self.ebuild.use_flags: %s', self.ebuild.use_flags)
 
         self.assertEqual(1, len(self.ebuild.use_flags))
+
+    def test_compat(self):
+        '''ebuild.Ebuild().compat'''
+
+        logger.debug('self.ebuild.compat.keys(): %s', self.ebuild.compat.keys())
+
+        self.assertIn('python', self.ebuild.compat)
+
+        self.assertEqual(( 'python3_3', 'python3_4', ), self.ebuild.compat['python'])

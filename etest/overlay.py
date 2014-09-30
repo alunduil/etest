@@ -26,7 +26,7 @@ class Overlay(object):
 
                 _ = os.path.dirname(_)
             else:
-                raise InvalidOverlayError('not in a portage tree or overlay directory')
+                raise InvalidOverlayError('not in a valid ebuild repository directory')
 
         return self._directory
 

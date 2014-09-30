@@ -3,6 +3,8 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import docker
+import functools
 import itertools
 import logging
 import os
@@ -14,7 +16,98 @@ logger = logging.getLogger(__name__)
 
 class Test(object):
     def __init__(self, ebuild, test = False, **kwargs):
-        pass
+        self.ebuild = ebuild
+
+        self.test = test
+
+        self.use_flags = kwargs.get('use_flags', [])
+
+
+        self.failed = False
+
+        self.name = ebuild.name + '[' + ','.join(self.use_flags)
+        if self.test:
+            self.name += ',test'
+        self.name += ']'
+
+        self.environment = {}
+
+        if 'python' in self.ebuild.compat:
+            self.environment['PYTHON_TARGETS'] = ' '.join(self.ebuild.compat['python'])
+
+        self.containers = []
+
+        _ = 'alunduil/etest'
+        self.docker_images = [
+            _ + ':latest',
+        ]
+
+        c = docker.Client()
+        c.pull(repository = _, tag = 'latest')
+
+        self.commands = []
+
+        if self.test:
+            self.commands.append('echo {0} test >> /etc/portage/package.env'.format(ebuild.name))
+
+        self.commands.append('echo {0} {1} >> /etc/portage/package.use'.format(ebuild.name, ' '.join(self.use_flags)))
+        self.commands.append('emerge -q {0} --autounmask-write'.format(ebuild.name))
+        self.commands.append('etc-update --automode -5')
+        self.commands.append('emerge -q {0}'.format(ebuild.name))
+
+        self.commands.extend(kwargs.get('commands', []))
+
+    def clean(self):
+        c = docker.Client()
+
+        for container in self.containers:
+            c.remove_container(container)
+
+        for docker_image in self.docker_images:
+            c.remove_image(docker_image)
+
+    def run(self):
+        repository = 'etest/' + self.name
+
+        c = docker.Client()
+
+        for command in self.commands:
+            self.containers.append(uuid.uuid4())
+            c.create_container(
+                image = self.docker_images[-1],
+                name = self.containers[-1],
+                environment = self.environment,
+                volumes = [
+                    '/usr/portage',
+                    '/overlay',
+                ],
+                entrypoint = '/bin/bash',
+                command = command,
+            )
+
+            c.start(
+                container = self.containers[-1],
+                binds = {
+                    self.ebuild.overlay.directory: {
+                        'bind': '/overlay',
+                        'ro': True,
+                    },
+                    # TODO: Retrive this from environment.
+                    '/usr/portage': {
+                        'bind': '/usr/portage',
+                        'ro': True,
+                    },
+                },
+            )
+
+            tag = self.commands.index(command)
+
+            self.docker_images.append(repository + ':' + tag)
+            c.commit(
+                self.containers[-1],
+                repository = repository,
+                tag = tag,
+            )
 
 
 class Tests(object):
