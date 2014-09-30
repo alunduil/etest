@@ -39,7 +39,7 @@ class Overlay(object):
                 if 'files' in directories:
                     directories.remove('files')
 
-                self._ebuilds.extend([ ebuild.Ebuild(os.path.relpath(os.path.join(path, _), self.directory), self.directory) for _ in files if _.endswith('.ebuild') ])
+                self._ebuilds.extend([ ebuild.Ebuild(os.path.relpath(os.path.join(path, _), self.directory), self) for _ in files if _.endswith('.ebuild') ])
 
         return self._ebuilds
 

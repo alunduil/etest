@@ -23,3 +23,20 @@ class TestTestsWithNonEmptyOverlay(unittest.TestCase):
         self.tests = tests.Tests()
 
         self.assertEqual(2, len(self.tests.tests))
+
+    def test_ebuild_filter(self):
+        '''tests.Tests().ebuild_filter'''
+
+        self.tests = tests.Tests()
+
+        self.assertEqual([], self.tests.ebuild_filter)
+
+    def test_ebuild_filter_subdirectory(self):
+        '''tests.Tests().ebuild_filter—subdirectory'''
+
+        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
+        os.chdir(os.path.join(FIXTURES_DIRECTORY, 'overlay', 'app-portage', 'etest'))
+
+        self.tests = tests.Tests()
+
+        self.assertEqual(['app-portage/etest',], self.tests.ebuild_filter)

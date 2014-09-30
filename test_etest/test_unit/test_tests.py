@@ -4,6 +4,7 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import logging
+import os
 import unittest
 
 from test_etest.test_common.test_overlay import TestWithEmptyOverlay
@@ -28,3 +29,17 @@ class TestTestsWithEmptyOverlay(TestWithEmptyOverlay):
         self.tests = tests.Tests()
 
         self.assertEqual(0, len(self.tests.tests))
+
+    def test_ebuild_filter(self):
+        '''tests.Tests().ebuild_filter'''
+
+        self.tests = tests.Tests()
+
+        self.assertEqual((), self.tests.ebuild_filter)
+
+    def test_ebuild_filter(self):
+        '''tests.Tests(app-portage/etest).ebuild_filter'''
+
+        self.tests = tests.Tests(('app-portage/etest',))
+
+        self.assertEqual(['app-portage/etest',], self.tests.ebuild_filter)
