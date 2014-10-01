@@ -15,47 +15,54 @@ logger = logging.getLogger(__name__)
 
 
 class Test(object):
-    def __init__(self, ebuild, test = False, **kwargs):
+    def __init__(self, ebuild, test = False, base_docker_image = 'alunduil/etest:latest', **kwargs):
         self.ebuild = ebuild
 
         self.test = test
 
         self.use_flags = kwargs.get('use_flags', [])
 
-
         self.failed = False
 
-        self.name = ebuild.name + '[' + ','.join(self.use_flags)
-        if self.test:
-            self.name += ',test'
-        self.name += ']'
-
-        self.environment = {}
-
-        if 'python' in self.ebuild.compat:
-            self.environment['PYTHON_TARGETS'] = ' '.join(self.ebuild.compat['python'])
-
         self.containers = []
+        self.docker_images = [ base_docker_image ]
 
-        _ = 'alunduil/etest'
-        self.docker_images = [
-            _ + ':latest',
-        ]
+    @property
+    def name(self):
+        if not hasattr(self, '_name'):
+            self._name = self.ebuild.name + '[' + ','.join(self.use_flags)
 
-        c = docker.Client()
-        c.pull(repository = _, tag = 'latest')
+            if self.test:
+                self._name += ',test'
 
-        self.commands = []
+            self._name += ']'
 
-        if self.test:
-            self.commands.append('echo {0} test >> /etc/portage/package.env'.format(ebuild.name))
+        return self._name
 
-        self.commands.append('echo {0} {1} >> /etc/portage/package.use'.format(ebuild.name, ' '.join(self.use_flags)))
-        self.commands.append('emerge -q {0} --autounmask-write'.format(ebuild.name))
-        self.commands.append('etc-update --automode -5')
-        self.commands.append('emerge -q {0}'.format(ebuild.name))
+    @property
+    def commands(self):
+        if not hasattr(self, '_commands'):
+            self._commands = []
 
-        self.commands.extend(kwargs.get('commands', []))
+            if self.test:
+                self._commands.append('echo {0} test >> /etc/portage/package.env'.format(ebuild.name))
+
+            self._commands.append('echo {0} {1} >> /etc/portage/package.use'.format(ebuild.name, ' '.join(self.use_flags)))
+            self._commands.append('emerge -q {0} --autounmask-write'.format(ebuild.name))
+            self._commands.append('etc-update --automode -5')
+            self._commands.append('emerge -q {0}'.format(ebuild.name))
+
+        return self._commands
+
+    @property
+    def environment(self):
+        if not hasattr(self, '_environment'):
+            self._environment = {}
+
+            if 'python' is self.ebuild.compat:
+                self.environment['PYTHON_TARGETS'] = ' '.join(self.ebuild.compat['python'])
+
+        return self._environment
 
     def clean(self):
         c = docker.Client()
@@ -63,13 +70,17 @@ class Test(object):
         for container in self.containers:
             c.remove_container(container)
 
-        for docker_image in self.docker_images:
+        for docker_image in self.docker_images[1:]:
             c.remove_image(docker_image)
 
     def run(self):
         repository = 'etest/' + self.name
 
         c = docker.Client()
+
+        repository, tag = self.docker_images[-1].split(':')
+
+        c.pull(repository = repository, tag = tag)
 
         for command in self.commands:
             self.containers.append(uuid.uuid4())
@@ -175,6 +186,8 @@ class Tests(object):
         use_flags.remove('test')
 
         logger.debug('ebuild.use_flags: %s', ebuild.use_flags)
+
+        # TODO: Add hints file for more testing information.
 
         for use_flags_combination in itertools.chain.from_iterable(itertools.combinations(use_flags, _) for _ in range(len(use_flags) + 1)):
             logger.info('adding %s[%s]', ebuild.name, ','.join(use_flags_combination))

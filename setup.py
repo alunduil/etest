@@ -66,7 +66,6 @@ PARAMS['install_requires'] = [
 PARAMS['test_suite'] = 'nose.collector'
 PARAMS['tests_require'] = [
     'coverage'
-    'mock',
     'nose',
 ]
 

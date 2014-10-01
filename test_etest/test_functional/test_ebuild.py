@@ -5,9 +5,9 @@
 
 import functools
 import logging
-import mock
 import os
 import unittest
+import unittest.mock
 
 from etest import ebuild
 
@@ -22,8 +22,8 @@ class TestBaseEbuild(unittest.TestCase):
 
         os.chdir(os.path.join(FIXTURES_DIRECTORY, 'overlay'))
 
-        self.mocked_overlay = mock.MagicMock()
-        type(self.mocked_overlay).directory = mock.PropertyMock(return_value = os.getcwd())
+        self.mocked_overlay = unittest.mock.MagicMock()
+        type(self.mocked_overlay).directory = unittest.mock.PropertyMock(return_value = os.getcwd())
 
 
 class TestEbuildConstructor(TestBaseEbuild):

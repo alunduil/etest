@@ -44,6 +44,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
         if not dry_run:
             check.run()
             elapsed_time += check.time
+            check.clean()
 
         if check.failed:
             failures.append(check)
