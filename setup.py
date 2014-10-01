@@ -56,6 +56,9 @@ PARAMS['keywords'] = [
 ]
 
 PARAMS['packages'] = find_packages()
+PARAMS['package_data'] = {
+    'etest.parsers': [ 'bash.p' ],
+}
 
 PARAMS['install_requires'] = [
     'click',
