@@ -4,8 +4,8 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import logging
-import os
 import unittest
+import unittest.mock
 
 from test_etest.test_common.test_overlay import TestWithEmptyOverlay
 
@@ -30,16 +30,37 @@ class TestTestsWithEmptyOverlay(TestWithEmptyOverlay):
 
         self.assertEqual(0, len(self.tests.tests))
 
-    def test_ebuild_filter(self):
+    def test_ebuild_filter_empty(self):
         '''tests.Tests().ebuild_filter'''
 
         self.tests = tests.Tests()
 
-        self.assertEqual((), self.tests.ebuild_filter)
+        self.assertEqual([], self.tests.ebuild_filter)
 
-    def test_ebuild_filter(self):
+    def test_ebuild_filter_nonempty(self):
         '''tests.Tests(app-portage/etest).ebuild_filter'''
 
         self.tests = tests.Tests(('app-portage/etest',))
 
-        self.assertEqual(['app-portage/etest',], self.tests.ebuild_filter)
+        self.assertEqual(['app-portage/etest', ], self.tests.ebuild_filter)
+
+
+class TestTestProperties(unittest.TestCase):
+    def setUp(self):
+        self.mocked_ebuild = unittest.mock.MagicMock()
+
+        type(self.mocked_ebuild).name = unittest.mock.PropertyMock(return_value = 'app-portage/ebuild-9999')
+
+    def test_name_without_test(self):
+        '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples'))'''
+
+        self.test = tests.Test(self.mocked_ebuild, use_flags = ('doc', 'examples'))
+
+        self.assertEqual('app-portage/ebuild-9999[doc,examples]', self.test.name)
+
+    def test_name_with_test(self):
+        '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples')), test = True'''
+
+        self.test = tests.Test(self.mocked_ebuild, use_flags = ('doc', 'examples'), test = True)
+
+        self.assertEqual('app-portage/ebuild-9999[doc,examples,test]', self.test.name)

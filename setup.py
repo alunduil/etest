@@ -74,7 +74,7 @@ PARAMS['tests_require'] = [
 
 PARAMS['entry_points'] = {
     'console_scripts': [
-        'etest = etest:run',
+        'etest = etest:etest',
     ],
 }
 

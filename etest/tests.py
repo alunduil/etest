@@ -4,10 +4,10 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import docker
-import functools
 import itertools
 import logging
 import os
+import uuid
 
 from etest import overlay
 
@@ -45,12 +45,12 @@ class Test(object):
             self._commands = []
 
             if self.test:
-                self._commands.append('echo {0} test >> /etc/portage/package.env'.format(ebuild.name))
+                self._commands.append('echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name))
 
-            self._commands.append('echo {0} {1} >> /etc/portage/package.use'.format(ebuild.name, ' '.join(self.use_flags)))
-            self._commands.append('emerge -q {0} --autounmask-write'.format(ebuild.name))
+            self._commands.append('echo {0} {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags)))
+            self._commands.append('emerge -q {0} -f --autounmask-write'.format(self.ebuild.name))
             self._commands.append('etc-update --automode -5')
-            self._commands.append('emerge -q {0}'.format(ebuild.name))
+            self._commands.append('emerge -q {0}'.format(self.ebuild.name))
 
         return self._commands
 

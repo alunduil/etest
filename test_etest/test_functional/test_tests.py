@@ -39,4 +39,4 @@ class TestTestsWithNonEmptyOverlay(unittest.TestCase):
 
         self.tests = tests.Tests()
 
-        self.assertEqual(['app-portage/etest',], self.tests.ebuild_filter)
+        self.assertEqual(['app-portage/etest', ], self.tests.ebuild_filter)
