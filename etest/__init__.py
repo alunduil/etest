@@ -36,7 +36,7 @@ def echo_check_verbose(check):
 @click.version_option(information.VERSION)
 @click.argument('ebuilds', nargs = -1)
 def etest(dry_run, fast, quiet, verbose, ebuilds):
-    checks = tests.Tests(ebuilds)
+    checks = tests.Tests(ebuilds).tests
     elapsed_time = datetime.timedelta()
     failures = []
 

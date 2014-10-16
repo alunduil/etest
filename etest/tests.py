@@ -111,7 +111,7 @@ class Test(object):
                 },
             )
 
-            tag = self.commands.index(command)
+            tag = str(self.commands.index(command))
 
             self.docker_images.append(repository + ':' + tag)
             c.commit(
