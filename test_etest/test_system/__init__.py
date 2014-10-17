@@ -4,9 +4,9 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import click.testing
+import functools
 import logging
 import os
-import shutil
 import traceback
 import unittest
 
@@ -53,26 +53,13 @@ class TestEtestCliEbuild(unittest.TestCase):
     def setUp(self):
         self.runner = click.testing.CliRunner()
 
-    def populate_cd_with_overlay(self):
-        logger.debug('ls: %s', os.listdir())
-
-        _ = os.path.join(FIXTURES_DIRECTORY, 'overlay')
-
-        for dirent in os.listdir(_):
-            logger.debug('dirent: %s', dirent)
-
-            if os.path.isdir(os.path.join(_, dirent)):
-                shutil.copytree(os.path.join(_, dirent), dirent)
-
-        logger.debug('ls: %s', os.listdir())
+        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
+        os.chdir(os.path.join(FIXTURES_DIRECTORY, 'overlay'))
 
     def test_etest_quiet_ebuild(self):
         '''etest --quiet'''
 
-        with self.runner.isolated_filesystem():
-            self.populate_cd_with_overlay()
-
-            _ = self.runner.invoke(etest, [ '--quiet' ])
+        _ = self.runner.invoke(etest, [ '--quiet' ])
 
         logger.debug('exception: %s', _.exception)
         logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))
@@ -84,18 +71,16 @@ class TestEtestCliEbuild(unittest.TestCase):
     def test_etest_verbose_ebuild(self):
         '''etest --verbose'''
 
-        with self.runner.isolated_filesystem():
-            self.populate_cd_with_overlay()
-
-            _ = self.runner.invoke(etest, [ '--verbose' ])
+        _ = self.runner.invoke(etest, [ '--verbose' ])
 
         logger.debug('exception: %s', _.exception)
         logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))
 
         self.assertEqual(
-            '[OK] app-portage/etest\n'
+            '[OK] app-portage/etest[]\n'
+            '[OK] app-portage/etest[test]\n'
             '-\n'
-            '1 tests ran in 0.003 seconds\n',
+            '2 tests ran in 0.003 seconds\n',
             _.output
         )
 
@@ -104,18 +89,15 @@ class TestEtestCliEbuild(unittest.TestCase):
     def test_etest_ebuild(self):
         '''etest'''
 
-        with self.runner.isolated_filesystem():
-            self.populate_cd_with_overlay()
-
-            _ = self.runner.invoke(etest, [])
+        _ = self.runner.invoke(etest, [])
 
         logger.debug('exception: %s', _.exception)
         logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))
 
         self.assertEqual(
-            '·\n'
+            '··\n'
             '-\n'
-            '1 tests ran in 0.003 seconds\n',
+            '2 tests ran in 0.003 seconds\n',
             _.output
         )
 
@@ -124,10 +106,7 @@ class TestEtestCliEbuild(unittest.TestCase):
     def test_etest_specific_ebuild(self):
         '''etest app-portage/etest'''
 
-        with self.runner.isolated_filesystem():
-            self.populate_cd_with_overlay()
-
-            _ = self.runner.invoke(etest, [ 'app-portage/etest' ])
+        _ = self.runner.invoke(etest, [ 'app-portage/etest' ])
 
         logger.debug('exception: %s', _.exception)
         logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))

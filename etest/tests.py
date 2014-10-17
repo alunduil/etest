@@ -3,6 +3,7 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import datetime
 import docker
 import itertools
 import logging
@@ -23,9 +24,10 @@ class Test(object):
         self.use_flags = kwargs.get('use_flags', [])
 
         self.failed = False
+        self.time = datetime.timedelta(0)
+        self.output = ''
 
-        self.containers = []
-        self.docker_images = [ base_docker_image ]
+        self.base_docker_image = base_docker_image
 
     @property
     def name(self):
@@ -45,12 +47,12 @@ class Test(object):
             self._commands = []
 
             if self.test:
-                self._commands.append('echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name))
+                self._commands.append(('bash', '-c', 'echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name)))
 
-            self._commands.append('echo {0} {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags)))
-            self._commands.append('emerge -q {0} -f --autounmask-write'.format(self.ebuild.name))
-            self._commands.append('etc-update --automode -5')
-            self._commands.append('emerge -q {0}'.format(self.ebuild.name))
+            self._commands.append(('bash', '-c', 'echo {0} {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags))))
+            self._commands.append(('emerge', '-q', self.ebuild.name, '-f', '--autounmask-write', '--backtrack=130'))
+            self._commands.append(('etc-update', '--automode', '-5'))
+            self._commands.append(('emerge', '-q', self.ebuild.name, '--backtrack=130'))
 
         return self._commands
 
@@ -64,40 +66,41 @@ class Test(object):
 
         return self._environment
 
-    def clean(self):
-        c = docker.Client()
-
-        for container in self.containers:
-            c.remove_container(container)
-
-        for docker_image in self.docker_images[1:]:
-            c.remove_image(docker_image)
-
     def run(self):
+        _ = docker.Client()
+
+        image_name = self.base_docker_image
+
+        repository, tag = image_name.split(':')
+        _.pull(repository = repository, tag = tag)
+
         repository = 'etest/' + self.name
 
-        c = docker.Client()
-
-        repository, tag = self.docker_images[-1].split(':')
-
-        c.pull(repository = repository, tag = tag)
+        image_names = []
 
         for command in self.commands:
-            self.containers.append(uuid.uuid4())
-            c.create_container(
-                image = self.docker_images[-1],
-                name = self.containers[-1],
+            logger.debug('command: %s', command)
+
+            container_name = str(uuid.uuid4())
+
+            logger.info('create container %s', container_name)
+
+            _.create_container(
+                image = image_name,
+                name = container_name,
                 environment = self.environment,
                 volumes = [
                     '/usr/portage',
                     '/overlay',
                 ],
-                entrypoint = '/bin/bash',
-                command = command,
+                entrypoint = command[0],
+                command = command[1:],
             )
 
-            c.start(
-                container = self.containers[-1],
+            logger.info('starting container %s', container_name)
+
+            _.start(
+                container = container_name,
                 binds = {
                     self.ebuild.overlay.directory: {
                         'bind': '/overlay',
@@ -111,14 +114,43 @@ class Test(object):
                 },
             )
 
+            logger.info('waiting for container %s', container_name)
+
+            status = _.wait(container_name)
+
+            logger.debug('container status: %s', status)
+            logger.debug('container failed: %s', bool(status))
+
+            self.failed = self.failed or bool(status)
+
+            self.output += _.logs(container_name).decode(encoding = 'utf-8')
+            logger.debug('log event:\n%s', self.output)
+
+            if self.failed:
+                _.remove_container(container_name)
+                break
+
             tag = str(self.commands.index(command))
 
-            self.docker_images.append(repository + ':' + tag)
-            c.commit(
-                self.containers[-1],
+            logger.info('image container %s', container_name)
+
+            _.commit(
+                container_name,
                 repository = repository,
                 tag = tag,
             )
+            image_name = repository + ':' + tag
+            image_names.append(image_name)
+
+            logger.info('created image %s', image_name)
+            logger.info('remove container %s', container_name)
+
+            _.remove_container(container_name)
+
+        for image_name in image_names:
+            logger.info('remove image %s', image_name)
+
+            _.remove_image(image_name)
 
 
 class Tests(object):

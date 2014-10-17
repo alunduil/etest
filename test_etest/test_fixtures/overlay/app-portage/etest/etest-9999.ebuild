@@ -20,9 +20,16 @@ IUSE="test"
 
 DEPEND="
 	dev-python/setuptools[${PYTHON_USEDEP}]
-	test? ( dev-python/nose[${PYTHON_USEDEP}] )
+	test? (
+		dev-python/coverage[${PYTHON_USEDEP}]
+		dev-python/nose[${PYTHON_USEDEP}]
+	)
 "
-RDEPEND=""
+RDEPEND="
+	dev-python/click[${PYTHON_USEDEP}]
+	dev-python/docker-py[${PYTHON_USEDEP}]
+	dev-python/ply[${PYTHON_USEDEP}]
+"
 
 python_test() {
 	nosetests || die "Tests failed under ${EPYTHON}"
