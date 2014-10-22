@@ -50,21 +50,21 @@ class TestTestProperties(unittest.TestCase):
     def setUp(self):
         self.mocked_ebuild = unittest.mock.MagicMock()
 
-        type(self.mocked_ebuild).name = unittest.mock.PropertyMock(return_value = 'app-portage/ebuild-9999')
+        type(self.mocked_ebuild).cpv = unittest.mock.PropertyMock(return_value = '=app-portage/ebuild-9999')
 
     def test_name_without_test(self):
         '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples')).name'''
 
         self.test = tests.Test(self.mocked_ebuild, use_flags = ('doc', 'examples'))
 
-        self.assertEqual('app-portage/ebuild-9999[doc,examples]', self.test.name)
+        self.assertEqual('=app-portage/ebuild-9999[doc,examples]', self.test.name)
 
     def test_name_with_test(self):
         '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples'), test = True).name'''
 
         self.test = tests.Test(self.mocked_ebuild, use_flags = ('doc', 'examples'), test = True)
 
-        self.assertEqual('app-portage/ebuild-9999[doc,examples,test]', self.test.name)
+        self.assertEqual('=app-portage/ebuild-9999[doc,examples,test]', self.test.name)
 
     def test_time(self):
         '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples')).time'''

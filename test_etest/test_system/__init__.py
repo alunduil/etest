@@ -76,12 +76,12 @@ class TestEtestCliEbuild(unittest.TestCase):
         logger.debug('exception: %s', _.exception)
         logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))
 
-        self.assertEqual(
-            '[OK] app-portage/etest[]\n'
-            '[OK] app-portage/etest[test]\n'
-            '-\n'
-            '2 tests ran in 0.003 seconds\n',
-            _.output
+        self.assertRegex(
+            _.output,
+            r'\[OK\] =app-portage/etest-9999\[\]\n'
+            r'\[OK\] =app-portage/etest-9999\[test\]\n'
+            r'-+\n'
+            r'2 tests ran in \d+(?:\.\d+)? seconds\n'
         )
 
         self.assertEqual(0, _.exit_code)
@@ -94,11 +94,11 @@ class TestEtestCliEbuild(unittest.TestCase):
         logger.debug('exception: %s', _.exception)
         logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))
 
-        self.assertEqual(
-            '··\n'
-            '-\n'
-            '2 tests ran in 0.003 seconds\n',
-            _.output
+        self.assertRegex(
+            _.output,
+            r'··\n'
+            r'-+\n'
+            r'2 tests ran in \d+(?:\.\d+)? seconds\n'
         )
 
         self.assertEqual(0, _.exit_code)
@@ -111,11 +111,11 @@ class TestEtestCliEbuild(unittest.TestCase):
         logger.debug('exception: %s', _.exception)
         logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))
 
-        self.assertEqual(
-            '·\n'
-            '-\n'
-            '1 tests ran in 0.003 seconds\n',
-            _.output
+        self.assertRegex(
+            _.output,
+            r'··\n'
+            r'-+\n'
+            r'2 tests ran in \d+(?:\.\d+)? seconds\n'
         )
 
         self.assertEqual(0, _.exit_code)

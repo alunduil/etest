@@ -8,6 +8,7 @@ import docker
 import itertools
 import logging
 import os
+import tempfile
 import uuid
 
 from etest import overlay
@@ -32,10 +33,13 @@ class Test(object):
     @property
     def name(self):
         if not hasattr(self, '_name'):
-            self._name = self.ebuild.name + '[' + ','.join(self.use_flags)
+            self._name = self.ebuild.cpv + '[' + ','.join(self.use_flags)
 
             if self.test:
-                self._name += ',test'
+                if len(self.use_flags):
+                    self._name += ','
+
+                self._name += 'test'
 
             self._name += ']'
 
@@ -49,10 +53,13 @@ class Test(object):
             if self.test:
                 self._commands.append(('bash', '-c', 'echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name)))
 
-            self._commands.append(('bash', '-c', 'echo {0} {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags))))
-            self._commands.append(('emerge', '-q', self.ebuild.name, '-f', '--autounmask-write', '--backtrack=130'))
-            self._commands.append(('etc-update', '--automode', '-5'))
-            self._commands.append(('emerge', '-q', self.ebuild.name, '--backtrack=130'))
+            if len(self.use_flags):
+                self._commands.append(('bash', '-c', 'echo {0} {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags))))
+
+            self._commands.append(('bash', '-c', 'emerge -q -f --autounmask-write {0} >/dev/null 2>&1 || true'.format(self.ebuild.cpv)))
+            self._commands.append(('bash', '-c', 'etc-update --automode -5 >/dev/null 2>&1'))
+
+            self._commands.append(('emerge', '-q', '--backtrack=130', self.ebuild.cpv))
 
         return self._commands
 
@@ -64,6 +71,10 @@ class Test(object):
             if 'python' is self.ebuild.compat:
                 self.environment['PYTHON_TARGETS'] = ' '.join(self.ebuild.compat['python'])
 
+                # Things still want python2…☹
+                if 'python2_7' not in self.environment['PYTHON_TARGETS']:
+                    self.environment['PYTHON_TARGETS'] += ' python2_7'
+
         return self._environment
 
     def run(self):
@@ -71,8 +82,13 @@ class Test(object):
 
         image_name = self.base_docker_image
 
+        image_id = _.inspect_image(image_name)['Id']
+
         repository, tag = image_name.split(':')
         _.pull(repository = repository, tag = tag)
+
+        if image_id != _.inspect_image(image_name)['Id']:
+            _.remove_image(image_id)
 
         repository = 'etest/' + self.name
 
@@ -90,8 +106,9 @@ class Test(object):
                 name = container_name,
                 environment = self.environment,
                 volumes = [
-                    '/usr/portage',
                     '/overlay',
+                    '/usr/portage',
+                    '/usr/portage/distfiles',
                 ],
                 entrypoint = command[0],
                 command = command[1:],
@@ -99,32 +116,33 @@ class Test(object):
 
             logger.info('starting container %s', container_name)
 
-            _.start(
-                container = container_name,
-                binds = {
-                    self.ebuild.overlay.directory: {
-                        'bind': '/overlay',
-                        'ro': True,
+            with tempfile.TemporaryDirectory() as distdir:
+                _.start(
+                    container = container_name,
+                    binds = {
+                        self.ebuild.overlay.directory: {
+                            'bind': '/overlay',
+                            'ro': True,
+                        },
+                        # TODO: Retrive this from environment.
+                        '/usr/portage': {
+                            'bind': '/usr/portage',
+                            'ro': True,
+                        },
+                        distdir: {
+                            'bind': '/usr/portage/distfiles',
+                            'ro': False,
+                        },
                     },
-                    # TODO: Retrive this from environment.
-                    '/usr/portage': {
-                        'bind': '/usr/portage',
-                        'ro': True,
-                    },
-                },
-            )
+                )
 
-            logger.info('waiting for container %s', container_name)
+                logger.info('waiting for container %s', container_name)
 
-            status = _.wait(container_name)
-
-            logger.debug('container status: %s', status)
-            logger.debug('container failed: %s', bool(status))
+                status = _.wait(container_name)
 
             self.failed = self.failed or bool(status)
 
             self.output += _.logs(container_name).decode(encoding = 'utf-8')
-            logger.debug('log event:\n%s', self.output)
 
             if self.failed:
                 _.remove_container(container_name)
@@ -146,6 +164,8 @@ class Test(object):
             logger.info('remove container %s', container_name)
 
             _.remove_container(container_name)
+
+        logger.debug('output: %s', self.output)
 
         for image_name in image_names:
             logger.info('remove image %s', image_name)

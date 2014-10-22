@@ -26,7 +26,9 @@ def echo_check_verbose(check):
         click.secho('OK', nl = False, fg = 'green')
     click.echo('] ', nl = False)
 
-    click.echo(check)
+    click.echo(check.name, nl = False)
+
+    click.echo()
 
 
 @click.command()
@@ -59,14 +61,14 @@ def etest(dry_run, fast, quiet, verbose, ebuilds):
     if not quiet:
         if verbose:
             for check in failures:
-                click.echo()
                 click.echo('=' * click.get_terminal_size()[0])
-                click.echo(check)
+                click.echo(check.name)
                 click.echo('-' * click.get_terminal_size()[0])
                 click.echo(check.output)
-            click.echo('-' * click.get_terminal_size()[0])
+                click.echo()
+        else:
+            click.echo()
 
-        click.echo()
         click.echo('-' * click.get_terminal_size()[0])
         click.secho('{0} tests ran in {1} seconds'.format(len(checks), elapsed_time.total_seconds()), fg = 'green')
         if len(failures):

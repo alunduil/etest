@@ -45,12 +45,26 @@ class TestEbuildProperties(TestBaseEbuild):
             overlay = self.mocked_overlay,
         )
 
-    def test_use_flags(self):
-        '''ebuild.Ebuild().use_flags'''
+    def test_name(self):
+        '''ebuild.Ebuild().name'''
 
-        logger.debug('self.ebuild.use_flags: %s', self.ebuild.use_flags)
+        logger.debug('self.ebuild.name: %s', self.ebuild.name)
 
-        self.assertEqual(1, len(self.ebuild.use_flags))
+        self.assertEqual('app-portage/etest', self.ebuild.name)
+
+    def test_cpv(self):
+        '''ebuild.Ebuild().cpv'''
+
+        logger.debug('self.ebuild.cpv: %s', self.ebuild.cpv)
+
+        self.assertEqual('=app-portage/etest-9999', self.ebuild.cpv)
+
+    def test_version(self):
+        '''ebuild.Ebuild().version'''
+
+        logger.debug('self.ebuild.version: %s', self.ebuild.version)
+
+        self.assertEqual('9999', self.ebuild.version)
 
     def test_compat(self):
         '''ebuild.Ebuild().compat'''
@@ -60,3 +74,10 @@ class TestEbuildProperties(TestBaseEbuild):
         self.assertIn('python', self.ebuild.compat)
 
         self.assertEqual(( 'python3_3', 'python3_4', ), self.ebuild.compat['python'])
+
+    def test_use_flags(self):
+        '''ebuild.Ebuild().use_flags'''
+
+        logger.debug('self.ebuild.use_flags: %s', self.ebuild.use_flags)
+
+        self.assertEqual(1, len(self.ebuild.use_flags))

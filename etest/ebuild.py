@@ -35,6 +35,20 @@ class Ebuild(object):
         return self._name
 
     @property
+    def cpv(self):
+        if not hasattr(self, '_cpv'):
+            self._cpv = '=' + self.name + '-' + self.version
+
+        return self._cpv
+
+    @property
+    def version(self):
+        if not hasattr(self, '_version'):
+            self._version = self.path.rsplit('-', 1)[-1].split('.', 1)[0]
+
+        return self._version
+
+    @property
     def compat(self):
         if not hasattr(self, '_compat'):
             self._compat = dict([ (k.replace('_COMPAT', '').lower(), v) for k, v in self.parse().items() if '_COMPAT' in k ])
