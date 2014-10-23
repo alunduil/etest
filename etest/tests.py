@@ -8,7 +8,6 @@ import docker
 import itertools
 import logging
 import os
-import tempfile
 import uuid
 
 from etest import overlay
@@ -108,7 +107,6 @@ class Test(object):
                 volumes = [
                     '/overlay',
                     '/usr/portage',
-                    '/usr/portage/distfiles',
                 ],
                 entrypoint = command[0],
                 command = command[1:],
@@ -116,31 +114,28 @@ class Test(object):
 
             logger.info('starting container %s', container_name)
 
-            with tempfile.TemporaryDirectory() as distdir:
-                _.start(
-                    container = container_name,
-                    binds = {
-                        self.ebuild.overlay.directory: {
-                            'bind': '/overlay',
-                            'ro': True,
-                        },
-                        # TODO: Retrive this from environment.
-                        '/usr/portage': {
-                            'bind': '/usr/portage',
-                            'ro': True,
-                        },
-                        distdir: {
-                            'bind': '/usr/portage/distfiles',
-                            'ro': False,
-                        },
+            start_time = datetime.datetime.now()
+
+            _.start(
+                container = container_name,
+                binds = {
+                    self.ebuild.overlay.directory: {
+                        'bind': '/overlay',
+                        'ro': True,
                     },
-                )
+                    # TODO: Retrive this from environment.
+                    '/usr/portage': {
+                        'bind': '/usr/portage',
+                        'ro': True,
+                    },
+                },
+            )
 
-                logger.info('waiting for container %s', container_name)
+            logger.info('waiting for container %s', container_name)
 
-                status = _.wait(container_name)
+            self.failed = bool(_.wait(container_name))
 
-            self.failed = self.failed or bool(status)
+            self.time += datetime.datetime.now() - start_time
 
             self.output += _.logs(container_name).decode(encoding = 'utf-8')
 

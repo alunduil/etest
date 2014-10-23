@@ -5,9 +5,9 @@ Framework for testing ebuilds.
 
 Using Docker to provide consistent sandboxed environments, etest runs ebuilds
 through several tests (implicitly and explicitly defined).  Every ebuild gets
-two containers created to install a testing and non-testing version (FEATURES
-with and without test) as well as any other commands specified for that ebuild
-with the particular USE flags.
+many containers created to run every testing scenario in isolation.  Testing
+scenarios are created from combinations of USE flags, features (test or no
+test), as well as custom commands provided in the hints files.
 
 Installation
 ============
@@ -24,7 +24,9 @@ The latest release available is:
 Using etest
 ===========
 
-Usage of this package is outlined in the documentation::
+To get started simply run etest in a directory that contains ebuilds.
+
+More advanced usage of this package is outlined in the built-in help
 
     etest --help
 
