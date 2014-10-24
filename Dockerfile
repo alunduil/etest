@@ -20,7 +20,7 @@ RUN chown root:portage /tmp/distfiles.d
 RUN chmod 0775 /tmp/distfiles.d
 
 RUN mkdir /tmp/etest.logs.d
-RUN chown portage:portage /tmp/etest.log.d
+RUN chown portage:portage /tmp/etest.logs.d
 RUN chmod 2775 /tmp/etest.logs.d
 
 RUN echo 'FEATURES="collision-protect parallel-fetch strict"' >> /etc/portage/make.conf
