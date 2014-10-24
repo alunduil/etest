@@ -5,7 +5,6 @@ RUN sed -e '/en_US/s/^#//' -i /etc/locale.gen
 RUN locale-gen
 RUN eselect locale set en_US.utf8
 
-ENV ACCEPT_KEYWORDS ~amd64
 ENV DISTDIR /tmp/distfiles.d
 ENV EGIT3_STORE_DIR /tmp/distfiles.git.d
 ENV EMERGE_LOG_DIR /tmp/etest.logs.d
