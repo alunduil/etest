@@ -188,7 +188,7 @@ class BashLexer(object):
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'[a-zA-Z-][\da-zA-Z/{},_-]*'
+        r'[a-zA-Z-][\da-zA-Z\./{},_-]*'
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()
