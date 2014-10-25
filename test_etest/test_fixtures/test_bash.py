@@ -101,3 +101,19 @@ BASH_TEXTS.setdefault('all', []).append(_)
 BASH_TEXTS.setdefault('correct', []).append(_)
 BASH_TEXTS.setdefault('correct_parse', []).append(_)
 BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+
+_ = {
+    'name': 'expansion',
+    'bash': script('07_expansion.sh'),
+    'dictionary': {
+        'foo': (
+            'python2_7',
+            'python3_3',
+        ),
+    },
+}
+
+BASH_TEXTS.setdefault('all', []).append(_)
+BASH_TEXTS.setdefault('correct', []).append(_)
+BASH_TEXTS.setdefault('correct_parse', []).append(_)
+BASH_TEXTS.setdefault('correct_tokenize', []).append(_)

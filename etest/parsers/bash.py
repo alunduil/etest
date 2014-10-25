@@ -6,10 +6,61 @@
 import logging
 import os
 import ply.yacc
+import re
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
 
 logger = logging.getLogger(__name__)
+
+
+def split_expansion(text):
+    '''Properly split an expansion's items at commas.'''
+
+    item = ''
+    level = 0
+
+    for character in text:
+        if character == '{':
+            item += character
+            level += 1
+        elif character == '}':
+            item += character
+            level -= 1
+        elif character == ',':
+            yield item
+            item = ''
+        else:
+            item += character
+
+    yield item
+
+
+def expand_word(word):
+    '''Expand any BASH expansions and return the resulting tuple of words.'''
+
+    logger.debug('word: %s', word)
+
+    if not re.search(r'(?:(?:\\\\)*\\)?[{}]', word):
+        logger.debug('words: %s', (word,))
+        return (word,)
+
+    prefix, rest = re.split(r'(?:(?:\\\\)*\\)?{', word, 1)
+    suffix = re.split(r'(?:(?:\\\\)*\\)?}', word)[-1]
+    rest = rest[:rest.rindex(suffix)].strip('\\}')
+
+    logger.debug('prefix: %s', prefix)
+    logger.debug('rest: %s', rest)
+    logger.debug('suffix: %s', suffix)
+
+    words = []
+
+    for expansion in split_expansion(rest):
+        logger.debug('expansion: %s', expansion)
+        words.extend([ prefix + _ + suffix for _ in expand_word(expansion) ])
+
+    logger.debug('words: %s', tuple(words))
+
+    return tuple(words)
 
 
 class BashParser(object):
@@ -61,10 +112,15 @@ class BashParser(object):
             logger.debug('inputunit: p[%d]: %s', _, p[_])
 
     def p_word_list_word(self, p):
-        '''word_list : WORD
-                     | quoted_word
+        '''word_list : WORD'''
 
-        '''
+        p[0] = expand_word(p[1])
+
+        for _ in range(len(p)):
+            logger.debug('world_list: p[%d]: %s', _, p[_])
+
+    def p_word_list_quoted_word(self, p):
+        '''word_list : quoted_word'''
 
         p[0] = (p[1],)
 
@@ -73,6 +129,16 @@ class BashParser(object):
 
     def p_word_list_list(self, p):
         '''word_list : word_list WORD'''
+
+        p[0] = p[1] + expand_word(p[2])
+
+        for _ in range(len(p)):
+            logger.debug('world_list: p[%d]: %s', _, p[_])
+
+    def p_word_list_quoted_list(self, p):
+        '''word_list : word_list quoted_word
+
+        '''
 
         p[0] = p[1] + (p[2],)
 
@@ -587,7 +653,12 @@ class BashParser(object):
         if p[1] in self.symbols:
             logger.warn('re-assignment of %s', p[1])
 
-        self.symbols[p[1]] = p[3]
+        _ = expand_word(p[3])
+
+        if len(_) == 1:
+            _ = _[0]
+
+        self.symbols[p[1]] = _
 
         p[0] = p[1]
 
