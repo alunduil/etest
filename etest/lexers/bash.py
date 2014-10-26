@@ -70,6 +70,7 @@ class BashLexer(object):
         'LESS_LESS_LESS',
         'LESS_LESS_MINUS',
         'NEWLINE',
+        'NEWLINE_ESCAPED',
         'NUMBER',
         'OR_OR',
         'REDIR_WORD',
@@ -151,6 +152,10 @@ class BashLexer(object):
         t.lexer.lineno += 1
         t.type = 'NEWLINE'
         return t
+
+    def t_NEWLINE_ESCAPED(self, t):
+        r'\\\n'
+        t.lexer.lineno += 1
 
     def t_NUMBER(self, t):
         r'\d+'

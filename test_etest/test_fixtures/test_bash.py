@@ -117,3 +117,14 @@ BASH_TEXTS.setdefault('all', []).append(_)
 BASH_TEXTS.setdefault('correct', []).append(_)
 BASH_TEXTS.setdefault('correct_parse', []).append(_)
 BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+
+_ = {
+    'name': 'line continuation',
+    'bash': script('08_line_continuation.sh'),
+    'dictionary': {},
+}
+
+BASH_TEXTS.setdefault('all', []).append(_)
+BASH_TEXTS.setdefault('correct', []).append(_)
+BASH_TEXTS.setdefault('correct_parse', []).append(_)
+BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
