@@ -3,10 +3,11 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import click
 import logging
 import os
 
-from etest.lexers.bash import BashLexer
+from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
 
 logger = logging.getLogger(__name__)
@@ -87,12 +88,15 @@ class Ebuild(object):
 
             logger.info('parsing: %s', _)
 
-            with open(_, 'r') as fh:
-                self.parser.parser.parse(
-                    input = fh.read(),
-                    lexer = self.lexer.lexer,
-                )
-                self._parse = self.parser.symbols
+            try:
+                with open(_, 'r') as fh:
+                    self.parser.parser.parse(
+                        input = fh.read(),
+                        lexer = self.lexer.lexer,
+                    )
+                    self._parse = self.parser.symbols
+            except BashSyntaxError as error:
+                raise click.ClickException('{0}\n{1}'.format(_, error.args[0]))
 
             self.parsed = True
 
