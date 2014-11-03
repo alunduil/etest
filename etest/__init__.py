@@ -48,15 +48,18 @@ def etest(dry_run, fast, quiet, verbose, ebuilds):
             check.run()
             elapsed_time += check.time
 
-        if check.failed:
-            failures.append(check)
-
         if quiet:
             continue
         elif verbose:
             echo_check_verbose(check)
         else:
             echo_check(check)
+
+        if check.failed:
+            failures.append(check)
+
+            if fast:
+                break
 
     if not quiet:
         if verbose:
