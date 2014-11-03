@@ -128,3 +128,25 @@ BASH_TEXTS.setdefault('all', []).append(_)
 BASH_TEXTS.setdefault('correct', []).append(_)
 BASH_TEXTS.setdefault('correct_parse', []).append(_)
 BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+
+_ = {
+    'name': 'command with path',
+    'bash': script('09_command_with_path.sh'),
+    'dictionary': {},
+}
+
+BASH_TEXTS.setdefault('all', []).append(_)
+BASH_TEXTS.setdefault('correct', []).append(_)
+BASH_TEXTS.setdefault('correct_parse', []).append(_)
+BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+
+_ = {
+    'name': 'assign variable',
+    'bash': script('09_assign_variable.sh'),
+    'dictionary': {},
+}
+
+BASH_TEXTS.setdefault('all', []).append(_)
+BASH_TEXTS.setdefault('correct', []).append(_)
+BASH_TEXTS.setdefault('correct_parse', []).append(_)
+BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
