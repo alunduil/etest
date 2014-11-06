@@ -14,7 +14,7 @@ def script(name):
     return open(os.path.join(FIXTURES_DIRECTORY, 'scripts', name), 'r', encoding = 'utf-8').read()
 
 
-BASH_TEXTS = {}
+BASH_SCRIPTS = {}
 
 _ = {
     'name': 'empty',
@@ -22,10 +22,10 @@ _ = {
     'dictionary': {},
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('incorrect', []).append(_)
-BASH_TEXTS.setdefault('incorrect_parse', []).append(_)
-BASH_TEXTS.setdefault('incorrect_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('incorrect', []).append(_)
+BASH_SCRIPTS.setdefault('incorrect_parse', []).append(_)
+BASH_SCRIPTS.setdefault('incorrect_tokenize', []).append(_)
 
 _ = {
     'name': 'comment',
@@ -33,10 +33,10 @@ _ = {
     'dictionary': {},
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'assignment',
@@ -46,10 +46,10 @@ _ = {
     },
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'assignment_array',
@@ -61,10 +61,10 @@ _ = {
     },
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'dangling_double_quote',
@@ -72,10 +72,10 @@ _ = {
     'dictionary': {},
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('incorrect', []).append(_)
-BASH_TEXTS.setdefault('incorrect_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('incorrect', []).append(_)
+BASH_SCRIPTS.setdefault('incorrect_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'assignment_double_quoted',
@@ -86,10 +86,10 @@ _ = {
     },
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'function_def',
@@ -97,10 +97,10 @@ _ = {
     'dictionary': {},
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'expansion',
@@ -113,10 +113,10 @@ _ = {
     },
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'line continuation',
@@ -124,10 +124,10 @@ _ = {
     'dictionary': {},
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'command with path',
@@ -135,18 +135,18 @@ _ = {
     'dictionary': {},
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 
 _ = {
     'name': 'assign variable',
-    'bash': script('09_assign_variable.sh'),
+    'bash': script('10_assign_variable.sh'),
     'dictionary': {},
 }
 
-BASH_TEXTS.setdefault('all', []).append(_)
-BASH_TEXTS.setdefault('correct', []).append(_)
-BASH_TEXTS.setdefault('correct_parse', []).append(_)
-BASH_TEXTS.setdefault('correct_tokenize', []).append(_)
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)

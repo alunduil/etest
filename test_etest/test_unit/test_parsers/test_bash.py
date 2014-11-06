@@ -3,10 +3,11 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import copy
 import logging
 import unittest
 
-from test_etest.test_fixtures.test_bash import BASH_TEXTS
+from test_etest.test_fixtures.test_bash import BASH_SCRIPTS
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
@@ -14,46 +15,50 @@ from etest.parsers.bash import BashParser
 logger = logging.getLogger(__name__)
 
 
-class TestBashParser(unittest.TestCase):
-    def setUp(self):
-        self.texts = BASH_TEXTS
+class TestBaseParserMeta(type):
+    def __init__(cls, name, bases, dct):
+        super(TestBaseParserMeta, cls).__init__(name, bases, dct)
 
-    def test_correct(self):
-        '''parsers.bash—correct parse'''
+        def gen_script_case(script, correct):
+            def case(self):
+                self.lexer = BashLexer()
+                self.lexer.build()
 
-        for text in self.texts['correct']:
-            logger.info('name: %s', text['name'])
+                self.parser = BashParser()
+                self.parser.build(
+                    debug = True,
+                    debuglog = logger,
+                )
 
-            self.lexer = BashLexer()
-            self.lexer.build()
+                if correct:
+                    self.parser.parser.parse(
+                        debug = logger,
+                        input = script['bash'],
+                        lexer = self.lexer.lexer,
+                    )
+                else:
+                    self.assertRaises(BashSyntaxError, self.parser.parser.parse, input = script['bash'], lexer = self.lexer.lexer)
 
-            self.parser = BashParser()
-            self.parser.build(
-                debug = True,
-                debuglog = logger,
-            )
+            case.__name__ = 'test_' + script['name']
+            case.__doc__ = 'parsers.bash—{0[name]}'.format(script)
 
-            self.parser.parser.parse(
-                debug = logger,
-                input = text['bash'],
-                lexer = self.lexer.lexer,
-            )
+            if correct:
+                case.__doc__ += '—correct'
+            else:
+                case.__doc__ += '—incorrect'
 
-            self.assertEqual(text['dictionary'], self.parser.symbols)
+            return case
 
-    def test_incorrect(self):
-        '''parsers.bash—incorrect parse'''
+        for script in copy.deepcopy(BASH_SCRIPTS['correct']):
+            logger.debug('adding %s to %s', script['name'], cls)
 
-        for text in self.texts['incorrect']:
-            logger.info('name: %s', text['name'])
+            setattr(cls, 'test_' + script['name'], gen_script_case(script, True))
 
-            self.lexer = BashLexer()
-            self.lexer.build()
+        for script in copy.deepcopy(BASH_SCRIPTS['incorrect']):
+            logger.debug('adding %s to %s', script['name'], cls)
 
-            self.parser = BashParser()
-            self.parser.build(
-                debug = True,
-                debuglog = logger,
-            )
+            setattr(cls, 'test_' + script['name'], gen_script_case(script, False))
 
-            self.assertRaises(BashSyntaxError, self.parser.parser.parse, input = text['bash'], lexer = self.lexer.lexer)
+
+class TestBashParser(unittest.TestCase, metaclass = TestBaseParserMeta):
+    pass
