@@ -5,6 +5,7 @@
 
 import copy
 import logging
+import os
 import unittest
 
 from test_etest.test_fixtures.test_bash import BASH_SCRIPTS
@@ -26,8 +27,9 @@ class TestBaseParserMeta(type):
 
                 self.parser = BashParser()
                 self.parser.build(
-                    debug = True,
-                    debuglog = logger,
+                    debug = 1,
+                    debugfile = os.path.join(os.path.dirname(__file__), 'parser.out'),
+                    debuglog = None,
                 )
 
                 if correct:
