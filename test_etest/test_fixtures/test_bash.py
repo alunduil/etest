@@ -150,3 +150,16 @@ BASH_SCRIPTS.setdefault('all', []).append(_)
 BASH_SCRIPTS.setdefault('correct', []).append(_)
 BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
 BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
+
+_ = {
+    'name': 'implicit concatenation',
+    'bash': script('11_implicit_concatenation.sh'),
+    'dictionary': {
+        'foo': 'barbaz',
+    },
+}
+
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
