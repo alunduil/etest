@@ -62,14 +62,13 @@ def etest(dry_run, fast, quiet, verbose, ebuilds):
                 break
 
     if not quiet:
-        if verbose:
-            for check in failures:
-                click.echo('=' * click.get_terminal_size()[0])
-                click.echo(check.name)
-                click.echo('-' * click.get_terminal_size()[0])
-                click.echo(check.output)
-                click.echo()
-        else:
+        for check in failures:
+            click.echo()
+            click.echo()
+            click.echo('=' * click.get_terminal_size()[0])
+            click.echo(check.name)
+            click.echo('-' * click.get_terminal_size()[0])
+            click.echo(check.output)
             click.echo()
 
         click.echo('-' * click.get_terminal_size()[0])
