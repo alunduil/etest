@@ -136,7 +136,7 @@ class BashLexer(object):
 
         return t
 
-    t_doublequote_WORD = r'([^"]|(\\\\)*\\")+'
+    t_doublequote_WORD = r'(?:[^"]|(?:\\\\)*\\")+'
 
     t_GREATER_AND = r'>&'
     t_GREATER_BAR = r'>\|'
@@ -187,13 +187,13 @@ class BashLexer(object):
 
         return t
 
-    t_singlequote_WORD = r'([^\']|(\\\\)*\\\')+'
+    t_singlequote_WORD = r'(?:[^\']|(?:\\\\)*\\\')+'
 
     t_TIMEIGN = r'--'
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'[a-zA-Z-/][\da-zA-Z\./{},_-]*'
+        r'[a-zA-Z-/\.][\da-zA-Z\./{},_-]*|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}'
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()

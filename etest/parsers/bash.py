@@ -40,6 +40,10 @@ def expand_word(word):
 
     logger.debug('word: %s', word)
 
+    if word.startswith('${'):
+        logger.debug('words: %s', (word,))
+        return (word,)
+
     if not re.search(r'(?:(?:\\\\)*\\)?[{}]', word):
         logger.debug('words: %s', (word,))
         return (word,)

@@ -143,7 +143,9 @@ BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
 _ = {
     'name': 'assign variable',
     'bash': script('10_assign_variable.sh'),
-    'dictionary': {},
+    'dictionary': {
+        'MY_PN': '${PN/-/.}',
+    },
 }
 
 BASH_SCRIPTS.setdefault('all', []).append(_)
