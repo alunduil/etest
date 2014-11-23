@@ -45,7 +45,7 @@ class Ebuild(object):
     @property
     def version(self):
         if not hasattr(self, '_version'):
-            self._version = self.path.rsplit('-', 1)[-1].split('.', 1)[0]
+            self._version = self.path.rsplit('-', 1)[-1].rsplit('.', 1)[0]
 
         return self._version
 
