@@ -6,6 +6,7 @@
 import click
 import logging
 import os
+import re
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
@@ -45,7 +46,8 @@ class Ebuild(object):
     @property
     def version(self):
         if not hasattr(self, '_version'):
-            self._version = self.path.rsplit('-', 1)[-1].rsplit('.', 1)[0]
+            self._version = self.path.replace('.ebuild', '')
+            self._version = re.sub(r'.*?' + self.name.split('/')[-1] + '-', '', self._version)
 
         return self._version
 
