@@ -87,6 +87,23 @@ class TestEtestCliEbuild(unittest.TestCase):
         self.assertEqual(0, _.exit_code)
 
     def test_etest_ebuild(self):
+        '''etest -j2'''
+
+        _ = self.runner.invoke(etest, [ '-j', '2' ])
+
+        logger.debug('exception: %s', _.exception)
+        logger.debug('traceback:\n%s', ''.join(traceback.format_tb(_.exc_info[2])))
+
+        self.assertRegex(
+            _.output,
+            r'··\n'
+            r'-+\n'
+            r'2 tests ran in \d+(?:\.\d+)? seconds\n'
+        )
+
+        self.assertEqual(0, _.exit_code)
+
+    def test_etest_ebuild(self):
         '''etest'''
 
         _ = self.runner.invoke(etest, [])

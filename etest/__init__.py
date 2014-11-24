@@ -5,10 +5,14 @@
 
 import click
 import datetime
+import logging
+import threading
 import sys
 
 from etest import information
 from etest import tests
+
+logger = logging.getLogger(__name__)
 
 
 def echo_check(check):
@@ -34,47 +38,70 @@ def echo_check_verbose(check):
 @click.command()
 @click.option('-d', '--dry-run', is_flag = True, default = False, help = 'report actions but do not run tests')
 @click.option('-f', '--fast', is_flag = True, default = False, help = 'stop at first failure')
+@click.option('-j', '--jobs', default = 1, help = 'number of test to run simultaneously')
 @click.option('-q', '--quiet', is_flag = True, default = False, help = 'suppress all output')
 @click.option('-v', '--verbose', is_flag = True, default = False, help = 'provide more output')
 @click.version_option(information.VERSION)
 @click.argument('ebuilds', nargs = -1)
-def etest(dry_run, fast, quiet, verbose, ebuilds):
+def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
     checks = tests.Tests(ebuilds).tests
-    elapsed_time = datetime.timedelta()
-    failures = []
 
-    for check in checks:
+    failures = []
+    elapsed_times = []
+
+    output_lock = threading.Lock()
+    jobs_limit_sem = threading.BoundedSemaphore(value = jobs)
+
+    failed = False
+
+    def _(check):
         if not dry_run:
             check.run()
-            elapsed_time += check.time
+            elapsed_times.append(check.time)
 
         if quiet:
-            continue
+            pass
         elif verbose:
-            echo_check_verbose(check)
+            with output_lock:
+                echo_check_verbose(check)
         else:
-            echo_check(check)
+            with output_lock:
+                echo_check(check)
 
         if check.failed:
             failures.append(check)
 
             if fast:
-                break
+                failed = True
+
+        jobs_limit_sem.release()
+
+    logger.debug('threading.enumerate(): %s', threading.enumerate())
+
+    for check in checks:
+        jobs_limit_sem.acquire()
+
+        threading.Thread(target = _, args = (check,)).start()
+
+    while threading.active_count() > 1:
+        threading.enumerate().pop().join()
+
+    elapsed_time = sum(elapsed_times, datetime.timedelta())
 
     if not quiet:
         for check in failures:
             click.echo()
             click.echo()
-            click.echo('=' * click.get_terminal_size()[0])
+            click.echo('=' * min(click.get_terminal_size()[0], 72))
             click.echo(check.name)
-            click.echo('-' * click.get_terminal_size()[0])
+            click.echo('-' * min(click.get_terminal_size()[0], 72))
             click.echo(check.output)
             click.echo()
 
         if not verbose:
             click.echo()
 
-        click.echo('-' * click.get_terminal_size()[0])
+        click.echo('-' * min(click.get_terminal_size()[0], 72))
         click.secho('{0} tests ran in {1} seconds'.format(len(checks), elapsed_time.total_seconds()), fg = 'green')
         if len(failures):
             click.secho('{0} tests FAILED'.format(len(failures)), fg = 'red')
