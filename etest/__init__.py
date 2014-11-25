@@ -71,6 +71,9 @@ def etest(dry_run, fast, quiet, verbose, ebuilds):
             click.echo(check.output)
             click.echo()
 
+        if not verbose:
+            click.echo()
+
         click.echo('-' * click.get_terminal_size()[0])
         click.secho('{0} tests ran in {1} seconds'.format(len(checks), elapsed_time.total_seconds()), fg = 'green')
         if len(failures):
