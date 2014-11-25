@@ -55,6 +55,8 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
     failed = False
 
     def _(check):
+        global failed
+
         if not dry_run:
             check.run()
             elapsed_times.append(check.time)
@@ -80,6 +82,9 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
 
     for check in checks:
         jobs_limit_sem.acquire()
+
+        if failed:
+            break
 
         threading.Thread(target = _, args = (check,)).start()
 

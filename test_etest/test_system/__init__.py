@@ -86,7 +86,7 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertEqual(0, _.exit_code)
 
-    def test_etest_ebuild(self):
+    def test_etest_parallel_ebuild(self):
         '''etest -j2'''
 
         _ = self.runner.invoke(etest, [ '-j', '2' ])
