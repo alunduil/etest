@@ -230,7 +230,8 @@ class Tests(object):
         tests = []
 
         use_flags = list(ebuild.use_flags)
-        use_flags.remove('test')
+        if 'test' in use_flags:
+            use_flags.remove('test')
 
         logger.debug('ebuild.use_flags: %s', ebuild.use_flags)
 
