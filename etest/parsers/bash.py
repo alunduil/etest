@@ -132,19 +132,19 @@ class BashParser(object):
             logger.debug('world_list: p[%d]: %s', _, p[_])
 
     def p_word_list_list(self, p):
-        '''word_list : word_list WORD'''
+        '''word_list : word_list newline_list WORD'''
 
-        p[0] = p[1] + expand_word(p[2])
+        p[0] = p[1] + expand_word(p[3])
 
         for _ in range(len(p)):
             logger.debug('world_list: p[%d]: %s', _, p[_])
 
     def p_word_list_quoted_list(self, p):
-        '''word_list : word_list quoted_word
+        '''word_list : word_list newline_list quoted_word
 
         '''
 
-        p[0] = p[1] + (p[2],)
+        p[0] = p[1] + (p[3],)
 
         for _ in range(len(p)):
             logger.debug('world_list: p[%d]: %s', _, p[_])
@@ -616,12 +616,12 @@ class BashParser(object):
     #
 
     def p_assignment_word_array(self, p):
-        '''assignment_word : WORD '=' '(' word_list ')' '''
+        '''assignment_word : WORD '=' '(' newline_list word_list newline_list ')' '''
 
         if p[1] in self.symbols:
             logger.warn('re-assignment of %s', p[1])
 
-        self.symbols[p[1]] = p[4]
+        self.symbols[p[1]] = p[5]
 
         p[0] = p[1]
 

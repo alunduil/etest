@@ -56,7 +56,7 @@ Known Issues
 ============
 
 Known issues can be found in the github issue list at
-https://github.com/alunduil/crumbs/etest.
+https://github.com/alunduil/etest/issues.
 
 Troubleshooting
 ===============

@@ -165,3 +165,16 @@ BASH_SCRIPTS.setdefault('all', []).append(_)
 BASH_SCRIPTS.setdefault('correct', []).append(_)
 BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
 BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)
+
+_ = {
+    'name': 'multiline_array',
+    'bash': script('12_multiline_array.sh'),
+    'dictionary': {
+        'foo': [ 'bar' ],
+    },
+}
+
+BASH_SCRIPTS.setdefault('all', []).append(_)
+BASH_SCRIPTS.setdefault('correct', []).append(_)
+BASH_SCRIPTS.setdefault('correct_parse', []).append(_)
+BASH_SCRIPTS.setdefault('correct_tokenize', []).append(_)

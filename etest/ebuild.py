@@ -21,12 +21,6 @@ class Ebuild(object):
 
         self.parsed = False
 
-        self.parser = BashParser()
-        self.parser.build()
-
-        self.lexer = BashLexer()
-        self.lexer.build()
-
     @property
     def name(self):
         if not hasattr(self, '_name'):
@@ -82,6 +76,12 @@ class Ebuild(object):
         '''
 
         if not self.parsed:
+            parser = BashParser()
+            parser.build()
+
+            lexer = BashLexer()
+            lexer.build()
+
             self._parse = {}
 
             logger.debug('overlay_path: %s', self.overlay.directory)
@@ -92,11 +92,11 @@ class Ebuild(object):
 
             try:
                 with open(_, 'r') as fh:
-                    self.parser.parser.parse(
+                    parser.parser.parse(
                         input = fh.read(),
-                        lexer = self.lexer.lexer,
+                        lexer = lexer.lexer,
                     )
-                    self._parse = self.parser.symbols
+                    self._parse = parser.symbols
             except BashSyntaxError as error:
                 raise click.ClickException('{0}\n{1}'.format(_, error.args[0]))
 
