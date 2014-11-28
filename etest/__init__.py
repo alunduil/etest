@@ -99,6 +99,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
             click.echo()
             click.echo('=' * min(click.get_terminal_size()[0], 72))
             click.echo(check.name)
+            click.echo(check.failed_command)
             click.echo('-' * min(click.get_terminal_size()[0], 72))
             click.echo(check.output)
             click.echo()

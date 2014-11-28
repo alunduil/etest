@@ -24,6 +24,7 @@ class Test(object):
         self.use_flags = kwargs.get('use_flags', [])
 
         self.failed = False
+        self.failed_command = None
         self.time = datetime.timedelta(0)
         self.output = ''
 
@@ -141,6 +142,7 @@ class Test(object):
 
             if self.failed:
                 _.remove_container(container_name)
+                self.failed_command = ' '.join(command)
                 break
 
             tag = str(self.commands.index(command))
