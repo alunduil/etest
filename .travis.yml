@@ -10,7 +10,10 @@ install:
   - sudo apt-get -qq update
   - sudo apt-get -qq install lxc-docker
   - pip install -q flake8
+before_script:
+  - wget 'https://raw.githubusercontent.com/mrueg/repomen-travis/master/spinner.sh'
+  - sudo chmod 777 spinner.sh
 script:
   - pip install .
   - flake8
-  - nosetests
+  - ./spinner.sh 'nosetests --verbosity=0 -q'
