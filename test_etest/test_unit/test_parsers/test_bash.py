@@ -33,7 +33,7 @@ class BaseParserMetaTest(type):
                 )
 
                 if 'correct' in script:
-                    logger.debug('script[text]: %s', script['text'])
+                    logger.debug('script[text]: %r', script['text'])
 
                     self.parser.parser.parse(
                         debug = logger,

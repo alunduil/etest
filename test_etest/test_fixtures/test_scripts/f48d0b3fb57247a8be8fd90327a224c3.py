@@ -7,7 +7,7 @@ from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
 FOO="bar"baz
-'''[1:-1]
+'''
 
 _ = {
     'uuid': 'f48d0b3fb57247a8be8fd90327a224c3',
@@ -19,6 +19,8 @@ _ = {
     'symbols': {
         'FOO': 'barbaz',
     },
+
+    'correct': None,
 }
 
 SCRIPTS.setdefault('all', []).append(_)

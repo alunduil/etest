@@ -9,7 +9,7 @@ _ = '''
 foo \
 	continues \
 	on
-'''[1:-1]
+'''
 
 _ = {
     'uuid': 'bec3d10b974e4447853ef59268946fe1',

@@ -9,7 +9,7 @@ _ = '''
 local FOO=(
 	bar
 )
-'''[1:-1]
+'''
 
 _ = {
     'uuid': '419f4873d82340699c55000386901621',
@@ -19,8 +19,10 @@ _ = {
     'text': _,
 
     'symbols': {
-        'FOO': [ 'bar', ],
+        'FOO': ( 'bar', ),
     },
+
+    'correct': None,
 }
 
 SCRIPTS.setdefault('all', []).append(_)

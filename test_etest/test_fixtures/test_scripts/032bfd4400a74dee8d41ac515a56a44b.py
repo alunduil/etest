@@ -6,7 +6,7 @@
 from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
-'''[1:-1]
+'''
 
 _ = {
     'uuid': '032bfd4400a74dee8d41ac515a56a44b',
@@ -16,6 +16,8 @@ _ = {
     'text': _,
 
     'symbols': {},
+
+    'correct': None,
 }
 
 SCRIPTS.setdefault('all', []).append(_)

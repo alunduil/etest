@@ -7,7 +7,7 @@ from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
 # comment
-'''[1:-1]
+'''
 
 _ = {
     'uuid': '0431e3bee752482986467023e54b4673',

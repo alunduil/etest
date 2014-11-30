@@ -7,7 +7,7 @@ from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
 FOO=python{2_7,3_3}
-'''[1:-1]
+'''
 
 _ = {
     'uuid': '86795acaa3c74f41a23bac16342ca2d8',

@@ -11,7 +11,7 @@ python_install_all() {
 
 	keepdir /etc/holland
 }
-'''[1:-1]
+'''
 
 _ = {
     'uuid': 'c20ac8ba1ced46b8981c4037e23bf6a5',

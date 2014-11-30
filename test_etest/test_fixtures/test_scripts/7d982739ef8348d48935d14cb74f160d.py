@@ -9,7 +9,7 @@ _ = '''
 python_test() {
 	nosetests || die "Tests failed under ${EPYTHON}"
 }
-'''[1:-1]
+'''
 
 _ = {
     'uuid': '7d982739ef8348d48935d14cb74f160d',
