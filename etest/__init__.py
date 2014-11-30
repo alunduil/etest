@@ -44,8 +44,6 @@ def echo_check_verbose(check):
 @click.version_option(information.VERSION)
 @click.argument('ebuilds', nargs = -1)
 def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
-    checks = tests.Tests(ebuilds).tests
-
     failures = []
     elapsed_times = []
 
@@ -59,7 +57,8 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
 
         if not dry_run:
             check.run()
-            elapsed_times.append(check.time)
+
+        elapsed_times.append(check.time)
 
         if quiet:
             pass
@@ -78,12 +77,11 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
 
         jobs_limit_sem.release()
 
-    logger.debug('threading.enumerate(): %s', threading.enumerate())
-
-    for check in checks:
+    for check in tests.Tests(ebuilds).itertests():
         jobs_limit_sem.acquire()
 
         if failed:
+            jobs_limit_sem.release()
             break
 
         threading.Thread(target = _, args = (check,)).start()
@@ -98,7 +96,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
             click.echo()
             click.echo()
             click.echo('=' * min(click.get_terminal_size()[0], 72))
-            click.echo(check.name)
+            click.secho(check.name, bold = True)
             click.echo(check.failed_command)
             click.echo('-' * min(click.get_terminal_size()[0], 72))
             click.echo(check.output)
@@ -108,12 +106,8 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
             click.echo()
 
         click.echo('-' * min(click.get_terminal_size()[0], 72))
-        click.echo('{0} tests ran in {1} seconds'.format(len(checks), elapsed_time.total_seconds()))
+        click.echo('{0} tests ran in {1.2f} seconds'.format(len(elapsed_times), elapsed_time.total_seconds()))
         if len(failures):
             click.secho('{0} tests FAILED'.format(len(failures)), fg = 'red')
 
     sys.exit(len(failures))
-
-
-if __name__ == '__main__':
-    etest()

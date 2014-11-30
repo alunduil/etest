@@ -3,6 +3,7 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import functools
 import logging
 import os
 
@@ -13,35 +14,29 @@ logger = logging.getLogger(__name__)
 
 class Overlay(object):
     @property
+    @functools.lru_cache(1)
     def directory(self):
-        if not hasattr(self, '_directory'):
-            _ = os.getcwd()
+        _ = os.getcwd()
 
-            while _ != '/':
-                logger.debug('current path: %s', _)
+        while _ != '/':
+            if os.path.exists(os.path.join(_, 'profiles', 'repo_name')) and os.path.exists(os.path.join(_, 'metadata', 'layout.conf')):
+                break
 
-                if os.path.exists(os.path.join(_, 'profiles', 'repo_name')) and os.path.exists(os.path.join(_, 'metadata', 'layout.conf')):
-                    self._directory = _
-                    break
+            _ = os.path.dirname(_)
+        else:
+            raise InvalidOverlayError('not in a valid ebuild repository directory')
 
-                _ = os.path.dirname(_)
-            else:
-                raise InvalidOverlayError('not in a valid ebuild repository directory')
-
-        return self._directory
+        return _
 
     @property
     def ebuilds(self):
-        if not hasattr(self, '_ebuilds'):
-            self._ebuilds = []
+        for path, directories, files in os.walk(self.directory):
+            if 'files' in directories:
+                directories.remove('files')
 
-            for path, directories, files in os.walk(self.directory):
-                if 'files' in directories:
-                    directories.remove('files')
-
-                self._ebuilds.extend([ ebuild.Ebuild(os.path.relpath(os.path.join(path, _), self.directory), self) for _ in files if _.endswith('.ebuild') ])
-
-        return self._ebuilds
+            for _ in files:
+                if _.endswith('.ebuild'):
+                    yield ebuild.Ebuild(os.path.relpath(os.path.join(path, _), self.directory), self)
 
 
 class InvalidOverlayError(RuntimeError):

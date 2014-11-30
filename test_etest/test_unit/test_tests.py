@@ -29,7 +29,7 @@ class TestTestsWithEmptyOverlay(TestWithEmptyOverlay):
 
         self.tests = tests.Tests()
 
-        self.assertEqual(0, len(self.tests.tests))
+        self.assertEqual(0, len(list(self.tests.tests)))
 
     def test_ebuild_filter_empty(self):
         '''tests.Tests().ebuild_filter'''

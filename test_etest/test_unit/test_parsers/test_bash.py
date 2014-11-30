@@ -8,7 +8,7 @@ import logging
 import os
 import unittest
 
-from test_etest.test_fixtures.test_bash import BASH_SCRIPTS
+from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
@@ -16,11 +16,11 @@ from etest.parsers.bash import BashParser
 logger = logging.getLogger(__name__)
 
 
-class TestBaseParserMeta(type):
+class BaseParserMetaTest(type):
     def __init__(cls, name, bases, dct):
-        super(TestBaseParserMeta, cls).__init__(name, bases, dct)
+        super(BaseParserMetaTest, cls).__init__(name, bases, dct)
 
-        def gen_script_case(script, correct):
+        def gen_script_case(script):
             def case(self):
                 self.lexer = BashLexer()
                 self.lexer.build()
@@ -32,35 +32,29 @@ class TestBaseParserMeta(type):
                     debuglog = None,
                 )
 
-                if correct:
+                if 'correct' in script:
+                    logger.debug('script[text]: %s', script['text'])
+
                     self.parser.parser.parse(
                         debug = logger,
-                        input = script['bash'],
+                        input = script['text'],
                         lexer = self.lexer.lexer,
                     )
+
+                    self.assertEqual(script['symbols'], self.parser.symbols)
                 else:
-                    self.assertRaises(BashSyntaxError, self.parser.parser.parse, input = script['bash'], lexer = self.lexer.lexer)
+                    self.assertRaises(BashSyntaxError, self.parser.parser.parse, input = script['text'], lexer = self.lexer.lexer)
 
-            case.__name__ = 'test_' + script['name']
-            case.__doc__ = 'parsers.bash—{0[name]}'.format(script)
-
-            if correct:
-                case.__doc__ += '—correct'
-            else:
-                case.__doc__ += '—incorrect'
+            case.__name__ = 'test_' + script['uuid']
+            case.__doc__ = 'parsers.bash—{0[uuid]}—{0[description]}'.format(script)
 
             return case
 
-        for script in copy.deepcopy(BASH_SCRIPTS['correct']):
-            logger.debug('adding %s to %s', script['name'], cls)
-
-            setattr(cls, 'test_' + script['name'], gen_script_case(script, True))
-
-        for script in copy.deepcopy(BASH_SCRIPTS['incorrect']):
-            logger.debug('adding %s to %s', script['name'], cls)
-
-            setattr(cls, 'test_' + script['name'], gen_script_case(script, False))
+        for script in copy.deepcopy(SCRIPTS['bash']):
+            _ = gen_script_case(script)
+            logger.info('adding %s', _.__name__)
+            setattr(cls, _.__name__, _)
 
 
-class TestBashParser(unittest.TestCase, metaclass = TestBaseParserMeta):
+class BashParserUnitTest(unittest.TestCase, metaclass = BaseParserMetaTest):
     pass

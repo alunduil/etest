@@ -3,34 +3,37 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import functools
-import os
-import tempfile
+import logging
+import re
 import unittest
 
+from test_etest import test_helpers
 
-class TestWithEmptyOverlay(unittest.TestCase):
+from etest import overlay
+
+logger = logging.getLogger(__name__)
+
+
+class BaseOverlayTest(unittest.TestCase):
+    mocks_mask = set()
+    mocks = set()
+
+    @property
+    def real_module(self):
+        return re.sub(r'\.[^.]+', '', self.__module__.replace('test_', ''), 1)
+
     def setUp(self):
-        self.mocked_directory = tempfile.mkdtemp()
-        self.addCleanup(os.rmdir, self.mocked_directory)
+        super().setUp()
 
-        _ = os.path.join(self.mocked_directory, 'profiles')
-        os.mkdir(_)
-        self.addCleanup(os.rmdir, _)
+        self.mock_ebuild()
 
-        _ = os.path.join(self.mocked_directory, 'profiles', 'repo_name')
-        with open(_, 'w') as fh:
-            fh.write('etest')
-        self.addCleanup(os.remove, _)
+        self.overlay = overlay.Overlay()
 
-        _ = os.path.join(self.mocked_directory, 'metadata')
-        os.mkdir(_)
-        self.addCleanup(os.rmdir, _)
+    mocks.add('ebuild')
 
-        _ = os.path.join(self.mocked_directory, 'metadata', 'layout.conf')
-        with open(_, 'w') as fh:
-            fh.write('masters = gentoo')
-        self.addCleanup(os.remove, _)
-
-        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
-        os.chdir(self.mocked_directory)
+    @test_helpers.mocker('ebuild')
+    def mock_ebuild(self):
+        logger.debug('mocking %s', self.real_module + '.ebuild')
+        _ = unittest.mock.patch(self.real_module + '.ebuild')
+        self.mocked_ebuild = _.start()
+        self.addCleanup(_.stop)

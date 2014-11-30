@@ -22,7 +22,7 @@ class TestTestsWithNonEmptyOverlay(unittest.TestCase):
 
         self.tests = tests.Tests()
 
-        self.assertEqual(2, len(self.tests.tests))
+        self.assertEqual(2, len(list(self.tests.tests)))
 
     def test_ebuild_filter(self):
         '''tests.Tests().ebuild_filter'''

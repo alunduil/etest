@@ -5,6 +5,7 @@
 
 import datetime
 import docker
+import functools
 import itertools
 import logging
 import os
@@ -25,57 +26,58 @@ class Test(object):
 
         self.failed = False
         self.failed_command = None
+
         self.time = datetime.timedelta(0)
         self.output = ''
 
         self.base_docker_image = base_docker_image
 
     @property
+    @functools.lru_cache(1)
     def name(self):
-        if not hasattr(self, '_name'):
-            self._name = self.ebuild.cpv + '[' + ','.join(self.use_flags)
+        _ = self.ebuild.cpv + '[' + ','.join(self.use_flags)
 
-            if self.test:
-                if len(self.use_flags):
-                    self._name += ','
-
-                self._name += 'test'
-
-            self._name += ']'
-
-        return self._name
-
-    @property
-    def commands(self):
-        if not hasattr(self, '_commands'):
-            self._commands = []
-
-            if self.test:
-                self._commands.append(('bash', '-c', 'echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name)))
-
+        if self.test:
             if len(self.use_flags):
-                self._commands.append(('bash', '-c', 'echo {0} {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags))))
+                _ += ','
 
-            self._commands.append(('bash', '-c', 'emerge -q -f --autounmask-write {0} >/dev/null 2>&1 || true'.format(self.ebuild.cpv)))
-            self._commands.append(('bash', '-c', 'etc-update --automode -5 >/dev/null 2>&1'))
+            _ += 'test'
 
-            self._commands.append(('emerge', '-q', '--backtrack=130', self.ebuild.cpv))
+        _ += ']'
 
-        return self._commands
+        return _
 
     @property
+    @functools.lru_cache(1)
+    def commands(self):
+        _ = []
+
+        if self.test:
+            _.append(('bash', '-c', 'echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name)))
+
+        if len(self.use_flags):
+            _.append(('bash', '-c', 'echo {0} {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags))))
+
+        _.append(('bash', '-c', 'emerge -q -f --autounmask-write {0} >/dev/null 2>&1 || true'.format(self.ebuild.cpv)))
+        _.append(('bash', '-c', 'etc-update --automode -5 >/dev/null 2>&1'))
+
+        _.append(('emerge', '-q', '--backtrack=130', self.ebuild.cpv))
+
+        return _
+
+    @property
+    @functools.lru_cache(1)
     def environment(self):
-        if not hasattr(self, '_environment'):
-            self._environment = {}
+        _ = {}
 
-            if 'python' is self.ebuild.compat:
-                self.environment['PYTHON_TARGETS'] = ' '.join(self.ebuild.compat['python'])
+        if 'python' in self.ebuild.compat:
+            _['PYTHON_TARGETS'] = ' '.join(self.ebuild.compat['python'])
 
-                # Things still want python2…☹
-                if 'python2_7' not in self.environment['PYTHON_TARGETS']:
-                    self.environment['PYTHON_TARGETS'] += ' python2_7'
+            # Things still want python2…☹
+            if 'python2_7' not in self.environment['PYTHON_TARGETS']:
+                _['PYTHON_TARGETS'] += ' python2_7'
 
-        return self._environment
+        return _
 
     def run(self):
         _ = docker.Client()
@@ -190,18 +192,10 @@ class Tests(object):
 
     @property
     def tests(self):
-        if not hasattr(self, '_tests'):
-            logger.info('STARTING: populate tests')
-
-            self._tests = []
-
-            for ebuild in self.overlay.ebuilds:
-                if not len(self.ebuild_filter) or any([ _ in ebuild.name for _ in self.ebuild_filter ]):
-                    self._tests.extend(self._generate_tests(ebuild))
-
-            logger.info('STOPPING: populate tests')
-
-        return self._tests
+        for ebuild in self.overlay.ebuilds:
+            if not len(self.ebuild_filter) or any([ _ in ebuild.name for _ in self.ebuild_filter ]):
+                for _ in self._generate_tests(ebuild):
+                    yield _
 
     def _generate_tests(self, ebuild):
         '''Generate all tests for a given ebuild.
@@ -227,10 +221,6 @@ class Tests(object):
 
         '''
 
-        logger.info('STARTING: generate tests for %s', ebuild.name)
-
-        tests = []
-
         use_flags = list(ebuild.use_flags)
         if 'test' in use_flags:
             use_flags.remove('test')
@@ -242,12 +232,8 @@ class Tests(object):
         for use_flags_combination in itertools.chain.from_iterable(itertools.combinations(use_flags, _) for _ in range(len(use_flags) + 1)):
             logger.info('adding %s[%s]', ebuild.name, ','.join(use_flags_combination))
 
-            tests.append(Test(ebuild, use_flags = use_flags_combination))
+            yield Test(ebuild, use_flags = use_flags_combination)
 
             logger.info('adding %s[test,%s]', ebuild.name, ','.join(use_flags_combination))
 
-            tests.append(Test(ebuild, test = True, use_flags = use_flags_combination))
-
-        logger.info('STOPPING: generate tests for %s', ebuild.name)
-
-        return tests
+            yield Test(ebuild, test = True, use_flags = use_flags_combination)
