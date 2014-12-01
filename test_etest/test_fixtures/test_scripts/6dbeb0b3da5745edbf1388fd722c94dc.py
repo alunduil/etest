@@ -8,7 +8,7 @@ from test_etest.test_fixtures.test_scripts import SCRIPTS
 _ = '''
 FOO="bar bar"
 EGIT_REPO_URI="git://github.com/alunduil/etest.git"
-'''
+'''  # flake8: noqa — inline bash script with tabs
 
 _ = {
     'uuid': '6dbeb0b3da5745edbf1388fd722c94dc',

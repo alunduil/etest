@@ -77,6 +77,6 @@ class Ebuild(object):
         except BashSyntaxError as error:
             logger.debug('error.args: %s', error.args)
 
-            raise click.ClickException('{0}\n{1}'.format(_, error.args[0]))
+            raise click.ClickException('{0}\n{1}'.format(parser.symbols, error.args[0]))
 
         return parser.symbols

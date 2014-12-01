@@ -9,7 +9,7 @@ _ = '''
 foo \
 	continues \
 	on
-'''
+'''  # flake8: noqa — inline bash script with tabs
 
 _ = {
     'uuid': 'bec3d10b974e4447853ef59268946fe1',

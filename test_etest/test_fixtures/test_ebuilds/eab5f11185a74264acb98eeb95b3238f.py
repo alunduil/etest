@@ -10,7 +10,7 @@ _ = {
 
     'path': 'app-portage/etest/etest-9999.ebuild',
 
-    'compat': { 'python': 'python3_3 python3_4', },
+    'compat': { 'python': ( 'python3_3', 'python3_4', ), },
     'cpv': '=app-portage/etest-9999',
     'name': 'app-portage/etest',
     'use_flags': [ 'test' ],
@@ -18,7 +18,7 @@ _ = {
 
     'symbols': {
         'IUSE': 'test',
-        'PYTHON_COMPAT': 'python3_3 python3_4',
+        'PYTHON_COMPAT': ( 'python3_3', 'python3_4', ),
     },
 }
 

@@ -6,21 +6,19 @@
 import logging
 import re
 import unittest
+import unittest.mock
 
 from test_etest import test_helpers
+from test_etest.test_common import BaseEtestTest
 
 from etest import overlay
 
 logger = logging.getLogger(__name__)
 
 
-class BaseOverlayTest(unittest.TestCase):
+class BaseOverlayTest(BaseEtestTest):
     mocks_mask = set()
     mocks = set()
-
-    @property
-    def real_module(self):
-        return re.sub(r'\.[^.]+', '', self.__module__.replace('test_', ''), 1)
 
     def setUp(self):
         super().setUp()

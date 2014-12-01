@@ -9,7 +9,7 @@ _ = '''
 local FOO=(
 	bar
 )
-'''
+'''  # flake8: noqa — inline bash script with tabs
 
 _ = {
     'uuid': '419f4873d82340699c55000386901621',

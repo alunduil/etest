@@ -7,7 +7,7 @@ from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
 # comment
-'''
+'''  # flake8: noqa — inline bash script with tabs
 
 _ = {
     'uuid': '0431e3bee752482986467023e54b4673',

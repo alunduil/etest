@@ -7,7 +7,7 @@ from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
 MY_PN=${PN/-/.}
-'''
+'''  # flake8: noqa — inline bash script with tabs
 
 _ = {
     'uuid': 'd5aaeeee36574cd3bf4ffa100537703d',

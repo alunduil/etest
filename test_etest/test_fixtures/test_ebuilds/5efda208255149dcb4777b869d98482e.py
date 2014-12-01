@@ -10,7 +10,7 @@ _ = {
 
     'path': 'dev-python/pyrax/pyrax-1.9.3.ebuild',
 
-    'compat': { 'python': 'python2_7', },
+    'compat': { 'python': ( 'python2_7', ), },
     'cpv': '=dev-python/pyrax-1.9.3',
     'name': 'dev-python/pyrax',
     'use_flags': [],
@@ -18,7 +18,7 @@ _ = {
 
     'symbols': {
         'IUSE': '',
-        'PYTHON_COMPAT': 'python2_7',
+        'PYTHON_COMPAT': ( 'python2_7', ),
     },
 }
 

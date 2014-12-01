@@ -3,72 +3,78 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import datetime
-import logging
+import functools
+import os
 import unittest
-import unittest.mock
 
-from test_etest.test_common.test_overlay import TestWithEmptyOverlay
+from test_etest.test_common import BaseEmptyOverlayTest
+from test_etest.test_common import BaseFixtureOverlayTest
+from test_etest.test_common.test_tests import BaseTestMetaTest
+from test_etest.test_common.test_tests import BaseTestTest
+from test_etest.test_common.test_tests import BaseTestsTest
+from test_etest.test_fixtures import FIXTURES_DIRECTORY
 
-from etest import tests
+from etest.tests import Tests
 from etest.overlay import InvalidOverlayError
 
-logger = logging.getLogger(__name__)
+
+class TestUnitTest(BaseTestTest, metaclass = BaseTestMetaTest):
+    mocks_mask = set().union(BaseTestTest.mocks_mask)
+    mocks = set().union(BaseTestTest.mocks)
 
 
-class TestTestsWithInvalidOverlay(unittest.TestCase):
+class TestsWithInvalidOverlayTest(BaseTestsTest):
     def test_invalid_overlay(self):
         '''tests.Tests()—invalid overlay'''
 
-        self.assertRaises(InvalidOverlayError, tests.Tests)
+        if self.is_mocked_overlay:
+            type(self.mocked_overlay).directory = os.getcwd()
+
+        self.assertRaises(InvalidOverlayError, Tests)
 
 
-class TestTestsWithEmptyOverlay(TestWithEmptyOverlay):
-    def test_empty_overlay(self):
-        '''tests.Tests()—empty overlay'''
+class ValidEmptyTestsUnitTest(BaseTestsTest, BaseEmptyOverlayTest):
+    def setUp(self):
+        super().setUp()
 
-        self.tests = tests.Tests()
+        if self.is_mocked_overlay:
+            type(self.mocked_overlay).directory = unittest.mock.PropertyMock(return_value = self.mocked_directory)
 
+    def test_empty_tests(self):
+        '''len(list(tests.Tests().tests)) == 0—empty overlay'''
+
+        self.tests = Tests()
         self.assertEqual(0, len(list(self.tests.tests)))
 
-    def test_ebuild_filter_empty(self):
-        '''tests.Tests().ebuild_filter'''
-
-        self.tests = tests.Tests()
-
-        self.assertEqual([], self.tests.ebuild_filter)
-
-    def test_ebuild_filter_nonempty(self):
-        '''tests.Tests(app-portage/etest).ebuild_filter'''
-
-        self.tests = tests.Tests(('app-portage/etest',))
-
-        self.assertEqual(['app-portage/etest', ], self.tests.ebuild_filter)
-
-
-class TestTestProperties(unittest.TestCase):
+class ValidNonEmptyTestsUnitTest(BaseTestsTest, BaseFixtureOverlayTest):
     def setUp(self):
-        self.mocked_ebuild = unittest.mock.MagicMock()
+        super().setUp()
 
-        type(self.mocked_ebuild).cpv = unittest.mock.PropertyMock(return_value = '=app-portage/ebuild-9999')
+        if self.is_mocked_overlay:
+            type(self.mocked_overlay).directory = unittest.mock.PropertyMock(return_value = self.mocked_directory)
 
-    def test_name_without_test(self):
-        '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples')).name'''
+    def test_nonempty_tests_empty_filter(self):
+        '''len(list(tests.Tests().tests)) == 2—nonempty overlay'''
 
-        self.test = tests.Test(self.mocked_ebuild, use_flags = ('doc', 'examples'))
+        self.tests = Tests()
+        self.assertEqual(2, len(list(self.tests.tests)))
 
-        self.assertEqual('=app-portage/ebuild-9999[doc,examples]', self.test.name)
+    def test_nonempty_tests_nonempty_filter(self):
+        '''len(list(tests.Tests(ebuild_selector = ('app-portage/etest',)).tests)) == 2—nonempty overlay'''
 
-    def test_name_with_test(self):
-        '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples'), test = True).name'''
+        self.tests = Tests(('app-portage/etest'),)
+        self.assertEqual(2, len(list(self.tests.tests)))
 
-        self.test = tests.Test(self.mocked_ebuild, use_flags = ('doc', 'examples'), test = True)
+    def test_nonempty_tests_subdirectory(self):
+        '''len(list(tests.Tests().tests)) == 2—nonempty overlay,subdirectory'''
 
-        self.assertEqual('=app-portage/ebuild-9999[doc,examples,test]', self.test.name)
+        self.mocked_directory = os.path.join(FIXTURES_DIRECTORY, 'overlay', 'app-portage', 'etest')
 
-    def test_time(self):
-        '''tests.Test(ebuild.Ebuild('app-portage/ebuild-9999'), use_flags = ('doc', 'examples')).time'''
+        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
+        os.chdir(self.mocked_directory)
 
-        self.test = tests.Test(self.mocked_ebuild, use_flags = ('doc', 'examples'))
+        if self.is_mocked_overlay:
+            type(self.mocked_overlay).directory = unittest.mock.PropertyMock(return_value = self.mocked_directory)
 
-        self.assertEqual(datetime.timedelta(0), self.test.time)
+        self.tests = Tests()
+        self.assertEqual(2, len(list(self.tests.tests)))

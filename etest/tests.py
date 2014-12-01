@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 class Test(object):
-    def __init__(self, ebuild, test = False, base_docker_image = 'alunduil/etest:latest', **kwargs):
+    def __init__(self, ebuild, with_test_phase = False, base_docker_image = 'alunduil/etest:latest', **kwargs):
         self.ebuild = ebuild
 
-        self.test = test
+        self.with_test_phase = with_test_phase
 
         self.use_flags = kwargs.get('use_flags', [])
 
@@ -37,7 +37,7 @@ class Test(object):
     def name(self):
         _ = self.ebuild.cpv + '[' + ','.join(self.use_flags)
 
-        if self.test:
+        if self.with_test_phase:
             if len(self.use_flags):
                 _ += ','
 
@@ -52,7 +52,7 @@ class Test(object):
     def commands(self):
         _ = []
 
-        if self.test:
+        if self.with_test_phase:
             _.append(('bash', '-c', 'echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name)))
 
         if len(self.use_flags):
@@ -74,7 +74,7 @@ class Test(object):
             _['PYTHON_TARGETS'] = ' '.join(self.ebuild.compat['python'])
 
             # Things still want python2…☹
-            if 'python2_7' not in self.environment['PYTHON_TARGETS']:
+            if 'python2_7' not in _['PYTHON_TARGETS']:
                 _['PYTHON_TARGETS'] += ' python2_7'
 
         return _
@@ -173,32 +173,29 @@ class Test(object):
 
 
 class Tests(object):
-    def __init__(self, ebuild_filter = ()):
+    def __init__(self, ebuild_selector = ()):
         self.overlay = overlay.Overlay()
 
         # NOTE: raises InvalidOverlayError when necessary
         logger.debug('self.overlay.directory: %s', self.overlay.directory)
 
-        self.ebuild_filter = [ _.replace('.ebuild', '') for _ in ebuild_filter ]
+        self.ebuild_selector = [ _.replace('.ebuild', '') for _ in ebuild_selector ]
 
-        if not len(self.ebuild_filter):
-            logger.debug('os.getcwd(): %s', os.getcwd())
-            logger.debug('os.path.relpath(self.overlay.directory): %s', os.path.relpath(self.overlay.directory))
-
+        if not len(self.ebuild_selector):
             _ = os.path.relpath(self.overlay.directory)
 
             if _.startswith('..'):
-                self.ebuild_filter.append(os.getcwd().replace(self.overlay.directory, '').strip('/'))
+                self.ebuild_selector.append(os.getcwd().replace(self.overlay.directory, '').strip('/'))
 
     @property
     def tests(self):
         for ebuild in self.overlay.ebuilds:
-            if not len(self.ebuild_filter) or any([ _ in ebuild.name for _ in self.ebuild_filter ]):
+            if not len(self.ebuild_selector) or any([ _ in ebuild.name for _ in self.ebuild_selector ]):
                 for _ in self._generate_tests(ebuild):
                     yield _
 
     def _generate_tests(self, ebuild):
-        '''Generate all tests for a given ebuild.
+        '''Generates all tests for a given ebuild.
 
         Prepare all tests for a given ebuild so they are ready to be run.  This
         includes finding the powerset of the USE flags and creating a runtime
@@ -214,26 +211,14 @@ class Tests(object):
 
         :``ebuild``: Ebuild to inspect and create various test cases for
 
-        Returns
-        -------
-
-        Tuple of Test objects.
-
         '''
 
         use_flags = list(ebuild.use_flags)
         if 'test' in use_flags:
             use_flags.remove('test')
 
-        logger.debug('ebuild.use_flags: %s', ebuild.use_flags)
-
         # TODO: Add hints file for more testing information.
 
         for use_flags_combination in itertools.chain.from_iterable(itertools.combinations(use_flags, _) for _ in range(len(use_flags) + 1)):
-            logger.info('adding %s[%s]', ebuild.name, ','.join(use_flags_combination))
-
-            yield Test(ebuild, use_flags = use_flags_combination)
-
-            logger.info('adding %s[test,%s]', ebuild.name, ','.join(use_flags_combination))
-
-            yield Test(ebuild, test = True, use_flags = use_flags_combination)
+            yield Test(ebuild, with_test_phase = False, use_flags = use_flags_combination)
+            yield Test(ebuild, with_test_phase = True, use_flags = use_flags_combination)
