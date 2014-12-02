@@ -4,11 +4,7 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import logging
-import re
-import unittest
-import unittest.mock
 
-from test_etest import test_helpers
 from test_etest.test_common import BaseEtestTest
 
 from etest import overlay
@@ -26,12 +22,3 @@ class BaseOverlayTest(BaseEtestTest):
         self.mock_ebuild()
 
         self.overlay = overlay.Overlay()
-
-    mocks.add('ebuild')
-
-    @test_helpers.mocker('ebuild')
-    def mock_ebuild(self):
-        logger.debug('mocking %s', self.real_module + '.ebuild')
-        _ = unittest.mock.patch(self.real_module + '.ebuild')
-        self.mocked_ebuild = _.start()
-        self.addCleanup(_.stop)

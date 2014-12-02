@@ -3,55 +3,40 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import functools
-import os
+import logging
 import re
-import tempfile
 import unittest
 
-from test_etest.test_fixtures import FIXTURES_DIRECTORY
+from test_etest import test_helpers
+
+logger = logging.getLogger(__name__)
 
 
 class BaseEtestTest(unittest.TestCase):
+    mocks_mask = set()
+    mocks = set()
+
     @property
     def real_module(self):
         return re.sub(r'\.[^.]+', '', self.__module__.replace('test_', ''), 1)
 
+    def _patch(self, name):
+        logger.debug('mocking %s', self.real_module + '.' + name)
+        _ = unittest.mock.patch(self.real_module + '.' + name)
+        setattr(self, 'mocked_' + name.replace('.', '_').strip('_'), _.start())
+        self.addCleanup(_.stop)
 
-class BaseEmptyOverlayTest(unittest.TestCase):
-    def setUp(self):
-        super().setUp()
+    mocks.add('ebuild')
 
-        self.mocked_directory = tempfile.mkdtemp()
-        self.addCleanup(os.rmdir, self.mocked_directory)
+    @test_helpers.mock('ebuild')
+    def mock_ebuild(self):
+        self._patch('ebuild')
 
-        _ = os.path.join(self.mocked_directory, 'profiles')
-        os.mkdir(_)
-        self.addCleanup(os.rmdir, _)
+    mocks.add('overlay')
 
-        _ = os.path.join(self.mocked_directory, 'profiles', 'repo_name')
-        with open(_, 'w') as fh:
-            fh.write('etest')
-        self.addCleanup(os.remove, _)
+    @test_helpers.mock('overlay')
+    def mock_overlay(self):
+        self._patch('overlay')
 
-        _ = os.path.join(self.mocked_directory, 'metadata')
-        os.mkdir(_)
-        self.addCleanup(os.rmdir, _)
-
-        _ = os.path.join(self.mocked_directory, 'metadata', 'layout.conf')
-        with open(_, 'w') as fh:
-            fh.write('masters = gentoo')
-        self.addCleanup(os.remove, _)
-
-        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
-        os.chdir(self.mocked_directory)
-
-
-class BaseFixtureOverlayTest(unittest.TestCase):
-    def setUp(self):
-        super().setUp()
-
-        self.mocked_directory = os.path.join(FIXTURES_DIRECTORY, 'overlay')
-
-        self.addCleanup(functools.partial(os.chdir, os.getcwd()))
-        os.chdir(self.mocked_directory)
+        self.mocked_overlay_overlay = unittest.mock.MagicMock()
+        self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay

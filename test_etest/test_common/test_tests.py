@@ -14,7 +14,6 @@ from test_etest.test_common import BaseEtestTest
 from test_etest.test_fixtures.test_tests import TESTS
 
 from etest.tests import Test
-from etest.tests import Tests
 
 logger = logging.getLogger(__name__)
 
@@ -120,22 +119,13 @@ class BaseTestTest(BaseEtestTest):
     def setUp(self):
         super().setUp()
 
-        self.mock_ebuild()
+        self.mocked_ebuild = unittest.mock.MagicMock()
 
     mocks.add('docker')
 
-    @test_helpers.mocker('docker')
+    @test_helpers.mock('docker')
     def mock_docker(self):
-        logger.debug('mocking %s', self.real_module + '.docker')
-        _ = unittest.mock.patch(self.real_module + '.docker')
-        self.mocked_docker = _.start()
-        self.addCleanup(_.stop)
-
-    mocks.add('ebuild')
-
-    @test_helpers.mocker('ebuild')
-    def mock_ebuild(self):
-        self.mocked_ebuild = unittest.mock.MagicMock()
+        self._patch('docker')
 
 
 class BaseTestsTest(BaseEtestTest):
@@ -146,15 +136,3 @@ class BaseTestsTest(BaseEtestTest):
         super().setUp()
 
         self.mock_overlay()
-
-    mocks.add('overlay')
-
-    @test_helpers.mocker('overlay')
-    def mock_overlay(self):
-        logger.debug('mocking %s', self.real_module + '.overlay')
-        _ = unittest.mock.patch(self.real_module + '.overlay')
-        mocked_overlay  = _.start()
-        self.addCleanup(_.stop)
-
-        self.mocked_overlay = unittest.mock.MagicMock()
-        mocked_overlay.Overlay.return_value = self.mocked_overlay

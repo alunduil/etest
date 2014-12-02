@@ -13,7 +13,7 @@ import sys
 logger = logging.getLogger(__name__)
 
 
-def mocker(name):
+def mock(name):
     def _(func):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):

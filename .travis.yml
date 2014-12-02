@@ -7,4 +7,4 @@ install:
 script:
   - pip install .
   - flake8
-  - nosetests test_etest/test_functional test_etest/test_unit
+  - nosetests test_etest/test_unit

@@ -9,7 +9,7 @@ import os
 import unittest
 import unittest.mock
 
-from test_etest import test_helpers
+from test_etest.test_common import BaseEtestTest
 from test_etest.test_fixtures import FIXTURES_DIRECTORY
 from test_etest.test_fixtures.test_ebuilds import EBUILDS
 
@@ -64,19 +64,12 @@ class BaseEbuildMetaTest(type):
                 setattr(cls, _.__name__, _)
 
 
-class BaseEbuildTest(unittest.TestCase):
-    mocks_mask = set()
-    mocks = set()
+class BaseEbuildTest(BaseEtestTest):
+    mocks_mask = set().union(BaseEtestTest.mocks_mask)
+    mocks = set().union(BaseEtestTest.mocks)
 
     def setUp(self):
         super().setUp()
 
-        self.mock_overlay()
-
-    mocks.add('overlay')
-
-    @test_helpers.mocker('overlay')
-    def mock_overlay(self):
         self.mocked_overlay = unittest.mock.MagicMock()
-
         type(self.mocked_overlay).directory = unittest.mock.PropertyMock(return_value = os.path.join(FIXTURES_DIRECTORY, 'overlay'))
