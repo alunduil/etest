@@ -77,7 +77,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
 
         jobs_limit_sem.release()
 
-    for check in tests.Tests(ebuilds).itertests():
+    for check in tests.Tests(ebuilds):
         jobs_limit_sem.acquire()
 
         if failed:
