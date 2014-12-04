@@ -16,7 +16,7 @@ def pull(image_name):
 
     '''
 
-    if DOCKER_PULL_LOCK.acquire(False):
+    if DOCKER_PULL_LOCK.acquire(blocking = False):
         client = docker.Client()
 
         image_id = client.inspect_image(image_name)['Id']

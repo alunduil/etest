@@ -32,5 +32,5 @@ RDEPEND="
 "
 
 python_test() {
-	nosetests test_etest/test_{functional,unit} || die "Tests failed under ${EPYTHON}"
+	nosetests test_etest/test_unit || die "Tests failed under ${EPYTHON}"
 }
