@@ -118,7 +118,7 @@ class BaseTestMetaTest(type):
             setattr(cls, _.__name__, _)
 
 
-class TestUnitTest(BaseEtestTest):
+class TestUnitTest(BaseEtestTest, metaclass = BaseTestMetaTest):
     mocks_mask = set()
     mocks = set()
 
@@ -176,6 +176,8 @@ class TestsUnitTest(BaseEtestTest):
         self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay
 
     def test_test_calls(self):
+        '''tests.Tests()'''
+
         self.tests = tests.Tests()
 
         self.assertEqual(self.tests.ebuild_selector, [])
