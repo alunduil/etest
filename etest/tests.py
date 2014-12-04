@@ -4,7 +4,6 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import datetime
-import docker
 import functools
 import itertools
 import logging
@@ -12,6 +11,7 @@ import os
 import uuid
 
 from etest import overlay
+from etest import docker
 
 logger = logging.getLogger(__name__)
 
@@ -80,30 +80,19 @@ class Test(object):
         return _
 
     def run(self):
-        _ = docker.Client()
+        docker.pull(self.base_docker_image)
+
+        client = docker.Client()
+
+        repository_name = 'etest—' + self.name
 
         image_name = self.base_docker_image
-
-        image_id = _.inspect_image(image_name)['Id']
-
-        repository, tag = image_name.split(':')
-        _.pull(repository = repository, tag = tag)
-
-        if image_id != _.inspect_image(image_name)['Id']:
-            _.remove_image(image_id)
-
-        repository = 'etest/' + self.name
-
         image_names = []
 
         for command in self.commands:
-            logger.debug('command: %s', command)
-
             container_name = str(uuid.uuid4())
 
-            logger.info('create container %s', container_name)
-
-            _.create_container(
+            client.create_container(
                 image = image_name,
                 name = container_name,
                 environment = self.environment,
@@ -115,11 +104,9 @@ class Test(object):
                 command = command[1:],
             )
 
-            logger.info('starting container %s', container_name)
-
             start_time = datetime.datetime.now()
 
-            _.start(
+            client.start(
                 container = container_name,
                 binds = {
                     self.ebuild.overlay.directory: {
@@ -134,42 +121,33 @@ class Test(object):
                 },
             )
 
-            logger.info('waiting for container %s', container_name)
-
-            self.failed = bool(_.wait(container_name))
+            self.failed = bool(client.wait(container_name))
 
             self.time += datetime.datetime.now() - start_time
 
-            self.output += _.logs(container_name).decode(encoding = 'utf-8')
+            # TODO: retrieve build log, etc
+            self.output += client.logs(container_name).decode(encoding = 'utf-8')
 
             if self.failed:
-                _.remove_container(container_name)
+                client.remove_container(container_name)
                 self.failed_command = ' '.join(command)
                 break
 
-            tag = str(self.commands.index(command))
+            tag_name = str(self.commands.index(command))
 
-            logger.info('image container %s', container_name)
-
-            _.commit(
+            client.commit(
                 container_name,
-                repository = repository,
-                tag = tag,
+                repository = repository_name,
+                tag = tag_name,
             )
-            image_name = repository + ':' + tag
+
+            image_name = repository_name + ':' + tag_name
             image_names.append(image_name)
 
-            logger.info('created image %s', image_name)
-            logger.info('remove container %s', container_name)
-
-            _.remove_container(container_name)
-
-        logger.debug('output: %s', self.output)
+            client.remove_container(container_name)
 
         for image_name in image_names:
-            logger.info('remove image %s', image_name)
-
-            _.remove_image(image_name)
+            client.remove_image(image_name)
 
 
 class Tests(object):

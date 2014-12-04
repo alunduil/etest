@@ -96,8 +96,6 @@ class BaseTestMetaTest(type):
 
                 self.mocked_docker.pull.assert_called_once()
 
-                self.fail('fix me')
-
             case.__name__ = 'test_run_' + str(test['uuid'])
             case.__doc__ = 'test.Test(mocked_ebuild, with_test_phase = {0[with_test_phase]}, base_docker_image = {0[base_docker_image]}, use_flags = {0[use_flags]}).run()'.format(kwargs)
 
