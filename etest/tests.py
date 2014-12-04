@@ -198,5 +198,5 @@ class Tests(object):
                 # TODO: Add hints file for more testing information.
 
                 for use_flags_combination in itertools.chain.from_iterable(itertools.combinations(use_flags, _) for _ in range(len(use_flags) + 1)):
-                    yield Test(ebuild, with_test_phase = False, use_flags = use_flags_combination)
-                    yield Test(ebuild, with_test_phase = True, use_flags = use_flags_combination)
+                    yield Test(ebuild, use_flags = use_flags_combination, with_test_phase = False)
+                    yield Test(ebuild, use_flags = use_flags_combination, with_test_phase = True)

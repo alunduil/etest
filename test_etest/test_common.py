@@ -31,12 +31,3 @@ class BaseEtestTest(unittest.TestCase):
     @test_helpers.mock('ebuild')
     def mock_ebuild(self):
         self._patch('ebuild')
-
-    mocks.add('overlay')
-
-    @test_helpers.mock('overlay')
-    def mock_overlay(self):
-        self._patch('overlay')
-
-        self.mocked_overlay_overlay = unittest.mock.MagicMock()
-        self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay

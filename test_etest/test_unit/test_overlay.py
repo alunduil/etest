@@ -4,13 +4,29 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 import functools
+import logging
 import os
 import tempfile
 
-from test_etest.test_common.test_overlay import BaseOverlayTest
+from test_etest.test_common import BaseEtestTest
 from test_etest.test_fixtures import FIXTURES_DIRECTORY
 
 from etest import overlay
+
+
+logger = logging.getLogger(__name__)
+
+
+class BaseOverlayTest(BaseEtestTest):
+    mocks_mask = set()
+    mocks = set()
+
+    def setUp(self):
+        super().setUp()
+
+        self.mock_ebuild()
+
+        self.overlay = overlay.Overlay()
 
 
 class InvalidOverlayUnitTest(BaseOverlayTest):

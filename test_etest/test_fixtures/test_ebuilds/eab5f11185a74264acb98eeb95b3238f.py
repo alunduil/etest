@@ -20,6 +20,10 @@ _ = {
         'IUSE': 'test',
         'PYTHON_COMPAT': ( 'python3_3', 'python3_4', ),
     },
+
+    'use_flag_sets': (
+        (),
+    ),
 }
 
 EBUILDS.setdefault('all', []).append(_)

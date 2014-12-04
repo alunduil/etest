@@ -20,6 +20,10 @@ _ = {
         'IUSE': '',
         'PYTHON_COMPAT': ( 'python2_7', ),
     },
+
+    'use_flag_sets': (
+        (),
+    ),
 }
 
 EBUILDS.setdefault('all', []).append(_)
