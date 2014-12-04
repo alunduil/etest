@@ -17,6 +17,8 @@ _ = {
     'text': _,
 
     'symbols': {},
+
+    'correct': None,
 }
 
 SCRIPTS.setdefault('all', []).append(_)
