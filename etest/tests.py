@@ -84,8 +84,6 @@ class Test(object):
 
         client = docker.Client()
 
-        repository_name = 'etest—' + self.name
-
         image_name = self.base_docker_image
         image_names = []
 
@@ -137,11 +135,11 @@ class Test(object):
 
             client.commit(
                 container_name,
-                repository = repository_name,
+                repository = self.name,
                 tag = tag_name,
             )
 
-            image_name = repository_name + ':' + tag_name
+            image_name = self.name + ':' + tag_name
             image_names.append(image_name)
 
             client.remove_container(container_name)
