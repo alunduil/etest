@@ -43,11 +43,6 @@ class BashLexer(object):
             **kwargs
         )
 
-    states = (
-        ( 'singlequote', 'exclusive', ),
-        ( 'doublequote', 'exclusive', ),
-    )
-
     tokens = (
         'AND_AND',
         'AND_GREATER',
@@ -60,7 +55,6 @@ class BashLexer(object):
         'COND_CMD',
         'COND_END',
         'COND_START',
-        'DOUBLE_QUOTE',
         'GREATER_AND',
         'GREATER_BAR',
         'GREATER_GREATER',
@@ -77,7 +71,6 @@ class BashLexer(object):
         'SEMI_AND',
         'SEMI_SEMI',
         'SEMI_SEMI_AND',
-        'SINGLE_QUOTE',
         'TIMEIGN',
         'TIMEOPT',
         'WORD',
@@ -121,23 +114,6 @@ class BashLexer(object):
     t_COND_END = r']]'
     t_COND_START = r'\[\['
 
-    def t_DOUBLE_QUOTE(self, t):
-        r'"'
-
-        if t.lexer.lexstate == 'INITIAL':
-            t.lexer.begin('doublequote')
-
-        return t
-
-    def t_doublequote_DOUBLE_QUOTE(self, t):
-        r'"'
-
-        t.lexer.begin('INITIAL')
-
-        return t
-
-    t_doublequote_WORD = r'(?:[^"]|(?:\\\\)*\\")+'
-
     t_GREATER_AND = r'>&'
     t_GREATER_BAR = r'>\|'
     t_GREATER_GREATER = r'>>'
@@ -172,37 +148,34 @@ class BashLexer(object):
     t_SEMI_SEMI = r';;'
     t_SEMI_SEMI_AND = r';;&'
 
-    def t_SINGLE_QUOTE(self, t):
-        r'\''
-
-        if t.lexer.lexstate == 'INITIAL':
-            t.lexer.begin('singlequote')
-
-        return t
-
-    def t_singlequote_SINGLE_QUOTE(self, t):
-        r'\''
-
-        t.lexer.begin('INITIAL')
-
-        return t
-
-    t_singlequote_WORD = r'(?:[^\']|(?:\\\\)*\\\')+'
-
     t_TIMEIGN = r'--'
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'[-a-zA-Z/\.][-\da-zA-Z\./{},_*]*|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}'
+        r'(?:[-a-zA-Z/\.][^\s=()]*|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")+"|\'(?:[^\']|(?:\\\\)*\\\')+\')+'
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()
+        else:
+            escaped = False
+
+            value = ''
+
+            for char in t.value:
+                if escaped:
+                    value += char
+                    escaped = False
+                else:
+                    if char == '\\':
+                        escaped = True
+                    elif char != '\'' and char != '"':
+                        value += char
+
+            t.value = value
 
         return t
 
     t_ignore = ' \t'
-    t_doublequote_ignore = ''
-    t_singlequote_ignore = ''
 
     def t_error(self, t):
         line_start = t.lexer.lexdata.rfind('\n', 0, t.lexpos)
@@ -228,9 +201,6 @@ class BashLexer(object):
         logger.error('\n' + error_message)
 
         raise BashSyntaxError(error_message, t)
-
-    t_singlequote_error = t_error
-    t_doublequote_error = t_error
 
 
 class BashSyntaxError(RuntimeError):

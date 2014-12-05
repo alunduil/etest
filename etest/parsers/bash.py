@@ -123,28 +123,10 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug('world_list: p[%d]: %s', _, p[_])
 
-    def p_word_list_quoted_word(self, p):
-        '''word_list : quoted_word'''
-
-        p[0] = (p[1],)
-
-        for _ in range(len(p)):
-            logger.debug('world_list: p[%d]: %s', _, p[_])
-
     def p_word_list_list(self, p):
         '''word_list : word_list newline_list WORD'''
 
         p[0] = p[1] + expand_word(p[3])
-
-        for _ in range(len(p)):
-            logger.debug('world_list: p[%d]: %s', _, p[_])
-
-    def p_word_list_quoted_list(self, p):
-        '''word_list : word_list newline_list quoted_word
-
-        '''
-
-        p[0] = p[1] + (p[3],)
 
         for _ in range(len(p)):
             logger.debug('world_list: p[%d]: %s', _, p[_])
@@ -201,10 +183,7 @@ class BashParser(object):
             logger.debug('redirection: p[%d]: %s', _, p[_])
 
     def p_simple_command_element_word(self, p):
-        '''simple_command_element : WORD
-                                  | quoted_word
-
-        '''
+        '''simple_command_element : WORD'''
 
         p[0] = ('WORD', p[1])
 
@@ -641,16 +620,6 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug('assignment_word: p[%d]: %s', _, p[_])
 
-    def p_assignment_word_quoted_word(self, p):
-        '''assignment_word : WORD '=' quoted_word'''
-
-        self.symbols[p[1]] = p[3]
-
-        p[0] = p[1]
-
-        for _ in range(len(p)):
-            logger.debug('assignment_word: p[%d]: %s', _, p[_])
-
     def p_assignment_word_word(self, p):
         '''assignment_word : WORD '=' WORD'''
 
@@ -668,28 +637,6 @@ class BashParser(object):
 
         for _ in range(len(p)):
             logger.debug('assignment_word: p[%d]: %s', _, p[_])
-
-    def p_quoted_word(self, p):
-        '''quoted_word : SINGLE_QUOTE WORD SINGLE_QUOTE
-                       | DOUBLE_QUOTE WORD DOUBLE_QUOTE
-
-        '''
-
-        p[0] = p[2]
-
-        for _ in range(len(p)):
-            logger.debug('quoted_word: p[%d]: %s', _, p[_])
-
-    def p_quoted_empty_word(self, p):
-        '''quoted_word : SINGLE_QUOTE SINGLE_QUOTE
-                       | DOUBLE_QUOTE DOUBLE_QUOTE
-
-        '''
-
-        p[0] = ''
-
-        for _ in range(len(p)):
-            logger.debug('quoted_word: p[%d]: %s', _, p[_])
 
     def p_error(self, p):
         if p is None:
