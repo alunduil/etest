@@ -16,19 +16,26 @@ def pull(image_name):
 
     '''
 
-    if DOCKER_PULL_LOCK.acquire(blocking = False):
-        client = docker.Client()
+    try:
+        if DOCKER_PULL_LOCK.acquire(blocking = False):
+            client = docker.Client()
 
-        image_id = client.inspect_image(image_name)['Id']
+            image_id = None
 
-        repository, tag = image_name.split(':')
+            try:
+                image_id = client.inspect_image(image_name)['Id']
+            except docker.errors.APIError as error:
+                if error.response.status_code != 404:
+                    raise error
 
-        client.pull(repository = repository, tag = tag)
+            repository, tag = image_name.split(':')
 
-        if image_id != client.inspect_image(image_name)['Id']:
-            client.remove_image(image_id)
-    else:
-        # Wait for the thread doing the pulling to finish.
-        DOCKER_PULL_LOCK.acquire()
+            client.pull(repository = repository, tag = tag)
 
-    DOCKER_PULL_LOCK.release()
+            if image_id is not None and image_id != client.inspect_image(image_name)['Id']:
+                client.remove_image(image_id)
+        else:
+            # Wait for the thread doing the pulling to finish.
+            DOCKER_PULL_LOCK.acquire()
+    finally:
+        DOCKER_PULL_LOCK.release()
