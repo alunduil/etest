@@ -102,7 +102,6 @@ class ValidNonEmptyOverlaySubdirectoryUnitTest(BaseOverlayTest):
         self.mocked_overlay_directory = os.path.join(FIXTURES_DIRECTORY, 'overlay')
         self.mocked_directory = os.path.join(self.mocked_overlay_directory, 'app-portage', 'etest')
 
-
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 

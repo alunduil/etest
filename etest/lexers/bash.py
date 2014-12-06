@@ -43,6 +43,10 @@ class BashLexer(object):
             **kwargs
         )
 
+    states = (
+        ( 'conditional', 'exclusive', ),
+    )
+
     tokens = (
         'AND_AND',
         'AND_GREATER',
@@ -107,12 +111,22 @@ class BashLexer(object):
 
     t_ignore_COMMENT = r'\#[^\n]*'
 
-    def t_COND_CMD(self, t):
-        r'cond cmd'
+    t_conditional_COND_CMD = r'.*?(?=]])'  # We don't parse conditionals
+
+    def t_conditional_COND_END(self, t):
+        r']]'
+
+        t.lexer.begin('INITIAL')
+
         return t
 
-    t_COND_END = r']]'
-    t_COND_START = r'\[\['
+    def t_COND_START(self, t):
+        r'\[\['
+
+        if t.lexer.lexstate == 'INITIAL':
+            t.lexer.begin('conditional')
+
+        return t
 
     t_GREATER_AND = r'>&'
     t_GREATER_BAR = r'>\|'
@@ -181,6 +195,7 @@ class BashLexer(object):
         return t
 
     t_ignore = ' \t'
+    t_conditional_ignore = ''
 
     def t_error(self, t):
         line_start = t.lexer.lexdata.rfind('\n', 0, t.lexpos)
@@ -206,6 +221,8 @@ class BashLexer(object):
         logger.error('\n' + error_message)
 
         raise BashSyntaxError(error_message, t)
+
+    t_conditional_error = t_error
 
 
 class BashSyntaxError(RuntimeError):
