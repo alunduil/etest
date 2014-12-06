@@ -99,7 +99,9 @@ class ValidNonEmptyOverlaySubdirectoryUnitTest(BaseOverlayTest):
     def setUp(self):
         super().setUp()
 
-        self.mocked_directory = os.path.join(FIXTURES_DIRECTORY, 'overlay', 'app-portage', 'etest')
+        self.mocked_overlay_directory = os.path.join(FIXTURES_DIRECTORY, 'overlay')
+        self.mocked_directory = os.path.join(self.mocked_overlay_directory, 'app-portage', 'etest')
+
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
@@ -107,7 +109,7 @@ class ValidNonEmptyOverlaySubdirectoryUnitTest(BaseOverlayTest):
     def test_nonempty_overlay_discovery(self):
         '''overlay.Overlay().directory—nonempty overlay,subdirectory'''
 
-        self.assertEqual(self.overlay.directory, self.mocked_directory.replace('/app-portage/etest', ''))
+        self.assertEqual(self.overlay.directory, self.mocked_overlay_directory)
 
     def test_nonempty_overlay_ebuilds(self):
         '''len(list(overlay.Overlay().ebuilds)) == 1—nonempty overlay,subdirectory'''

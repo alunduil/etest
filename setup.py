@@ -54,7 +54,7 @@ PARAMS['keywords'] = [
     'emerge',
 ]
 
-PARAMS['packages'] = find_packages()
+PARAMS['packages'] = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 PARAMS['package_data'] = {
     'etest.parsers': [ 'bash.p' ],
 }
