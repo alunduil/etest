@@ -16,23 +16,24 @@ logger = logging.getLogger(__name__)
 def split_expansion(text):
     '''Properly split an expansion's items at commas.'''
 
-    item = ''
+    expansion = ''
     level = 0
 
     for character in text:
-        if character == '{':
-            item += character
-            level += 1
-        elif character == '}':
-            item += character
-            level -= 1
-        elif character == ',':
-            yield item
-            item = ''
-        else:
-            item += character
+        if character == ',' and level == 0:
+            yield expansion
+            expansion = ''
+            continue
 
-    yield item
+        if character == '{':
+            level += 1
+
+        if character == '}':
+            level -= 1
+
+        expansion += character
+
+    yield expansion
 
 
 def expand_word(word):
@@ -40,26 +41,26 @@ def expand_word(word):
 
     logger.debug('word: %s', word)
 
-    if word.startswith('${'):
-        logger.debug('words: %s', (word,))
-        return (word,)
+    if not re.search(r'(?:(?:\\\\)*\\)?(?<!\$){', word):
+        logger.debug('words: %s', (word, ))
 
-    if not re.search(r'(?:(?:\\\\)*\\)?[{}]', word):
-        logger.debug('words: %s', (word,))
-        return (word,)
+        return (word, )
 
-    prefix, rest = re.split(r'(?:(?:\\\\)*\\)?{', word, 1)
-    suffix = re.split(r'(?:(?:\\\\)*\\)?}', word)[-1]
-    rest = rest[:rest.rindex(suffix)].strip('\\}')
-
+    prefix, rest = re.split(r'(?:(?:\\\\)*\\)?(?<!\$){', word, 1)
     logger.debug('prefix: %s', prefix)
+
     logger.debug('rest: %s', rest)
+
+    suffix = ''.join(re.split(r'(?:(?:\\\\)*\\)?}', word)[-max(prefix.count('${'), 1):])
     logger.debug('suffix: %s', suffix)
+
+    rest = rest[:rest.rindex(suffix) - 1].lstrip('\\}')
+
+    logger.debug('rest: %s', rest)
 
     words = []
 
     for expansion in split_expansion(rest):
-        logger.debug('expansion: %s', expansion)
         words.extend([ prefix + _ + suffix for _ in expand_word(expansion) ])
 
     logger.debug('words: %s', tuple(words))
