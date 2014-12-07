@@ -43,15 +43,6 @@ class ValidEmptyOverlayUnitTest(BaseOverlayTest):
         self.mocked_directory = tempfile.mkdtemp()
         self.addCleanup(os.rmdir, self.mocked_directory)
 
-        _ = os.path.join(self.mocked_directory, 'profiles')
-        os.mkdir(_)
-        self.addCleanup(os.rmdir, _)
-
-        _ = os.path.join(self.mocked_directory, 'profiles', 'repo_name')
-        with open(_, 'w') as fh:
-            fh.write('etest')
-        self.addCleanup(os.remove, _)
-
         _ = os.path.join(self.mocked_directory, 'metadata')
         os.mkdir(_)
         self.addCleanup(os.rmdir, _)

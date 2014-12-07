@@ -19,7 +19,7 @@ class Overlay(object):
         _ = os.getcwd()
 
         while _ != '/':
-            if os.path.exists(os.path.join(_, 'profiles', 'repo_name')) and os.path.exists(os.path.join(_, 'metadata', 'layout.conf')):
+            if os.path.exists(os.path.join(_, 'metadata', 'layout.conf')):
                 break
 
             _ = os.path.dirname(_)
