@@ -165,7 +165,7 @@ class Tests(object):
 
     def __iter__(self):
         for ebuild in self.overlay.ebuilds:
-            if not len(self.ebuild_selector) or any([ _ in ebuild.name for _ in self.ebuild_selector ]):
+            if not len(self.ebuild_selector) or any([ _ in ebuild.cpv for _ in self.ebuild_selector ]):
 
                 use_flags = list(ebuild.use_flags)
                 if 'test' in use_flags:

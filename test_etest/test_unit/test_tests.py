@@ -154,6 +154,7 @@ class TestsUnitTest(BaseEtestTest):
         for ebuild in copy.deepcopy(EBUILDS['all']):
             mocked_ebuild = unittest.mock.MagicMock()
             type(mocked_ebuild).use_flags = unittest.mock.PropertyMock(return_value = ebuild['use_flags'])
+            type(mocked_ebuild).cpv = unittest.mock.PropertyMock(return_value = ebuild['cpv'])
             ebuilds.append(mocked_ebuild)
 
             for use_flag_set in ebuild['use_flag_sets']:
@@ -173,7 +174,7 @@ class TestsUnitTest(BaseEtestTest):
         self.mocked_overlay_overlay = unittest.mock.MagicMock()
         self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay
 
-    def test_test_calls(self):
+    def test_tests(self):
         '''tests.Tests()'''
 
         self.tests = tests.Tests()
@@ -181,3 +182,11 @@ class TestsUnitTest(BaseEtestTest):
         self.assertEqual(self.tests.ebuild_selector, [])
         self.assertEqual(len(list(self.tests)), len(self.test_calls))
         self.assertEqual(self.mocked_Test.mock_calls, self.test_calls)
+
+    def test_tests_with_filter_with_version(self):
+        '''tests.Tests(('etest-9999.ebuild',))'''
+
+        self.tests = tests.Tests(('etest-9999.ebuild',))
+
+        self.assertEqual(self.tests.ebuild_selector, ['etest-9999', ])
+        self.assertEqual(len(list(self.tests)), 2)
