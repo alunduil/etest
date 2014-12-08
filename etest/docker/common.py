@@ -5,6 +5,7 @@
 
 import docker
 import os
+import ssl
 
 BASE_URL = os.environ.get('DOCKER_HOST')
 TLS_CONFIG = None

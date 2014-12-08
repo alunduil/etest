@@ -3,13 +3,12 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import click
 import functools
 import logging
 import os
 import re
 
-from etest.lexers.bash import BashLexer, BashSyntaxError
+from etest.lexers.bash import BashLexer
 from etest.parsers.bash import BashParser
 
 logger = logging.getLogger(__name__)
@@ -68,15 +67,10 @@ class Ebuild(object):
         lexer = BashLexer()
         lexer.build()
 
-        try:
-            with open(os.path.join(self.overlay.directory, self.path), 'r') as fh:
-                parser.parser.parse(
-                    input = fh.read(),
-                    lexer = lexer.lexer,
-                )
-        except BashSyntaxError as error:
-            logger.debug('error.args: %s', error.args)
-
-            raise click.ClickException('{0}\n{1}'.format(parser.symbols, error.args[0]))
+        with open(os.path.join(self.overlay.directory, self.path), 'r') as fh:
+            parser.parser.parse(
+                input = fh.read(),
+                lexer = lexer.lexer,
+            )
 
         return parser.symbols

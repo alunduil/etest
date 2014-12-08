@@ -3,6 +3,7 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import click
 import logging
 import os
 import ply.lex
@@ -220,10 +221,10 @@ class BashLexer(object):
 
         logger.error('\n' + error_message)
 
-        raise BashSyntaxError(error_message, t)
+        raise BashSyntaxError(error_message)
 
     t_conditional_error = t_error
 
 
-class BashSyntaxError(RuntimeError):
+class BashSyntaxError(click.ClickException):
     pass

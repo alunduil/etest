@@ -669,4 +669,4 @@ class BashParser(object):
 
         logger.error('\n' + error_message)
 
-        raise BashSyntaxError(error_message, p)
+        raise BashSyntaxError(error_message)
