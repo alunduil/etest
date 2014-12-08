@@ -9,7 +9,7 @@ from etest.docker import common
 
 
 def remove(*args, **kwargs):
-    return common.CLIENT.commit(*args, **kwargs)
+    return common.CLIENT.remove_image(*args, **kwargs)
 
 
 def pull(image_name):
