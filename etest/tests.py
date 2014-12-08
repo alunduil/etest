@@ -80,9 +80,7 @@ class Test(object):
         return _
 
     def run(self):
-        docker.pull(self.base_docker_image)
-
-        client = docker.Client()
+        docker.image.pull(self.base_docker_image)
 
         image_name = self.base_docker_image
         image_names = []
@@ -90,7 +88,7 @@ class Test(object):
         for command in self.commands:
             container_name = str(uuid.uuid4())
 
-            client.create_container(
+            docker.container.create(
                 image = image_name,
                 name = container_name,
                 environment = self.environment,
@@ -104,7 +102,7 @@ class Test(object):
 
             start_time = datetime.datetime.now()
 
-            client.start(
+            docker.container.start(
                 container = container_name,
                 binds = {
                     self.ebuild.overlay.directory: {
@@ -119,21 +117,21 @@ class Test(object):
                 },
             )
 
-            self.failed = bool(client.wait(container_name))
+            self.failed = bool(docker.container.wait(container_name))
 
             self.time += datetime.datetime.now() - start_time
 
             # TODO: retrieve build log, etc
-            self.output += client.logs(container_name).decode(encoding = 'utf-8')
+            self.output += docker.container.logs(container_name).decode(encoding = 'utf-8')
 
             if self.failed:
-                client.remove_container(container_name)
+                docker.container.remove(container_name)
                 self.failed_command = ' '.join(command)
                 break
 
             tag_name = str(self.commands.index(command))
 
-            client.commit(
+            docker.container.commit(
                 container_name,
                 repository = self.name,
                 tag = tag_name,
@@ -142,10 +140,10 @@ class Test(object):
             image_name = self.name + ':' + tag_name
             image_names.append(image_name)
 
-            client.remove_container(container_name)
+            docker.container.remove(container_name)
 
         for image_name in image_names:
-            client.remove_image(image_name)
+            docker.image.remove(image_name)
 
 
 class Tests(object):
