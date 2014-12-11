@@ -33,7 +33,7 @@ class Ebuild(object):
     @functools.lru_cache(1)
     def version(self):
         _ = self.path.replace('.ebuild', '')
-        _ = re.sub(r'.*?' + self.name.split('/')[-1] + '-', '', _)
+        _ = re.sub(r'.*?' + re.escape(self.name.split('/')[-1]) + '-', '', _)
 
         return _
 
