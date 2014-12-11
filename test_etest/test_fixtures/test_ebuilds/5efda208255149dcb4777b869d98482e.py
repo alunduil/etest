@@ -13,6 +13,7 @@ _ = {
     'compat': { 'python': ( 'python2_7', ), },
     'cpv': '=dev-python/pyrax-1.9.3',
     'name': 'dev-python/pyrax',
+    'restrictions': [],
     'use_flags': [],
     'version': '1.9.3',
 

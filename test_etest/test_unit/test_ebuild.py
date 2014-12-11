@@ -58,7 +58,7 @@ class BaseEbuildMetaTest(type):
             logger.info('adding %s', _.__name__)
             setattr(cls, _.__name__, _)
 
-            for prop in ( 'compat', 'cpv', 'name', 'use_flags', 'version', ):
+            for prop in ( 'compat', 'cpv', 'name', 'use_flags', 'version', 'restrictions', ):
                 _ = gen_property_case(ebuild, prop)
                 logger.info('adding %s', _.__name__)
                 setattr(cls, _.__name__, _)

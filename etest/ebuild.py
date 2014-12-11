@@ -44,6 +44,11 @@ class Ebuild(object):
 
     @property
     @functools.lru_cache(1)
+    def restrictions(self):
+        return self.parse().get('RESTRICT', '').split()
+
+    @property
+    @functools.lru_cache(1)
     def use_flags(self):
         return self.parse()['IUSE'].split()
 

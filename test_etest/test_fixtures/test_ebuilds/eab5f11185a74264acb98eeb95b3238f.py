@@ -13,6 +13,7 @@ _ = {
     'compat': { 'python': ( 'python3_3', 'python3_4', ), },
     'cpv': '=app-portage/etest-9999',
     'name': 'app-portage/etest',
+    'restrictions': [],
     'use_flags': [ 'test' ],
     'version': '9999',
 
