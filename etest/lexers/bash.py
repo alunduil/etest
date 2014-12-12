@@ -167,7 +167,7 @@ class BashLexer(object):
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'(?:[-a-zA-Z/\.][^\s(]*|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
+        r'(?:[-a-zA-Z/\.][^\s(]*|\$\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()
@@ -182,6 +182,9 @@ class BashLexer(object):
                 value = t.value[:t.value.find('=')]
             else:
                 for char in t.value:
+                    if char == '\n':
+                        t.lexer.lineno +=1
+
                     if escaped:
                         value += char
                         escaped = False

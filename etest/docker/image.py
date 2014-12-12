@@ -31,5 +31,5 @@ def pull(image_name):
         try:
             common.CLIENT.remove_image(image_id)
         except docker.errors.APIError as error:
-            if error.response.status_code != 404:
+            if error.response.status_code not in [ 404, 409 ]:
                 raise error
