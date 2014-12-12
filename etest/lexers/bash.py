@@ -183,7 +183,7 @@ class BashLexer(object):
             else:
                 for char in t.value:
                     if char == '\n':
-                        t.lexer.lineno +=1
+                        t.lexer.lineno += 1
 
                     if escaped:
                         value += char
