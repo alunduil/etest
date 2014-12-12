@@ -34,6 +34,11 @@ The latest release available is:
 Using etest
 ===========
 
+.. note::
+    etest requires a running docker daemon (either local or remote).  If using
+    a remote docker instance you must set the DOCKER_HOST environment variable
+    with the hostname (just like fig).
+
 To get started simply run ``etest`` in a directory that contains ebuilds in a
 valid overlay.
 
