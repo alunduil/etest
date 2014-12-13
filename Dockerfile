@@ -6,6 +6,9 @@ RUN sed -e '/en_US/s/^#//' -i /etc/locale.gen
 RUN locale-gen
 RUN eselect locale set en_US.utf8
 
+# Set a profile
+RUN eselect profile set default/linux/amd64/13.0
+
 ENV DISTDIR /tmp/distfiles.d
 ENV EMERGE_LOG_DIR /tmp/etest.logs.d
 ENV EPAUSE_IGNORE TRUE
