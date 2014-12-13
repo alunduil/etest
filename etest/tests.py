@@ -125,7 +125,7 @@ class Test(object):
             self.output += docker.container.logs(container_name).decode(encoding = 'utf-8')
 
             if self.failed:
-                docker.container.remove(container_name)
+                docker.container.remove(container_name, v = True)
                 self.failed_command = ' '.join(command)
                 break
 
@@ -140,7 +140,7 @@ class Test(object):
             image_name = self.name + ':' + tag_name
             image_names.append(image_name)
 
-            docker.container.remove(container_name)
+            docker.container.remove(container_name, v = True)
 
         for image_name in image_names:
             docker.image.remove(image_name)
