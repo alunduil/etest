@@ -50,11 +50,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
     output_lock = threading.Lock()
     jobs_limit_sem = threading.BoundedSemaphore(value = jobs)
 
-    failed = False
-
     def _(check):
-        global failed
-
         if not dry_run:
             check.run()
 
@@ -72,15 +68,12 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
         if check.failed:
             failures.append(check)
 
-            if fast:
-                failed = True
-
         jobs_limit_sem.release()
 
     for check in tests.Tests(ebuilds):
         jobs_limit_sem.acquire()
 
-        if failed:
+        if fast and len(failures):
             jobs_limit_sem.release()
             break
 
