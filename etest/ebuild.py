@@ -8,7 +8,7 @@ import logging
 import os
 import re
 
-from etest.lexers.bash import BashLexer
+from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
 
 logger = logging.getLogger(__name__)
@@ -72,10 +72,16 @@ class Ebuild(object):
         lexer = BashLexer()
         lexer.build()
 
-        with open(os.path.join(self.overlay.directory, self.path), 'r') as fh:
-            parser.parser.parse(
-                input = fh.read(),
-                lexer = lexer.lexer,
-            )
+        ebuild_filename = os.path.join(self.overlay.directory, self.path)
+
+        with open(ebuild_filename, 'r') as fh:
+            try:
+                parser.parser.parse(
+                    input = fh.read(),
+                    lexer = lexer.lexer,
+                )
+            except BashSyntaxError as error:
+                error.message = ebuild_filename + '\n' + error.message
+                raise
 
         return parser.symbols
