@@ -639,6 +639,14 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug('assignment_word: p[%d]: %s', _, p[_])
 
+    def p_simple_command_element_number(self, p):
+        '''simple_command_element : NUMBER'''
+
+        p[0] = ('NUMBER', p[1])
+
+        for _ in range(len(p)):
+            logger.debug('simple_command_element: p[%d]: %s', _, p[_])
+
     def p_error(self, p):
         if p is None:
             raise BashSyntaxError('did not receive any input')
