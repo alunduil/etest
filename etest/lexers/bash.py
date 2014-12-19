@@ -168,7 +168,7 @@ class BashLexer(object):
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'(?:(?:[-a-zA-Z/\.!][^;\s"\'(]*)|\$\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
+        r'(?:(?:[-a-zA-Z/\.!][^;\s"\'(]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()
@@ -238,6 +238,32 @@ class BashLexer(object):
 
                 logger.debug('found: "')
 
+            elif t.lexer.lexmatch.string[pos] == '{':
+                logger.debug('found: {')
+
+                value += t.lexer.lexmatch.string[pos]
+
+                count = 0
+                pos += 1
+
+                while t.lexer.lexmatch.string[pos] != '}' and count > 0:
+                    if t.lexer.lexmatch.string[pos] == '\\':
+                        pos += 1
+
+                    if t.lexer.lexmatch.string[pos] == '{':
+                        count += 1
+                    elif t.lexer.lexmatch.string[pos] == '}':
+                        count -= 1
+
+                    value = t.lexer.lexmatch.string[pos]
+                    pos += 1
+
+                    logger.debug('adding: %s', value[-1])
+
+                value += t.lexer.lexmatch.string[pos]
+
+                logger.debug('found: }')
+
             elif t.lexer.lexmatch.string[pos] == '=':
                 logger.debug('found: =')
 
@@ -248,6 +274,33 @@ class BashLexer(object):
                     value += t.lexer.lexmatch.string[pos]
 
                     logger.debug('adding: %s', value[-1])
+
+            elif t.lexer.lexmatch.string[pos] == '$':
+                logger.debug('found: $')
+
+                pos += 1
+
+                if t.lexer.lexmatch.string[pos] == '(':
+                    logger.debug('found (')
+
+                    count = 0
+                    pos += 1
+
+                    while t.lexer.lexmatch.string[pos] != ')' and count > 0:
+                        if t.lexer.lexmatch.string[pos] == '\\':
+                            pos += 1
+
+                        if t.lexer.lexmatch.string[pos] == '(':
+                            count += 1
+                        elif t.lexer.lexmatch.string[pos] == ')':
+                            count -= 1
+
+                        value = t.lexer.lexmatch.string[pos]
+                        pos += 1
+
+                        logger.debug('adding: %s', value [-1])
+
+                    logger.debug('found: )')
 
             else:
                 value += t.lexer.lexmatch.string[pos]
