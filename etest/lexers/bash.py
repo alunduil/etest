@@ -298,7 +298,7 @@ class BashLexer(object):
                         value = t.lexer.lexmatch.string[pos]
                         pos += 1
 
-                        logger.debug('adding: %s', value [-1])
+                        logger.debug('adding: %s', value[-1])
 
                     logger.debug('found: )')
 
