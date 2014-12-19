@@ -19,6 +19,7 @@ _ = {
 
     'commands': [
         ('bash', '-c', 'echo app-portage/etest test >> /etc/portage/package.env', ),
+        ('bash', '-c', 'echo app-portage/etest \'-*\'  >> /etc/portage/package.use', ),
         ('bash', '-c', 'emerge -q -f --autounmask-write =app-portage/etest-9999 >/dev/null 2>&1 || true', ),
         ('bash', '-c', 'etc-update --automode -5 >/dev/null 2>&1', ),
         ('emerge', '-q', '--backtrack=130', '=app-portage/etest-9999', ),

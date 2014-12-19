@@ -50,7 +50,7 @@ class Ebuild(object):
     @property
     @functools.lru_cache(1)
     def use_flags(self):
-        return self.parse()['IUSE'].split()
+        return [ re.sub(r'^[+-]', '', _) for _ in self.parse()['IUSE'].split() ]
 
     @functools.lru_cache(1)
     def parse(self):
