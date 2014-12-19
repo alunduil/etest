@@ -596,12 +596,12 @@ class BashParser(object):
     #
 
     def p_assignment_word_array(self, p):
-        '''assignment_word : WORD '=' '(' newline_list word_list newline_list ')' '''
+        '''assignment_word : WORD '=' assignment_off '(' newline_list word_list newline_list ')' assignment_on'''
 
         if p[1] in self.symbols:
             logger.warn('re-assignment of %s', p[1])
 
-        self.symbols[p[1]] = p[5]
+        self.symbols[p[1]] = p[6]
 
         p[0] = p[1]
 
@@ -622,12 +622,12 @@ class BashParser(object):
             logger.debug('assignment_word: p[%d]: %s', _, p[_])
 
     def p_assignment_word_word(self, p):
-        '''assignment_word : WORD '=' WORD'''
+        '''assignment_word : WORD '=' assignment_off WORD assignment_on'''
 
         if p[1] in self.symbols:
             logger.warn('re-assignment of %s', p[1])
 
-        _ = expand_word(p[3])
+        _ = expand_word(p[4])
 
         if len(_) == 1:
             _ = _[0]
@@ -638,6 +638,16 @@ class BashParser(object):
 
         for _ in range(len(p)):
             logger.debug('assignment_word: p[%d]: %s', _, p[_])
+
+    def p_assignment_off(self, p):
+        '''assignment_off : '''
+
+        p.lexer.assignment = False
+
+    def p_assignment_on(self, p):
+        '''assignment_on : '''
+
+        p.lexer.assignment = True
 
     def p_simple_command_element_number(self, p):
         '''simple_command_element : NUMBER'''

@@ -21,11 +21,11 @@ _ = {
     'text': _,
 
     'symbols': {
-        'mycmakeargs': [
+        'mycmakeargs': (
             '-DVALA_EXECUTABLE=${VALAC}',
             '-DGSETTINGS_COMPILE=OFF',
             '-DMINIMAL_FLAGS=ON',
-        ],
+        ),
     },
 
     'correct': None,

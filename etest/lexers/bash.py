@@ -43,6 +43,7 @@ class BashLexer(object):
             *args,
             **kwargs
         )
+        self.lexer.assignment = True
 
     states = (
         ( 'conditional', 'exclusive', ),
@@ -167,34 +168,97 @@ class BashLexer(object):
     t_TIMEOPT = r'-p'
 
     def t_WORD(self, t):
-        r'(?:[-a-zA-Z/\.!][^;\s(]*|\$\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
+        r'(?:(?:[-a-zA-Z/\.!][^;\s"\'(]*)|\$\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
 
         if t.value.upper() in reserved:
             t.type = t.value.upper()
-        else:
-            escaped = False
+            return t
 
-            value = ''
+        logger.debug('t.lexer.lexmatch.start(): %s', t.lexer.lexmatch.start())
+        logger.debug('t.lexer.lexmatch.end(): %s', t.lexer.lexmatch.end())
+        logger.debug('t.lexer.lexmatch.string: %s', t.lexer.lexmatch.string)
 
-            if t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '=' and '=' in t.value:
-                t.lexer.lexpos = t.lexer.lexdata.find('=', t.lexer.lexpos - len(t.value))
+        value = ''
 
-                value = t.value[:t.value.find('=')]
+        assignment = t.lexer.assignment and t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '='
+
+        logger.debug('t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != =: %s', t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '=')
+        logger.debug('t.lexer.assignment: %s', t.lexer.assignment)
+        logger.debug('assignment: %s', assignment)
+
+        pos = t.lexer.lexmatch.start()
+        while pos < t.lexer.lexmatch.end():
+            logger.debug('pos: %s', pos)
+
+            if t.lexer.lexmatch.string[pos] == '\\':
+                logger.debug('found: \\')
+
+                pos += 1
+                value += t.lexer.lexmatch.string[pos]
+
+                logger.debug('adding: %s', value[-1])
+
+            elif t.lexer.lexmatch.string[pos] == '\n':
+                logger.debug('found: \\n')
+
+                t.lexer.lineno += 1
+                value += t.lexer.lexmatch.string[pos]
+
+                logger.debug('adding: %s', value[-1])
+
+            elif t.lexer.lexmatch.string[pos] == '\'':
+                logger.debug('found: \'')
+
+                assignment = False
+                pos += 1
+
+                while t.lexer.lexmatch.string[pos] != '\'':
+                    if t.lexer.lexmatch.string[pos] == '\\':
+                        pos += 1
+                    value += t.lexer.lexmatch.string[pos]
+                    pos += 1
+
+                    logger.debug('adding: %s', value[-1])
+
+                logger.debug('found: \'')
+
+            elif t.lexer.lexmatch.string[pos] == '"':
+                logger.debug('found: "')
+
+                assignment = False
+                pos += 1
+
+                while t.lexer.lexmatch.string[pos] != '"':
+                    if t.lexer.lexmatch.string[pos] == '\\':
+                        pos += 1
+                    value += t.lexer.lexmatch.string[pos]
+                    pos += 1
+
+                    logger.debug('adding: %s', value[-1])
+
+                logger.debug('found: "')
+
+            elif t.lexer.lexmatch.string[pos] == '=':
+                logger.debug('found: =')
+
+                if assignment:
+                    t.lexer.lexpos = t.lexer.lexdata.find('=', t.lexer.lexpos - len(t.value))
+                    break
+                else:
+                    value += t.lexer.lexmatch.string[pos]
+
+                    logger.debug('adding: %s', value[-1])
+
             else:
-                for char in t.value:
-                    if char == '\n':
-                        t.lexer.lineno += 1
+                value += t.lexer.lexmatch.string[pos]
 
-                    if escaped:
-                        value += char
-                        escaped = False
-                    else:
-                        if char == '\\':
-                            escaped = True
-                        elif char != '\'' and char != '"':
-                            value += char
+                logger.debug('adding: %s', value[-1])
 
-            t.value = value
+            pos += 1
+
+        t.value = value
+
+        logger.debug('t.value: %s', t.value)
 
         return t
 
