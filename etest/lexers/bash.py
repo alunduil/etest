@@ -278,10 +278,14 @@ class BashLexer(object):
             elif t.lexer.lexmatch.string[pos] == '$':
                 logger.debug('found: $')
 
+                value += t.lexer.lexmatch.string[pos]
+
                 pos += 1
 
                 if t.lexer.lexmatch.string[pos] == '(':
                     logger.debug('found (')
+
+                    value += t.lexer.lexmatch.string[pos]
 
                     count = 0
                     pos += 1
