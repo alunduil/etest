@@ -305,6 +305,8 @@ class BashLexer(object):
                         logger.debug('adding: %s', value[-1])
 
                     logger.debug('found: )')
+                else:
+                    pos -= 1
 
             else:
                 value += t.lexer.lexmatch.string[pos]
