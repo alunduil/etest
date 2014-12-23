@@ -215,6 +215,10 @@ class BashLexer(object):
                 while t.lexer.lexmatch.string[pos] != '\'':
                     if t.lexer.lexmatch.string[pos] == '\\':
                         pos += 1
+
+                    if t.lexer.lexmatch.string[pos] == '\n':
+                        t.lexer.lineno += 1
+
                     value += t.lexer.lexmatch.string[pos]
                     pos += 1
 
@@ -231,6 +235,10 @@ class BashLexer(object):
                 while t.lexer.lexmatch.string[pos] != '"':
                     if t.lexer.lexmatch.string[pos] == '\\':
                         pos += 1
+
+                    if t.lexer.lexmatch.string[pos] == '\n':
+                        t.lexer.lineno += 1
+
                     value += t.lexer.lexmatch.string[pos]
                     pos += 1
 
@@ -250,7 +258,9 @@ class BashLexer(object):
                     if t.lexer.lexmatch.string[pos] == '\\':
                         pos += 1
 
-                    if t.lexer.lexmatch.string[pos] == '{':
+                    if t.lexer.lexmatch.string[pos] == '\n':
+                        t.lexer.lineno += 1
+                    elif t.lexer.lexmatch.string[pos] == '{':
                         count += 1
                     elif t.lexer.lexmatch.string[pos] == '}':
                         count -= 1
@@ -294,7 +304,9 @@ class BashLexer(object):
                         if t.lexer.lexmatch.string[pos] == '\\':
                             pos += 1
 
-                        if t.lexer.lexmatch.string[pos] == '(':
+                        if t.lexer.lexmatch.string[pos] == '\n':
+                            t.lexer.lineno += 1
+                        elif t.lexer.lexmatch.string[pos] == '(':
                             count += 1
                         elif t.lexer.lexmatch.string[pos] == ')':
                             count -= 1
