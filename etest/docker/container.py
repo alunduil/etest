@@ -5,6 +5,9 @@
 
 from etest.docker import common
 
+CONTAINERS = []
+CREATE = True
+
 
 def commit(*args, **kwargs):
     return common.CLIENT.commit(*args, **kwargs)
@@ -18,12 +21,17 @@ def logs(*args, **kwargs):
     return common.CLIENT.logs(*args, **kwargs)
 
 
-def remove(*args, **kwargs):
-    return common.CLIENT.remove_container(*args, **kwargs)
+def remove(container, *args, **kwargs):
+    CONTAINERS.remove(container)
+    return common.CLIENT.remove_container(container, *args, **kwargs)
 
 
-def start(*args, **kwargs):
-    return common.CLIENT.start(*args, **kwargs)
+def start(container, *args, **kwargs):
+    if not CREATE:
+        return
+
+    CONTAINERS.append(container)
+    return common.CLIENT.start(container, *args, **kwargs)
 
 
 def wait(*args, **kwargs):

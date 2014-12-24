@@ -101,7 +101,7 @@ class Test(object):
 
             start_time = datetime.datetime.now()
 
-            docker.container.start(
+            is_interrupted = None is docker.container.start(
                 container = container_name,
                 binds = {
                     self.ebuild.overlay.directory: {
@@ -116,7 +116,7 @@ class Test(object):
                 },
             )
 
-            self.failed = bool(docker.container.wait(container_name))
+            self.failed = is_interrupted or bool(docker.container.wait(container_name))
 
             self.time += datetime.datetime.now() - start_time
 

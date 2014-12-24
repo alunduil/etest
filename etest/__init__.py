@@ -7,8 +7,10 @@ import click
 import datetime
 import logging
 import threading
+import signal
 import sys
 
+from etest import docker
 from etest import information
 from etest import tests
 
@@ -44,6 +46,8 @@ def echo_check_verbose(check):
 @click.version_option(information.VERSION)
 @click.argument('ebuilds', nargs = -1)
 def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
+    signal.signal(signal.SIGTERM, sigterm_handler)
+
     failures = []
     elapsed_times = []
 
@@ -104,3 +108,10 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
             click.secho('{0} tests FAILED'.format(len(failures)), fg = 'red')
 
     sys.exit(len(failures))
+
+
+def sigterm_handler(signum, frame):
+    docker.container.CREATE = False
+
+    while len(docker.container.CONTAINERS):
+        docker.container.stop(docker.container.CONTAINERS[0])
