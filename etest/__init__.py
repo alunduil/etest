@@ -15,6 +15,8 @@ from etest import information
 from etest import tests
 
 logger = logging.getLogger(__name__)
+logger.propogate = False
+logger.addHandler(logging.NullHandler())
 
 
 def echo_check(check):
