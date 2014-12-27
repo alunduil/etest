@@ -264,6 +264,8 @@ class BashParser(object):
                        | FOR WORD ';' newline_list '{' compound_list '}'
                        | FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
                        | FOR WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
+                       | FOR WORD newline_list IN number_list list_terminator newline_list DO compound_list DONE
+                       | FOR WORD newline_list IN number_list list_terminator newline_list '{' compound_list '}'
                        | FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE
                        | FOR WORD newline_list IN list_terminator newline_list '{' compound_list '}'
 
@@ -594,6 +596,22 @@ class BashParser(object):
     #
     # Additional Productions
     #
+
+    def p_number_list_number(self, p):
+        '''number_list : NUMBER'''
+
+        p[0] = (p[1],)
+
+        for _ in range(len(p)):
+            logger.debug('world_list: p[%d]: %s', _, p[_])
+
+    def p_number_list_list(self, p):
+        '''number_list : number_list newline_list NUMBER'''
+
+        p[0] = p[1] + (p[3],)
+
+        for _ in range(len(p)):
+            logger.debug('world_list: p[%d]: %s', _, p[_])
 
     def p_assignment_word_array(self, p):
         '''assignment_word : WORD '=' assignment_off '(' newline_list word_list newline_list ')' assignment_on'''
