@@ -650,7 +650,8 @@ class BashParser(object):
         if len(_) == 1:
             _ = _[0]
 
-        self.symbols[p[1]] = _
+        if not p[1].startswith('-'):
+            self.symbols[p[1]] = _
 
         p[0] = p[1]
 

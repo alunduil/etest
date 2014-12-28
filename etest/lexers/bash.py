@@ -176,7 +176,6 @@ class BashLexer(object):
 
         logger.debug('t.lexer.lexmatch.start(): %s', t.lexer.lexmatch.start())
         logger.debug('t.lexer.lexmatch.end(): %s', t.lexer.lexmatch.end())
-        logger.debug('t.lexer.lexmatch.string: %s', t.lexer.lexmatch.string)
 
         value = ''
 
@@ -265,7 +264,7 @@ class BashLexer(object):
                     elif t.lexer.lexmatch.string[pos] == '}':
                         count -= 1
 
-                    value = t.lexer.lexmatch.string[pos]
+                    value += t.lexer.lexmatch.string[pos]
                     pos += 1
 
                     logger.debug('adding: %s', value[-1])
@@ -300,7 +299,7 @@ class BashLexer(object):
                     count = 0
                     pos += 1
 
-                    while t.lexer.lexmatch.string[pos] != ')' and count > 0:
+                    while t.lexer.lexmatch.string[pos] != ')' or count > 0:
                         if t.lexer.lexmatch.string[pos] == '\\':
                             pos += 1
 
@@ -311,12 +310,14 @@ class BashLexer(object):
                         elif t.lexer.lexmatch.string[pos] == ')':
                             count -= 1
 
-                        value = t.lexer.lexmatch.string[pos]
+                        value += t.lexer.lexmatch.string[pos]
                         pos += 1
 
                         logger.debug('adding: %s', value[-1])
 
                     logger.debug('found: )')
+
+                    value += t.lexer.lexmatch.string[pos]
                 else:
                     pos -= 1
 
@@ -328,8 +329,11 @@ class BashLexer(object):
             pos += 1
 
         t.value = value
+        t.lexer.lexpos = pos
 
         logger.debug('t.value: %s', t.value)
+        logger.debug('t.lexer.lexpos: %s', t.lexer.lexpos)
+        logger.debug('pos: %s', pos)
 
         return t
 
@@ -355,7 +359,7 @@ class BashLexer(object):
 
         error_message += t.lexer.lexdata[line_start:line_end].strip() + '\n'
         error_message += ' ' * ( column - 2 + _ ) + '^\n'
-        error_message += 'unexpected token: {t.value}'.format(t = t)
+        error_message += 'unexpected character: {t.value}'.format(t = t)
 
         logger.error('\n' + error_message)
 
