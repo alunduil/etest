@@ -276,7 +276,7 @@ class BashLexer(object):
 
                 count = 0
 
-                while t.lexer.lexmatch.string[pos] != '}' and count > 0:
+                while t.lexer.lexmatch.string[pos] != '}' or count > 0:
                     if t.lexer.lexmatch.string[pos] == '\\':
                         pos += 1
 
