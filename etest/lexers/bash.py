@@ -382,7 +382,7 @@ class BashLexer(object):
 
         error_message += t.lexer.lexdata[line_start:line_end].strip() + '\n'
         error_message += ' ' * ( column - 2 + _ ) + '^\n'
-        error_message += 'unexpected character: {t.value}'.format(t = t)
+        error_message += 'unexpected character: \'{t.value}\''.format(t = t)
 
         logger.error('\n' + error_message)
 
