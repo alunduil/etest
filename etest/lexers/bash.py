@@ -197,7 +197,7 @@ class BashLexer(object):
 
                 logger.debug('adding: %s', value[-1])
 
-            elif t.lexer.lexmatch.string[pos] == '\n':
+            if t.lexer.lexmatch.string[pos] == '\n':
                 logger.debug('found: \\n')
 
                 t.lexer.lineno += 1
@@ -231,6 +231,8 @@ class BashLexer(object):
                 assignment = False
                 pos += 1
 
+                contained = False
+
                 while t.lexer.lexmatch.string[pos] != '"':
                     if t.lexer.lexmatch.string[pos] == '\\':
                         pos += 1
@@ -247,6 +249,8 @@ class BashLexer(object):
 
             elif t.lexer.lexmatch.string[pos] == '{':
                 logger.debug('found: {')
+
+                assignment = False
 
                 value += t.lexer.lexmatch.string[pos]
 
@@ -286,6 +290,8 @@ class BashLexer(object):
 
             elif t.lexer.lexmatch.string[pos] == '$':
                 logger.debug('found: $')
+
+                assignment = False
 
                 value += t.lexer.lexmatch.string[pos]
 
