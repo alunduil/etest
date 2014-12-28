@@ -79,6 +79,7 @@ class BashLexer(object):
         'SEMI_SEMI_AND',
         'TIMEIGN',
         'TIMEOPT',
+        'WHITESPACE',
         'WORD',
     ) + reserved
 
@@ -166,6 +167,8 @@ class BashLexer(object):
 
     t_TIMEIGN = r'--'
     t_TIMEOPT = r'-p'
+
+    t_ignore_WHITESPACE = r'(?!\n)\s'
 
     def t_WORD(self, t):
         r'(?:(?:[-a-zA-Z/\.!+][^;\s"\'()]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
@@ -360,7 +363,7 @@ class BashLexer(object):
 
         return t
 
-    t_ignore = ' \t'
+    t_ignore = ''
     t_conditional_ignore = ''
 
     def t_error(self, t):
