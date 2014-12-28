@@ -170,7 +170,14 @@ class BashLexer(object):
     def t_WORD(self, t):
         r'(?:(?:[-a-zA-Z/\.!+][^;\s"\'()]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
 
-        if t.value.upper() in reserved:
+        logger.debug('t.lexer.assignment: %s', t.lexer.assignment)
+        logger.debug('t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != =: %s', t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '=')
+
+        assignment = t.lexer.assignment and t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '='
+
+        logger.debug('assignment: %s', assignment)
+
+        if t.value.upper() in reserved and assignment:
             t.type = t.value.upper()
             return t
 
@@ -179,35 +186,20 @@ class BashLexer(object):
 
         value = ''
 
-        assignment = t.lexer.assignment and t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '='
-
-        logger.debug('t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != =: %s', t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '=')
-        logger.debug('t.lexer.assignment: %s', t.lexer.assignment)
-        logger.debug('assignment: %s', assignment)
-
         pos = t.lexer.lexmatch.start()
         while pos < t.lexer.lexmatch.end():
-            logger.debug('pos: %s', pos)
-
             if t.lexer.lexmatch.string[pos] == '\\':
-                logger.debug('found: \\')
-
                 pos += 1
-                value += t.lexer.lexmatch.string[pos]
-
-                logger.debug('adding: %s', value[-1])
 
             if t.lexer.lexmatch.string[pos] == '\n':
-                logger.debug('found: \\n')
-
                 t.lexer.lineno += 1
+
                 value += t.lexer.lexmatch.string[pos]
 
-                logger.debug('adding: %s', value[-1])
+                logger.debug('pos: %s', pos)
+                logger.debug('found: %s', t.lexer.lexmatch.string[pos])
 
             elif t.lexer.lexmatch.string[pos] == '\'':
-                logger.debug('found: \'')
-
                 assignment = False
                 pos += 1
 
@@ -219,43 +211,67 @@ class BashLexer(object):
                         t.lexer.lineno += 1
 
                     value += t.lexer.lexmatch.string[pos]
+
+                    logger.debug('pos: %s', pos)
+                    logger.debug('found: %s', t.lexer.lexmatch.string[pos])
+
                     pos += 1
 
-                    logger.debug('adding: %s', value[-1])
-
+                logger.debug('pos: %s', pos)
                 logger.debug('found: \'')
 
             elif t.lexer.lexmatch.string[pos] == '"':
-                logger.debug('found: "')
-
                 assignment = False
                 pos += 1
 
                 contained = False
+                count = 0
 
-                while t.lexer.lexmatch.string[pos] != '"':
+                while t.lexer.lexmatch.string[pos] != '"' or contained:
+                    logger.debug('contained: %s', contained)
+
                     if t.lexer.lexmatch.string[pos] == '\\':
                         pos += 1
 
                     if t.lexer.lexmatch.string[pos] == '\n':
                         t.lexer.lineno += 1
+                    elif t.lexer.lexmatch.string[pos] == '$':
+                        value += t.lexer.lexmatch.string[pos]
+
+                        logger.debug('pos: %s', pos)
+                        logger.debug('found: %s', t.lexer.lexmatch.string[pos])
+
+                        pos += 1
+
+                        if t.lexer.lexmatch.string[pos] == '(':
+                            contained = True
+                            count += 1
+
+                    elif t.lexer.lexmatch.string[pos] == '(':
+                        count += 1
+                    elif t.lexer.lexmatch.string[pos] == ')':
+                        count -= 1
+
+                        if count == 0:
+                            contained = False
 
                     value += t.lexer.lexmatch.string[pos]
+
+                    logger.debug('pos: %s', pos)
+                    logger.debug('found: %s', t.lexer.lexmatch.string[pos])
+
                     pos += 1
 
-                    logger.debug('adding: %s', value[-1])
-
+                logger.debug('pos: %s', pos)
                 logger.debug('found: "')
 
             elif t.lexer.lexmatch.string[pos] == '{':
-                logger.debug('found: {')
-
-                assignment = False
-
                 value += t.lexer.lexmatch.string[pos]
 
-                count = 0
+                assignment = False
                 pos += 1
+
+                count = 0
 
                 while t.lexer.lexmatch.string[pos] != '}' and count > 0:
                     if t.lexer.lexmatch.string[pos] == '\\':
@@ -269,41 +285,39 @@ class BashLexer(object):
                         count -= 1
 
                     value += t.lexer.lexmatch.string[pos]
-                    pos += 1
 
-                    logger.debug('adding: %s', value[-1])
+                    logger.debug('pos: %s', pos)
+                    logger.debug('found: %s', t.lexer.lexmatch.string[pos])
+
+                    pos += 1
 
                 value += t.lexer.lexmatch.string[pos]
 
-                logger.debug('found: }')
+                logger.debug('pos: %s', pos)
+                logger.debug('found: %s', t.lexer.lexmatch.string[pos])
 
             elif t.lexer.lexmatch.string[pos] == '=':
-                logger.debug('found: =')
-
                 if assignment:
                     t.lexer.lexpos = t.lexer.lexdata.find('=', t.lexer.lexpos - len(t.value))
                     break
                 else:
                     value += t.lexer.lexmatch.string[pos]
 
-                    logger.debug('adding: %s', value[-1])
+                    logger.debug('pos: %s', pos)
+                    logger.debug('found: %s', t.lexer.lexmatch.string[pos])
 
             elif t.lexer.lexmatch.string[pos] == '$':
-                logger.debug('found: $')
-
-                assignment = False
-
                 value += t.lexer.lexmatch.string[pos]
 
+                assignment = False
                 pos += 1
 
                 if t.lexer.lexmatch.string[pos] == '(':
-                    logger.debug('found (')
-
                     value += t.lexer.lexmatch.string[pos]
 
-                    count = 0
                     pos += 1
+
+                    count = 0
 
                     while t.lexer.lexmatch.string[pos] != ')' or count > 0:
                         if t.lexer.lexmatch.string[pos] == '\\':
@@ -317,29 +331,32 @@ class BashLexer(object):
                             count -= 1
 
                         value += t.lexer.lexmatch.string[pos]
+
+                        logger.debug('pos: %s', pos)
+                        logger.debug('found: %s', t.lexer.lexmatch.string[pos])
+
                         pos += 1
 
-                        logger.debug('adding: %s', value[-1])
-
-                    logger.debug('found: )')
-
                     value += t.lexer.lexmatch.string[pos]
+
                 else:
                     pos -= 1
 
             else:
                 value += t.lexer.lexmatch.string[pos]
 
-                logger.debug('adding: %s', value[-1])
+                logger.debug('pos: %s', pos)
+                logger.debug('found: %s', t.lexer.lexmatch.string[pos])
 
             pos += 1
 
         t.value = value
         t.lexer.lexpos = pos
 
-        logger.debug('t.value: %s', t.value)
-        logger.debug('t.lexer.lexpos: %s', t.lexer.lexpos)
         logger.debug('pos: %s', pos)
+        logger.debug('t.value: %s', t.value)
+
+        logger.debug('t.lexer.lexpos: %s', t.lexer.lexpos)
 
         return t
 

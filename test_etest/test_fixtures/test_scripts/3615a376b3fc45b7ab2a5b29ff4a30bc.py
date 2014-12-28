@@ -17,7 +17,7 @@ _ = {
     'text': _,
 
     'symbols': {
-        'currentamanda': '${set | egrep ^AMANDA_" | grep -v \'^AMANDA_ENV_SETTINGS\' | xargs)',
+        'currentamanda': '$(set | egrep "^AMANDA_" | grep -v \'^AMANDA_ENV_SETTINGS\' | xargs)',
     },
 
     'correct': None,
