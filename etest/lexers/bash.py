@@ -171,7 +171,7 @@ class BashLexer(object):
     t_ignore_WHITESPACE = r'(?!\n)\s'
 
     def t_WORD(self, t):
-        r'(?:(?:[-a-zA-Z/\.!+\\][^;\s"\'()]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
+        r'(?:(?:[-a-zA-Z/\.!+\\_][^;\s"\'()]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
 
         logger.debug('t.lexer.assignment: %s', t.lexer.assignment)
         logger.debug('t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != =: %s', t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '=')
