@@ -44,6 +44,7 @@ class BashLexer(object):
             **kwargs
         )
         self.lexer.assignment = True
+        self.lexer.curly = True
 
     states = (
         ( 'conditional', 'exclusive', ),
@@ -64,6 +65,7 @@ class BashLexer(object):
         'GREATER_AND',
         'GREATER_BAR',
         'GREATER_GREATER',
+        'LBRACE',
         'LESS_AND',
         'LESS_GREATER',
         'LESS_LESS',
@@ -92,7 +94,6 @@ class BashLexer(object):
         ';',
         '(',
         ')',
-        '{',
         '}',
         '&',
     )
@@ -171,7 +172,7 @@ class BashLexer(object):
     t_ignore_WHITESPACE = r'(?!\n)\s'
 
     def t_WORD(self, t):
-        r'(?:(?:[-a-zA-Z/\.!+\\_*][^;\s"\'()]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
+        r'(?:(?:[-a-zA-Z/\.!+\\_*{][^;\s"\'()]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
 
         logger.debug('t.lexer.assignment: %s', t.lexer.assignment)
         logger.debug('t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != =: %s', t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != '=')
@@ -182,6 +183,14 @@ class BashLexer(object):
 
         if t.value.upper() in reserved and assignment:
             t.type = t.value.upper()
+            return t
+
+        if t.lexer.curly and t.lexer.lexdata[t.lexer.lexmatch.start()] == '{':
+            t.value = '{'
+            t.type = 'LBRACE'
+
+            t.lexer.lexpos = t.lexer.lexmatch.start() + 1
+
             return t
 
         logger.debug('t.lexer.lexmatch.start(): %s', t.lexer.lexmatch.start())

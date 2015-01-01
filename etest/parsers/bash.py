@@ -218,7 +218,7 @@ class BashParser(object):
 
     def p_simple_command(self, p):
         '''simple_command : simple_command_element
-                          | simple_command simple_command_element
+                          | simple_command curly_off simple_command_element
 
         '''
 
@@ -226,7 +226,7 @@ class BashParser(object):
             logger.debug('simple_command: p[%d]: %s', _, p[_])
 
     def p_command(self, p):
-        '''command : simple_command
+        '''command : simple_command curly_on
                    | shell_command
                    | shell_command redirection_list
                    | function_def
@@ -259,15 +259,15 @@ class BashParser(object):
 
     def p_for_command(self, p):
         '''for_command : FOR WORD newline_list DO compound_list DONE
-                       | FOR WORD newline_list '{' compound_list '}'
+                       | FOR WORD newline_list LBRACE compound_list '}'
                        | FOR WORD ';' newline_list DO compound_list DONE
-                       | FOR WORD ';' newline_list '{' compound_list '}'
+                       | FOR WORD ';' newline_list LBRACE compound_list '}'
                        | FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
-                       | FOR WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
+                       | FOR WORD newline_list IN word_list list_terminator newline_list LBRACE compound_list '}'
                        | FOR WORD newline_list IN number_list list_terminator newline_list DO compound_list DONE
-                       | FOR WORD newline_list IN number_list list_terminator newline_list '{' compound_list '}'
+                       | FOR WORD newline_list IN number_list list_terminator newline_list LBRACE compound_list '}'
                        | FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE
-                       | FOR WORD newline_list IN list_terminator newline_list '{' compound_list '}'
+                       | FOR WORD newline_list IN list_terminator newline_list LBRACE compound_list '}'
 
         '''
 
@@ -276,9 +276,9 @@ class BashParser(object):
 
     def p_arith_for_command(self, p):
         '''arith_for_command : FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE
-                             | FOR ARITH_FOR_EXPRS list_terminator newline_list '{' compound_list '}'
+                             | FOR ARITH_FOR_EXPRS list_terminator newline_list LBRACE compound_list '}'
                              | FOR ARITH_FOR_EXPRS DO compound_list DONE
-                             | FOR ARITH_FOR_EXPRS '{' compound_list '}'
+                             | FOR ARITH_FOR_EXPRS LBRACE compound_list '}'
 
         '''
 
@@ -287,11 +287,11 @@ class BashParser(object):
 
     def p_select_command(self, p):
         '''select_command : SELECT WORD newline_list DO list DONE
-                          | SELECT WORD newline_list '{' list '}'
+                          | SELECT WORD newline_list LBRACE list '}'
                           | SELECT WORD ';' newline_list DO list DONE
-                          | SELECT WORD ';' newline_list '{' list '}'
+                          | SELECT WORD ';' newline_list LBRACE list '}'
                           | SELECT WORD newline_list IN word_list list_terminator newline_list DO list DONE
-                          | SELECT WORD newline_list IN word_list list_terminator newline_list '{' list '}'
+                          | SELECT WORD newline_list IN word_list list_terminator newline_list LBRACE list '}'
 
         '''
 
@@ -370,7 +370,7 @@ class BashParser(object):
             logger.debug('subshell: p[%d]: %s', _, p[_])
 
     def p_group_command(self, p):
-        '''group_command : '{' compound_list '}' '''
+        '''group_command : LBRACE compound_list '}' '''
 
         for _ in range(len(p)):
             logger.debug('group_command: p[%d]: %s', _, p[_])
@@ -675,6 +675,16 @@ class BashParser(object):
 
         for _ in range(len(p)):
             logger.debug('simple_command_element: p[%d]: %s', _, p[_])
+
+    def p_curly_off(self, p):
+        '''curly_off : '''
+
+        p.lexer.curly = False
+
+    def p_curly_on(self, p):
+        '''curly_on : '''
+
+        p.lexer.curly = True
 
     def p_error(self, p):
         if p is None:
