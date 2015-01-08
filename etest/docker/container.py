@@ -28,10 +28,12 @@ def remove(container, *args, **kwargs):
 
 def start(container, *args, **kwargs):
     if not CREATE:
-        return
+        return False
 
     CONTAINERS.append(container)
-    return common.CLIENT.start(container, *args, **kwargs)
+    common.CLIENT.start(container, *args, **kwargs)
+
+    return True
 
 
 def wait(*args, **kwargs):
