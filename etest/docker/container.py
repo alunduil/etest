@@ -36,5 +36,9 @@ def start(container, *args, **kwargs):
     return True
 
 
+def stop(container, *args, **kwargs):
+    return common.CLIENT.stop(container, *args, **kwargs)
+
+
 def wait(*args, **kwargs):
     return common.CLIENT.wait(*args, **kwargs)
