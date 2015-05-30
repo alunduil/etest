@@ -95,7 +95,7 @@ class Test(object):
                     '/overlay',
                     '/usr/portage',
                 ],
-                entrypoint = command[0],
+                entrypoint = ( command[0], ),
                 command = command[1:],
             )
 
