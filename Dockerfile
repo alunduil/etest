@@ -1,4 +1,4 @@
-FROM wking/gentoo:latest
+FROM gentoo/stage3-amd64:latest
 MAINTAINER Alex Brandt <alunduil@gentoo.org>
 
 # Set a locale
