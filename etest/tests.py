@@ -55,7 +55,7 @@ class Test(object):
         if self.with_test_phase:
             _.append(('bash', '-c', 'echo {0} test >> /etc/portage/package.env'.format(self.ebuild.name)))
 
-        _.append(('bash', '-c', 'echo {0} \'-*\' {1} >> /etc/portage/package.use'.format(self.ebuild.name, ' '.join(self.use_flags))))
+        _.append(('bash', '-c', 'echo {0} \'-*\' {1} >> /etc/portage/package.use/etest'.format(self.ebuild.name, ' '.join(self.use_flags))))
 
         _.append(('bash', '-c', 'emerge -q -f --autounmask-write {0} >/dev/null 2>&1 || true'.format(self.ebuild.cpv)))
         _.append(('bash', '-c', 'etc-update --automode -5 >/dev/null 2>&1'))

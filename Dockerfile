@@ -29,6 +29,5 @@ RUN mkdir /etc/portage/env
 RUN echo 'FEATURES="test"' >> /etc/portage/env/test
 
 RUN touch /etc/portage/package.env
-RUN touch /etc/portage/package.use
 
 RUN mkdir /overlay
