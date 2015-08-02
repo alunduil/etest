@@ -3,6 +3,8 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+# flake8: noqa (inline bash script with tabs)
+
 from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
@@ -11,7 +13,7 @@ local mycmakeargs=(
 	-DGSETTINGS_COMPILE=OFF
 	-DMINIMAL_FLAGS=ON
 )
-'''  # flake8: noqa — inline bash script with tabs
+'''
 
 _ = {
     'uuid': 'd1ec9787-9e85-46d5-81c5-78ce046b8fc1',

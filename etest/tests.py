@@ -76,6 +76,13 @@ class Test(object):
             if 'python2_7' not in _['PYTHON_TARGETS']:
                 _['PYTHON_TARGETS'] += ' python2_7'
 
+            # No time to test pypy right now
+            if 'pypy' in _['PYTHON_TARGETS']:
+                _['PYTHON_TARGETS'].remove('pypy')
+
+            if 'pypy3' in _['PYTHON_TARGETS']:
+                _['PYTHON_TARGETS'].remove('pypy3')
+
         return _
 
     def run(self):

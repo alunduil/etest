@@ -3,6 +3,8 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+# flake8: noqa (inline bash script with tabs)
+
 from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
@@ -12,7 +14,7 @@ python_install_all() {
 
 	distutils-r1_python_install_all
 }
-'''  # flake8: noqa — inline bash script with tabs
+'''
 
 _ = {
     'uuid': '6186f2ff-5610-4071-981c-7e4bb172291c',

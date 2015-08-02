@@ -3,6 +3,8 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+# flake8: noqa (inline bash script with tabs)
+
 from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
@@ -58,7 +60,7 @@ pkg_postinst() {
 pkg_postrm() {
         use emacs && elisp-site-regen
 }
-'''  # flake8: noqa — inline bash script with tabs
+'''
 
 _ = {
     'uuid': '41a217e3-097c-487b-8a0e-cc1ffc7ffe40',

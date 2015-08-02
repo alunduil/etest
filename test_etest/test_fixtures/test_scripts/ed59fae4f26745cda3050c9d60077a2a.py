@@ -3,11 +3,13 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+# flake8: noqa (inline bash script with tabs)
+
 from test_etest.test_fixtures.test_scripts import SCRIPTS
 
 _ = '''
 find "${ED}" -name '*.la' -exec rm -f {} +
-'''  # flake8: noqa — inline bash script with tabs
+'''
 
 _ = {
     'uuid': 'a5f28a1f-930a-482e-b94d-b56fad5984a3',
