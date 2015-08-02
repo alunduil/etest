@@ -77,11 +77,11 @@ class Test(object):
                 _['PYTHON_TARGETS'] += ' python2_7'
 
             # No time to test pypy right now
-            if 'pypy' in _['PYTHON_TARGETS']:
-                _['PYTHON_TARGETS'].remove('pypy')
-
             if 'pypy3' in _['PYTHON_TARGETS']:
-                _['PYTHON_TARGETS'].remove('pypy3')
+                _['PYTHON_TARGETS'].replace('pypy3', '')
+
+            if 'pypy' in _['PYTHON_TARGETS']:
+                _['PYTHON_TARGETS'].replace('pypy', '')
 
         return _
 
