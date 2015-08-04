@@ -78,10 +78,10 @@ class Test(object):
 
             # No time to test pypy right now
             if 'pypy3' in _['PYTHON_TARGETS']:
-                _['PYTHON_TARGETS'].replace('pypy3', '')
+                _['PYTHON_TARGETS'] = _['PYTHON_TARGETS'].replace('pypy3', '')
 
             if 'pypy' in _['PYTHON_TARGETS']:
-                _['PYTHON_TARGETS'].replace('pypy', '')
+                _['PYTHON_TARGETS'] = _['PYTHON_TARGETS'].replace('pypy', '')
 
         return _
 
