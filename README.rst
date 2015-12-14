@@ -69,7 +69,7 @@ etest is tested continuously by Travis-CI and running the tests is quite
 simple::
 
     flake8
-    nosetests test_etest/test_unit
+    python setup.py test
 
 System tests can be run as well but require a working docker daemon as well as
 approximately two and half hours::

@@ -1,12 +1,18 @@
-# Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
+# Copyright (C) 2015 etest project developers.
+#
+# See the COPYRIGHT file at the top-level directory of this distribution and at
+# https://github.com/alunduil/etest/blob/master/COPYRIGHT
 #
 # etest is freely distributable under the terms of an MIT-style license.
-# See COPYING or http://www.opensource.org/licenses/mit-license.php.
+# See LICENSE or http://www.opensource.org/licenses/mit-license.php.
 
 import os
+import sys
 
-from setuptools import setup, find_packages
 from codecs import open
+from distutils.core import Command
+from setuptools import find_packages
+from setuptools import setup
 
 with open(os.path.join('etest', 'information.py'), 'r', encoding = 'utf-8') as fh:
     exec(fh.read(), globals(), locals())
@@ -40,6 +46,8 @@ PARAMS['classifiers'] = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: Implementation :: CPython',
     'Topic :: Software Development :: Quality Assurance',
     'Topic :: Software Development :: Testing',
@@ -65,11 +73,41 @@ PARAMS['install_requires'] = [
     'ply',
 ]
 
-PARAMS['test_suite'] = 'nose.collector'
 PARAMS['tests_require'] = [
     'coverage'
     'nose',
 ]
+
+
+class test(Command):
+    description = 'run all tests'
+
+    user_options = [
+        ( 'nosetests-arguments=', None, 'arguments for nosetests', ),
+    ]
+
+    def initialize_options(self):
+        self.nosetests_arguments = None
+
+    def finalize_options(self):
+        if self.nosetests_arguments is None:
+            self.nosetests_arguments = []
+        else:
+            self.nosetests_arguments = self.nosetests_arguments.split()
+
+        self.nosetests_arguments.insert(0, os.path.basename(os.getcwd()))
+
+    def run(self):
+        import nose
+        success = nose.run(argv = self.nosetests_arguments)
+
+        print('success:', success)
+
+        sys.exit(not success)
+
+PARAMS['cmdclass'] = {
+    'test': test,
+}
 
 PARAMS['entry_points'] = {
     'console_scripts': [
