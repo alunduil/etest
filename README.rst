@@ -29,7 +29,9 @@ The latest release available is:
 
 
  ``etest`` does require a running docker daemon but does not explicitly list it
- as a requirement.
+ as a requirement.  It's not explicitly listed since the docker daemon doesn't
+ necessarily need to be local.  Non-local docker daemons are not currently
+ supported.
 
 Using etest
 ===========
@@ -37,7 +39,7 @@ Using etest
 .. note::
     etest requires a running docker daemon (either local or remote).  If using
     a remote docker instance you must set the DOCKER_HOST environment variable
-    with the hostname (just like fig).
+    with the hostname (just like compose).
 
 To get started simply run ``etest`` in a directory that contains ebuilds in a
 valid overlay.
@@ -78,11 +80,6 @@ The current status of the build is:
 
 .. image:: https://secure.travis-ci.org/alunduil/etest.png?branch=master
    :target: http://travis-ci.org/alunduil/etest
-
-Authors
-=======
-
-* Alex Brandt <alunduil@gentoo.org>
 
 Known Issues
 ============
