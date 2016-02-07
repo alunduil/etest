@@ -35,7 +35,7 @@ class Test(object):
     @property
     @functools.lru_cache(1)
     def name(self):
-        _ = self.ebuild.cpv + '[' + ','.join(self.use_flags)
+        _ = self.ebuild.cpv.replace('/', '_') + '[' + ','.join(self.use_flags)
 
         if self.with_test_phase:
             if len(self.use_flags):
