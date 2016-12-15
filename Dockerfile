@@ -27,6 +27,7 @@ RUN echo 'FEATURES="collision-protect parallel-fetch strict"' >> /etc/portage/ma
 
 RUN mkdir /etc/portage/env
 RUN echo 'FEATURES="test"' >> /etc/portage/env/test
+RUN echo 'FEATURES="binpkg"' >> /etc/portage/env/binpkg
 
 RUN touch /etc/portage/package.env
 
