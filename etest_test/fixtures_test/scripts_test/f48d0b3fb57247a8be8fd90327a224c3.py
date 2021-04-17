@@ -1,3 +1,4 @@
+"""Implicit concatenation of strings."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -5,25 +6,23 @@
 
 # flake8: noqa (inline bash script with tabs)
 
+import textwrap
+
 from etest_test.fixtures_test.scripts_test import SCRIPTS
 
-_ = '''
-FOO="bar"baz
-'''
-
 _ = {
-    'uuid': 'f48d0b3fb57247a8be8fd90327a224c3',
-
-    'description': 'implicit concatenation of strings',
-
-    'text': _,
-
-    'symbols': {
-        'FOO': 'barbaz',
+    "uuid": "f48d0b3fb57247a8be8fd90327a224c3",
+    "description": "implicit concatenation of strings",
+    "text": textwrap.dedent(
+        """
+        FOO="bar"baz
+        """,
+    ),
+    "symbols": {
+        "FOO": "barbaz",
     },
-
-    'correct': None,
+    "correct": None,
 }
 
-SCRIPTS.setdefault('all', []).append(_)
-SCRIPTS.setdefault('bash', []).append(_)
+SCRIPTS.setdefault("all", []).append(_)
+SCRIPTS.setdefault("bash", []).append(_)

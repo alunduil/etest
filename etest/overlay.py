@@ -1,3 +1,4 @@
+"""Overlay."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -13,31 +14,36 @@ logger = logging.getLogger(__name__)
 
 
 class Overlay(object):
-    @property
-    @functools.lru_cache(1)
+    """A portage defined overlay."""
+
+    @functools.cached_property
     def directory(self):
+        """Directory containing overlay."""
         _ = os.getcwd()
 
-        while _ != '/':
-            if os.path.exists(os.path.join(_, 'metadata', 'layout.conf')):
+        while _ != "/":
+            if os.path.exists(os.path.join(_, "metadata", "layout.conf")):
                 break
 
             _ = os.path.dirname(_)
         else:
-            raise InvalidOverlayError('not in a valid ebuild repository directory')
+            raise InvalidOverlayError("not in a valid ebuild repository directory")
 
         return _
 
     @property
     def ebuilds(self):
+        """Contained ebuilds in overlay."""
         for path, directories, files in os.walk(self.directory):
-            if 'files' in directories:
-                directories.remove('files')
+            if "files" in directories:
+                directories.remove("files")
 
             for _ in files:
-                if _.endswith('.ebuild'):
+                if _.endswith(".ebuild"):
                     yield ebuild.Ebuild(os.path.relpath(os.path.join(path, _), self.directory), self)
 
 
 class InvalidOverlayError(RuntimeError):
+    """Overlay is invalid."""
+
     pass

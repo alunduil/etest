@@ -1,3 +1,4 @@
+"""Function definition."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -5,26 +6,23 @@
 
 # flake8: noqa (inline bash script with tabs)
 
+import textwrap
+
 from etest_test.fixtures_test.scripts_test import SCRIPTS
 
-_ = '''
-python_test() {
-	nosetests || die "Tests failed under ${EPYTHON}"
-}
-'''
-
 _ = {
-    'uuid': '7d982739ef8348d48935d14cb74f160d',
-
-    'description': 'function definition',
-
-    'text': _,
-
-    'symbols': {
-    },
-
-    'correct': None,
+    "uuid": "7d982739ef8348d48935d14cb74f160d",
+    "description": "function definition",
+    "text": textwrap.dedent(
+        """
+        python_test() {
+            nosetests || die "Tests failed under ${EPYTHON}"
+        }
+        """,
+    ),
+    "symbols": {},
+    "correct": None,
 }
 
-SCRIPTS.setdefault('all', []).append(_)
-SCRIPTS.setdefault('bash', []).append(_)
+SCRIPTS.setdefault("all", []).append(_)
+SCRIPTS.setdefault("bash", []).append(_)

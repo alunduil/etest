@@ -1,3 +1,4 @@
+"""Ebuild."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -15,57 +16,57 @@ logger = logging.getLogger(__name__)
 
 
 class Ebuild(object):
+    """Ebuild."""
+
     def __init__(self, path, overlay):
+        """Construct an ebuild."""
         self.path = path
         self.overlay = overlay
 
-    @property
-    @functools.lru_cache(1)
+    @functools.cached_property
     def name(self):
+        """Name of ebuild."""
         return os.path.dirname(self.path)
 
-    @property
-    @functools.lru_cache(1)
+    @functools.cached_property
     def cpv(self):
-        return '=' + self.name + '-' + self.version
+        """Category package version."""
+        return "=" + self.name + "-" + self.version
 
-    @property
-    @functools.lru_cache(1)
+    @functools.cached_property
     def version(self):
-        _ = self.path.replace('.ebuild', '')
-        _ = re.sub(r'.*?' + re.escape(self.name.split('/')[-1]) + '-', '', _)
+        """Version of ebuild."""
+        _ = self.path.replace(".ebuild", "")
+        _ = re.sub(r".*?" + re.escape(self.name.split("/")[-1]) + "-", "", _)
 
         return _
 
-    @property
-    @functools.lru_cache(1)
+    @functools.cached_property
     def compat(self):
-        return { k.replace('_COMPAT', '').lower(): v for k, v in self.parse().items() if '_COMPAT' in k }
+        """COMPAT for ebuild."""
+        return {k.replace("_COMPAT", "").lower(): v for k, v in self.parse().items() if "_COMPAT" in k}
 
-    @property
-    @functools.lru_cache(1)
+    @functools.cached_property
     def restrictions(self):
-        return self.parse().get('RESTRICT', '').split()
+        """Ebuild Restrictions."""
+        return self.parse().get("RESTRICT", "").split()
 
-    @property
-    @functools.lru_cache(1)
+    @functools.cached_property
     def use_flags(self):
-        return [ re.sub(r'^[+-]', '', _) for _ in self.parse()['IUSE'].split() ]
+        """USE flags for ebuild."""
+        return [re.sub(r"^[+-]", "", _) for _ in self.parse()["IUSE"].split()]
 
     @functools.lru_cache(1)
     def parse(self):
-        '''Convert ebuild file into a dictionary, mapping variables to values.
+        """Convert ebuild file into a dictionary, mapping variables to values.
 
         Parses the ebuild file and constructs a dictionary that maps the
         variables to their values.
 
         Returns
         -------
-
         Dictionary whose keys are variables in the associated ebuild.
-
-        '''
-
+        """
         parser = BashParser()
         parser.build()
 
@@ -74,14 +75,14 @@ class Ebuild(object):
 
         ebuild_filename = os.path.join(self.overlay.directory, self.path)
 
-        with open(ebuild_filename, 'r') as fh:
+        with open(ebuild_filename, "r") as fh:
             try:
                 parser.parser.parse(
-                    input = fh.read(),
-                    lexer = lexer.lexer,
+                    input=fh.read(),
+                    lexer=lexer.lexer,
                 )
             except BashSyntaxError as error:
-                error.message = ebuild_filename + '\n' + error.message
+                error.message = ebuild_filename + "\n" + error.message
                 raise
 
         return parser.symbols

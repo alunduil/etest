@@ -1,3 +1,4 @@
+"""Quoted subshell."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -5,25 +6,23 @@
 
 # flake8: noqa — inline bash script with tabs
 
+import textwrap
+
 from etest_test.fixtures_test.scripts_test import SCRIPTS
 
-_ = '''
-currentamanda="$(set | egrep "^AMANDA_" | grep -v '^AMANDA_ENV_SETTINGS' | xargs)"
-'''
-
 _ = {
-    'uuid': '3615a376-b3fc-45b7-ab2a-5b29ff4a30bc',
-
-    'description': 'quoted subshell',
-
-    'text': _,
-
-    'symbols': {
-        'currentamanda': '$(set | egrep "^AMANDA_" | grep -v \'^AMANDA_ENV_SETTINGS\' | xargs)',
+    "uuid": "3615a376-b3fc-45b7-ab2a-5b29ff4a30bc",
+    "description": "quoted subshell",
+    "text": textwrap.dedent(
+        """
+        currentamanda="$(set | egrep "^AMANDA_" | grep -v '^AMANDA_ENV_SETTINGS' | xargs)"
+        """,
+    ),
+    "symbols": {
+        "currentamanda": "$(set | egrep \"^AMANDA_\" | grep -v '^AMANDA_ENV_SETTINGS' | xargs)",
     },
-
-    'correct': None,
+    "correct": None,
 }
 
-SCRIPTS.setdefault('all', []).append(_)
-SCRIPTS.setdefault('bash', []).append(_)
+SCRIPTS.setdefault("all", []).append(_)
+SCRIPTS.setdefault("bash", []).append(_)

@@ -22,12 +22,6 @@ This package is also stored in PyPI and can be installed the standard way::
 
     pip install etest
 
-The latest release available is:
-
-.. image:: https://badge.fury.io/py/etest.png
-    :target: http://badge.fury.io/py/etest
-
-
  ``etest`` does require a running docker daemon but does not explicitly list it
  as a requirement.  It's not explicitly listed since the docker daemon doesn't
  necessarily need to be local.  Non-local docker daemons are not currently
@@ -62,10 +56,10 @@ More advanced usage of this package is outlined in the built-in help::
 Developing etest
 ================
 
-If you would prefer to clone this package directly from git or assist with 
+If you would prefer to clone this package directly from git or assist with
 development, the URL is https://github.com/alunduil/etest.
 
-etest is tested continuously by Travis-CI and running the tests is quite 
+etest is tested continuously by Travis-CI and running the tests is quite
 simple::
 
     flake8

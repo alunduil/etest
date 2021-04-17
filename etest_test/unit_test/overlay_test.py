@@ -1,3 +1,4 @@
+"""Overlay Test."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -7,21 +8,23 @@ import functools
 import logging
 import os
 import tempfile
-
-from etest_test.common_test import BaseEtestTest
-from etest_test.fixtures_test import FIXTURES_DIRECTORY
+from typing import Set
 
 from etest import overlay
-
+from etest_test.common_test import BaseEtestTest
+from etest_test.fixtures_test import FIXTURES_DIRECTORY
 
 logger = logging.getLogger(__name__)
 
 
 class BaseOverlayTest(BaseEtestTest):
-    mocks_mask = set()
-    mocks = set()
+    """Overlay test."""
+
+    mocks_mask: Set = set()
+    mocks: Set = set()
 
     def setUp(self):
+        """Set up test cases."""
         super().setUp()
 
         self.mock_ebuild()
@@ -30,78 +33,82 @@ class BaseOverlayTest(BaseEtestTest):
 
 
 class InvalidOverlayUnitTest(BaseOverlayTest):
-    def test_invalid_overlay(self):
-        '''overlay.Overlay()—invalid overlay'''
+    """Invalid overlays."""
 
-        self.assertRaises(overlay.InvalidOverlayError, getattr, self.overlay, 'directory')
+    def test_invalid_overlay(self):
+        """overlay.Overlay()—invalid overlay."""
+        self.assertRaises(overlay.InvalidOverlayError, getattr, self.overlay, "directory")
 
 
 class ValidEmptyOverlayUnitTest(BaseOverlayTest):
+    """Empty overlays."""
+
     def setUp(self):
+        """Set up test cases."""
         super().setUp()
 
         self.mocked_directory = tempfile.mkdtemp()
         self.addCleanup(os.rmdir, self.mocked_directory)
 
-        _ = os.path.join(self.mocked_directory, 'metadata')
+        _ = os.path.join(self.mocked_directory, "metadata")
         os.mkdir(_)
         self.addCleanup(os.rmdir, _)
 
-        _ = os.path.join(self.mocked_directory, 'metadata', 'layout.conf')
-        with open(_, 'w') as fh:
-            fh.write('masters = gentoo')
+        _ = os.path.join(self.mocked_directory, "metadata", "layout.conf")
+        with open(_, "w") as fh:
+            fh.write("masters = gentoo")
         self.addCleanup(os.remove, _)
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 
     def test_empty_overlay_discovery(self):
-        '''overlay.Overlay().directory—empty overlay'''
-
+        """overlay.Overlay().directory—empty overlay."""
         self.assertEqual(self.overlay.directory, self.mocked_directory)
 
     def test_empty_overlay_ebuilds(self):
-        '''len(list(overlay.Overlay().ebuilds)) == 0—empty overlay'''
-
+        """len(list(overlay.Overlay().ebuilds)) == 0—empty overlay."""
         self.assertEqual(0, len(list(self.overlay.ebuilds)))
 
 
 class ValidNonEmptyOverlayUnitTest(BaseOverlayTest):
+    """Check Empty Overlays."""
+
     def setUp(self):
+        """Set up test cases."""
         super().setUp()
 
-        self.mocked_directory = os.path.join(FIXTURES_DIRECTORY, 'overlay')
+        self.mocked_directory = os.path.join(FIXTURES_DIRECTORY, "overlay")
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 
     def test_nonempty_overlay_discovery(self):
-        '''overlay.Overlay().directory—nonempty overlay'''
-
+        """overlay.Overlay().directory—nonempty overlay."""
         self.assertEqual(self.overlay.directory, self.mocked_directory)
 
     def test_nonempty_overlay_ebuilds(self):
-        '''len(list(overlay.Overlay().ebuilds)) == 1—nonempty overlay'''
-
+        """len(list(overlay.Overlay().ebuilds)) == 1—nonempty overlay."""
         self.assertEqual(1, len(list(self.overlay.ebuilds)))
 
 
 class ValidNonEmptyOverlaySubdirectoryUnitTest(BaseOverlayTest):
+    """Check Non-empty Overlay Subdirectory Tests."""
+
     def setUp(self):
+        """Set up test cases."""
         super().setUp()
 
-        self.mocked_overlay_directory = os.path.join(FIXTURES_DIRECTORY, 'overlay')
-        self.mocked_directory = os.path.join(self.mocked_overlay_directory, 'app-portage', 'etest')
+        self.mocked_overlay_directory = os.path.join(FIXTURES_DIRECTORY, "overlay")
+        self.mocked_directory = os.path.join(self.mocked_overlay_directory, "app-portage", "etest")
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 
     def test_nonempty_overlay_discovery(self):
-        '''overlay.Overlay().directory—nonempty overlay,subdirectory'''
-
+        """overlay.Overlay().directory—nonempty overlay,subdirectory."""
         self.assertEqual(self.overlay.directory, self.mocked_overlay_directory)
 
     def test_nonempty_overlay_ebuilds(self):
-        '''len(list(overlay.Overlay().ebuilds)) == 1—nonempty overlay,subdirectory'''
-
+        """Number of ebuilds equals 1 for non-empty subdirectories."""
         self.assertEqual(1, len(list(self.overlay.ebuilds)))

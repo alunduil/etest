@@ -1,3 +1,4 @@
+"""Multiline array assignment."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -5,27 +6,25 @@
 
 # flake8: noqa (inline bash script with tabs)
 
+import textwrap
+
 from etest_test.fixtures_test.scripts_test import SCRIPTS
 
-_ = '''
-local FOO=(
-	bar
-)
-'''
-
 _ = {
-    'uuid': '419f4873d82340699c55000386901621',
-
-    'description': 'multiline array assignment',
-
-    'text': _,
-
-    'symbols': {
-        'FOO': ( 'bar', ),
+    "uuid": "419f4873d82340699c55000386901621",
+    "description": "multiline array assignment",
+    "text": textwrap.dedent(
+        """
+        local FOO=(
+            bar
+        )
+        """,
+    ),
+    "symbols": {
+        "FOO": ("bar",),
     },
-
-    'correct': None,
+    "correct": None,
 }
 
-SCRIPTS.setdefault('all', []).append(_)
-SCRIPTS.setdefault('bash', []).append(_)
+SCRIPTS.setdefault("all", []).append(_)
+SCRIPTS.setdefault("bash", []).append(_)

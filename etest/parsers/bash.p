@@ -2,7 +2,7 @@ V3.10
 p0
 .VLALR
 p0
-.Vinputunit_listleft&;NEWLINEleftAND_ANDOR_ORright|BAR_ANDAND_AND AND_GREATER AND_GREATER_GREATER ARITH_CMD ARITH_FOR_EXPRS BANG BAR_AND CASE COMMENT COND_CMD COND_END COND_START COPROC DO DONE ELIF ELSE ESAC FI FOR FUNCTION GREATER_AND GREATER_BAR GREATER_GREATER IF IN LBRACE LESS_AND LESS_GREATER LESS_LESS LESS_LESS_LESS LESS_LESS_MINUS NEWLINE NEWLINE_ESCAPED NUMBER OR_OR REDIR_WORD SELECT SEMI_AND SEMI_SEMI SEMI_SEMI_AND THEN TIME TIMEIGN TIMEOPT UNTIL WHILE WHITESPACE WORDinputunit_list : inputunit\u000a                          | inputunit_list inputunit\u000a\u000a        inputunit : simple_list simple_list_terminator\u000a                     | NEWLINE\u000a\u000a        word_list : WORDword_list : word_list newline_list WORDredirection : '>' WORD\u000a                       | '<' WORD\u000a                       | NUMBER '>' WORD\u000a                       | NUMBER '<' WORD\u000a                       | REDIR_WORD '>' WORD\u000a                       | REDIR_WORD '<' WORD\u000a                       | GREATER_GREATER WORD\u000a                       | NUMBER GREATER_GREATER WORD\u000a                       | REDIR_WORD GREATER_GREATER WORD\u000a                       | GREATER_BAR WORD\u000a                       | NUMBER GREATER_BAR WORD\u000a                       | REDIR_WORD GREATER_BAR WORD\u000a                       | LESS_GREATER WORD\u000a                       | NUMBER LESS_GREATER WORD\u000a                       | REDIR_WORD LESS_GREATER WORD\u000a                       | LESS_LESS WORD\u000a                       | NUMBER LESS_LESS WORD\u000a                       | REDIR_WORD LESS_LESS WORD\u000a                       | LESS_LESS_MINUS WORD\u000a                       | NUMBER LESS_LESS_MINUS WORD\u000a                       | REDIR_WORD LESS_LESS_MINUS WORD\u000a                       | LESS_LESS_LESS WORD\u000a                       | NUMBER LESS_LESS_LESS WORD\u000a                       | REDIR_WORD LESS_LESS_LESS WORD\u000a                       | LESS_AND NUMBER\u000a                       | NUMBER LESS_AND NUMBER\u000a                       | REDIR_WORD LESS_AND NUMBER\u000a                       | GREATER_AND NUMBER\u000a                       | NUMBER GREATER_AND NUMBER\u000a                       | REDIR_WORD GREATER_AND NUMBER\u000a                       | LESS_AND WORD\u000a                       | NUMBER LESS_AND WORD\u000a                       | REDIR_WORD LESS_AND WORD\u000a                       | GREATER_AND WORD\u000a                       | NUMBER GREATER_AND WORD\u000a                       | REDIR_WORD GREATER_AND WORD\u000a                       | GREATER_AND '-'\u000a                       | NUMBER GREATER_AND '-'\u000a                       | REDIR_WORD GREATER_AND '-'\u000a                       | LESS_AND '-'\u000a                       | NUMBER LESS_AND '-'\u000a                       | REDIR_WORD LESS_AND '-'\u000a                       | AND_GREATER WORD\u000a                       | AND_GREATER_GREATER WORD\u000a\u000a        simple_command_element : WORDsimple_command_element : assignment_wordsimple_command_element : redirectionredirection_list : redirection\u000a                            | redirection_list redirection\u000a\u000a        simple_command : simple_command_element\u000a                          | simple_command curly_off simple_command_element\u000a\u000a        command : simple_command curly_on\u000a                   | shell_command\u000a                   | shell_command redirection_list\u000a                   | function_def\u000a                   | coproc\u000a\u000a        shell_command : for_command\u000a                         | case_command\u000a                         | WHILE compound_list DO compound_list DONE\u000a                         | UNTIL compound_list DO compound_list DONE\u000a                         | select_command\u000a                         | if_command\u000a                         | subshell\u000a                         | group_command\u000a                         | arith_command\u000a                         | cond_command\u000a                         | arith_for_command\u000a\u000a        for_command : FOR WORD newline_list DO compound_list DONE\u000a                       | FOR WORD newline_list LBRACE compound_list '}'\u000a                       | FOR WORD ';' newline_list DO compound_list DONE\u000a                       | FOR WORD ';' newline_list LBRACE compound_list '}'\u000a                       | FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE\u000a                       | FOR WORD newline_list IN word_list list_terminator newline_list LBRACE compound_list '}'\u000a                       | FOR WORD newline_list IN number_list list_terminator newline_list DO compound_list DONE\u000a                       | FOR WORD newline_list IN number_list list_terminator newline_list LBRACE compound_list '}'\u000a                       | FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE\u000a                       | FOR WORD newline_list IN list_terminator newline_list LBRACE compound_list '}'\u000a\u000a        arith_for_command : FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE\u000a                             | FOR ARITH_FOR_EXPRS list_terminator newline_list LBRACE compound_list '}'\u000a                             | FOR ARITH_FOR_EXPRS DO compound_list DONE\u000a                             | FOR ARITH_FOR_EXPRS LBRACE compound_list '}'\u000a\u000a        select_command : SELECT WORD newline_list DO list DONE\u000a                          | SELECT WORD newline_list LBRACE list '}'\u000a                          | SELECT WORD ';' newline_list DO list DONE\u000a                          | SELECT WORD ';' newline_list LBRACE list '}'\u000a                          | SELECT WORD newline_list IN word_list list_terminator newline_list DO list DONE\u000a                          | SELECT WORD newline_list IN word_list list_terminator newline_list LBRACE list '}'\u000a\u000a        case_command : CASE WORD newline_list IN newline_list ESAC\u000a                        | CASE WORD newline_list IN case_clause_sequence newline_list ESAC\u000a                        | CASE WORD newline_list IN case_clause ESAC\u000a\u000a        function_def : WORD '(' ')' newline_list function_bodyfunction_def : FUNCTION WORD '(' ')' newline_list function_bodyfunction_def : FUNCTION WORD newline_list function_bodyfunction_body : shell_command\u000a                         | shell_command redirection_list\u000a\u000a        subshell : '(' compound_list ')' coproc : COPROC shell_command\u000a                  | COPROC shell_command redirection_list\u000a                  | COPROC WORD shell_command\u000a                  | COPROC WORD shell_command redirection_list\u000a                  | COPROC simple_command\u000a\u000a        if_command : IF compound_list THEN compound_list FI\u000a                      | IF compound_list THEN compound_list ELSE compound_list FI\u000a                      | IF compound_list THEN compound_list elif_clause FI\u000a\u000a        group_command : LBRACE compound_list '}' arith_command : ARITH_CMDcond_command : COND_START COND_CMD COND_ENDelif_clause : ELIF compound_list THEN compound_list\u000a                       | ELIF compound_list THEN compound_list ELSE compound_list\u000a                       | ELIF compound_list THEN compound_list elif_clause\u000a\u000a        case_clause : pattern_list\u000a                       | case_clause_sequence pattern_list\u000a\u000a        pattern_list : newline_list pattern ')' compound_list\u000a                        | newline_list pattern ')' newline_list\u000a                        | newline_list '(' pattern ')' compound_list\u000a                        | newline_list '(' pattern ')' newline_list\u000a\u000a        case_clause_sequence : pattern_list SEMI_SEMI\u000a                                | case_clause_sequence pattern_list SEMI_SEMI\u000a                                | pattern_list SEMI_AND\u000a                                | case_clause_sequence pattern_list SEMI_AND\u000a                                | pattern_list SEMI_SEMI_AND\u000a                                | case_clause_sequence pattern_list SEMI_SEMI_AND\u000a\u000a        pattern : WORD\u000a                   | pattern '|' WORD\u000a\u000a        list : newline_list list0compound_list : list\u000a                         | newline_list list1\u000a\u000a        list0 : list1 NEWLINE newline_list\u000a                 | list1 '&' newline_list\u000a                 | list1 ';' newline_list\u000a\u000a        list1 : list1 AND_AND newline_list list1\u000a                 | list1 OR_OR newline_list list1\u000a                 | list1 '&' newline_list list1\u000a                 | list1 ';' newline_list list1\u000a                 | list1 NEWLINE newline_list list1\u000a                 | pipeline_command\u000a\u000a        simple_list_terminator : NEWLINElist_terminator : NEWLINE\u000a                           | ';'\u000a\u000a        newline_list :\u000a                        | newline_list NEWLINE\u000a\u000a        simple_list : simple_list1\u000a                       | simple_list1 '&'\u000a                       | simple_list1 ';'\u000a\u000a        simple_list1 : simple_list1 AND_AND newline_list simple_list1\u000a                        | simple_list1 OR_OR newline_list simple_list1\u000a\u000a        simple_list1 : simple_list1 '&' simple_list1\u000a                        | simple_list1 ';' simple_list1\u000a\u000a        simple_list1 : pipeline_commandpipeline_command : pipelinepipeline_command : BANG pipeline_command\u000a                            | timespec pipeline_command\u000a                            | timespec list_terminator\u000a                            | BANG list_terminator\u000a\u000a        pipeline : pipeline '|' newline_list pipeline\u000a                    | pipeline BAR_AND newline_list pipeline\u000a\u000a        pipeline : commandtimespec : TIME\u000a                    | TIME TIMEOPT\u000a                    | TIME TIMEOPT TIMEIGN\u000a\u000a        number_list : NUMBERnumber_list : number_list newline_list NUMBERassignment_word : WORD '=' assignment_off '(' newline_list word_list newline_list ')' assignment_onassignment_word : WORD '=' NUMBERassignment_word : WORD '=' assignment_off WORD assignment_onassignment_off : assignment_on : simple_command_element : NUMBERcurly_off : curly_on : 
+.Vinputunit_listleft&;NEWLINEleftAND_ANDOR_ORright|BAR_ANDAND_AND AND_GREATER AND_GREATER_GREATER ARITH_CMD ARITH_FOR_EXPRS BANG BAR_AND CASE COMMENT COND_CMD COND_END COND_START COPROC DO DONE ELIF ELSE ESAC FI FOR FUNCTION GREATER_AND GREATER_BAR GREATER_GREATER IF IN LBRACE LESS_AND LESS_GREATER LESS_LESS LESS_LESS_LESS LESS_LESS_MINUS NEWLINE NEWLINE_ESCAPED NUMBER OR_OR REDIR_WORD SELECT SEMI_AND SEMI_SEMI SEMI_SEMI_AND THEN TIME TIMEIGN TIMEOPT UNTIL WHILE WHITESPACE WORDinputunit_list : inputunit\u000a        | inputunit_list inputunit\u000a\u000a        inputunit : simple_list simple_list_terminator\u000a        | NEWLINE\u000a\u000a        word_list : WORDword_list : word_list newline_list WORDredirection : '>' WORD\u000a        | '<' WORD\u000a        | NUMBER '>' WORD\u000a        | NUMBER '<' WORD\u000a        | REDIR_WORD '>' WORD\u000a        | REDIR_WORD '<' WORD\u000a        | GREATER_GREATER WORD\u000a        | NUMBER GREATER_GREATER WORD\u000a        | REDIR_WORD GREATER_GREATER WORD\u000a        | GREATER_BAR WORD\u000a        | NUMBER GREATER_BAR WORD\u000a        | REDIR_WORD GREATER_BAR WORD\u000a        | LESS_GREATER WORD\u000a        | NUMBER LESS_GREATER WORD\u000a        | REDIR_WORD LESS_GREATER WORD\u000a        | LESS_LESS WORD\u000a        | NUMBER LESS_LESS WORD\u000a        | REDIR_WORD LESS_LESS WORD\u000a        | LESS_LESS_MINUS WORD\u000a        | NUMBER LESS_LESS_MINUS WORD\u000a        | REDIR_WORD LESS_LESS_MINUS WORD\u000a        | LESS_LESS_LESS WORD\u000a        | NUMBER LESS_LESS_LESS WORD\u000a        | REDIR_WORD LESS_LESS_LESS WORD\u000a        | LESS_AND NUMBER\u000a        | NUMBER LESS_AND NUMBER\u000a        | REDIR_WORD LESS_AND NUMBER\u000a        | GREATER_AND NUMBER\u000a        | NUMBER GREATER_AND NUMBER\u000a        | REDIR_WORD GREATER_AND NUMBER\u000a        | LESS_AND WORD\u000a        | NUMBER LESS_AND WORD\u000a        | REDIR_WORD LESS_AND WORD\u000a        | GREATER_AND WORD\u000a        | NUMBER GREATER_AND WORD\u000a        | REDIR_WORD GREATER_AND WORD\u000a        | GREATER_AND '-'\u000a        | NUMBER GREATER_AND '-'\u000a        | REDIR_WORD GREATER_AND '-'\u000a        | LESS_AND '-'\u000a        | NUMBER LESS_AND '-'\u000a        | REDIR_WORD LESS_AND '-'\u000a        | AND_GREATER WORD\u000a        | AND_GREATER_GREATER WORD\u000a\u000a        simple_command_element : WORDsimple_command_element : assignment_wordsimple_command_element : redirectionredirection_list : redirection\u000a        | redirection_list redirection\u000a\u000a        simple_command : simple_command_element\u000a        | simple_command curly_off simple_command_element\u000a\u000a        command : simple_command curly_on\u000a        | shell_command\u000a        | shell_command redirection_list\u000a        | function_def\u000a        | coproc\u000a\u000a        shell_command : for_command\u000a        | case_command\u000a        | WHILE compound_list DO compound_list DONE\u000a        | UNTIL compound_list DO compound_list DONE\u000a        | select_command\u000a        | if_command\u000a        | subshell\u000a        | group_command\u000a        | arith_command\u000a        | cond_command\u000a        | arith_for_command\u000a\u000a        for_command : FOR WORD newline_list DO compound_list DONE\u000a        | FOR WORD newline_list LBRACE compound_list '}'\u000a        | FOR WORD ';' newline_list DO compound_list DONE\u000a        | FOR WORD ';' newline_list LBRACE compound_list '}'\u000a        | FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE\u000a        | FOR WORD newline_list IN word_list list_terminator newline_list LBRACE compound_list '}'\u000a        | FOR WORD newline_list IN number_list list_terminator newline_list DO compound_list DONE\u000a        | FOR WORD newline_list IN number_list list_terminator newline_list LBRACE compound_list '}'\u000a        | FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE\u000a        | FOR WORD newline_list IN list_terminator newline_list LBRACE compound_list '}'\u000a\u000a        arith_for_command : FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE\u000a        | FOR ARITH_FOR_EXPRS list_terminator newline_list LBRACE compound_list '}'\u000a        | FOR ARITH_FOR_EXPRS DO compound_list DONE\u000a        | FOR ARITH_FOR_EXPRS LBRACE compound_list '}'\u000a\u000a        select_command : SELECT WORD newline_list DO list DONE\u000a        | SELECT WORD newline_list LBRACE list '}'\u000a        | SELECT WORD ';' newline_list DO list DONE\u000a        | SELECT WORD ';' newline_list LBRACE list '}'\u000a        | SELECT WORD newline_list IN word_list list_terminator newline_list DO list DONE\u000a        | SELECT WORD newline_list IN word_list list_terminator newline_list LBRACE list '}'\u000a\u000a        case_command : CASE WORD newline_list IN newline_list ESAC\u000a        | CASE WORD newline_list IN case_clause_sequence newline_list ESAC\u000a        | CASE WORD newline_list IN case_clause ESAC\u000a\u000a        function_def : WORD '(' ')' newline_list function_bodyfunction_def : FUNCTION WORD '(' ')' newline_list function_bodyfunction_def : FUNCTION WORD newline_list function_bodyfunction_body : shell_command\u000a        | shell_command redirection_list\u000a\u000a        subshell : '(' compound_list ')' coproc : COPROC shell_command\u000a        | COPROC shell_command redirection_list\u000a        | COPROC WORD shell_command\u000a        | COPROC WORD shell_command redirection_list\u000a        | COPROC simple_command\u000a\u000a        if_command : IF compound_list THEN compound_list FI\u000a        | IF compound_list THEN compound_list ELSE compound_list FI\u000a        | IF compound_list THEN compound_list elif_clause FI\u000a\u000a        group_command : LBRACE compound_list '}' arith_command : ARITH_CMDcond_command : COND_START COND_CMD COND_ENDelif_clause : ELIF compound_list THEN compound_list\u000a        | ELIF compound_list THEN compound_list ELSE compound_list\u000a        | ELIF compound_list THEN compound_list elif_clause\u000a\u000a        case_clause : pattern_list\u000a        | case_clause_sequence pattern_list\u000a\u000a        pattern_list : newline_list pattern ')' compound_list\u000a        | newline_list pattern ')' newline_list\u000a        | newline_list '(' pattern ')' compound_list\u000a        | newline_list '(' pattern ')' newline_list\u000a\u000a        case_clause_sequence : pattern_list SEMI_SEMI\u000a        | case_clause_sequence pattern_list SEMI_SEMI\u000a        | pattern_list SEMI_AND\u000a        | case_clause_sequence pattern_list SEMI_AND\u000a        | pattern_list SEMI_SEMI_AND\u000a        | case_clause_sequence pattern_list SEMI_SEMI_AND\u000a\u000a        pattern : WORD\u000a        | pattern '|' WORD\u000a\u000a        list : newline_list list0compound_list : list\u000a        | newline_list list1\u000a\u000a        list0 : list1 NEWLINE newline_list\u000a        | list1 '&' newline_list\u000a        | list1 ';' newline_list\u000a\u000a        list1 : list1 AND_AND newline_list list1\u000a        | list1 OR_OR newline_list list1\u000a        | list1 '&' newline_list list1\u000a        | list1 ';' newline_list list1\u000a        | list1 NEWLINE newline_list list1\u000a        | pipeline_command\u000a\u000a        simple_list_terminator : NEWLINElist_terminator : NEWLINE\u000a        | ';'\u000a\u000a        newline_list :\u000a\u000a        | newline_list NEWLINE\u000a        simple_list : simple_list1\u000a        | simple_list1 '&'\u000a        | simple_list1 ';'\u000a\u000a        simple_list1 : simple_list1 AND_AND newline_list simple_list1\u000a        | simple_list1 OR_OR newline_list simple_list1\u000a\u000a        simple_list1 : simple_list1 '&' simple_list1\u000a        | simple_list1 ';' simple_list1\u000a\u000a        simple_list1 : pipeline_commandpipeline_command : pipelinepipeline_command : BANG pipeline_command\u000a        | timespec pipeline_command\u000a        | timespec list_terminator\u000a        | BANG list_terminator\u000a\u000a        pipeline : pipeline '|' newline_list pipeline\u000a        | pipeline BAR_AND newline_list pipeline\u000a\u000a        pipeline : commandtimespec : TIME\u000a        | TIME TIMEOPT\u000a        | TIME TIMEOPT TIMEIGN\u000a\u000a        number_list : NUMBERnumber_list : number_list newline_list NUMBERassignment_word : WORD '=' assignment_off '(' newline_list word_list newline_list ')' assignment_onassignment_word : WORD '=' NUMBERassignment_word : WORD '=' assignment_off WORD assignment_onassignment_off :assignment_on :simple_command_element : NUMBERcurly_off :curly_on :
 p0
 .(dp0
 I0
@@ -17913,7 +17913,7 @@ Vp_inputunit_list
 p6
 Vbash.py
 p7
-I102
+I103
 tp8
 a(Vinputunit_list -> inputunit_list inputunit
 p9
@@ -17922,7 +17922,7 @@ I2
 g6
 Vbash.py
 p10
-I103
+I104
 tp11
 a(Vinputunit -> simple_list simple_list_terminator
 p12
@@ -17933,7 +17933,7 @@ Vp_inputunit
 p14
 Vbash.py
 p15
-I111
+I112
 tp16
 a(Vinputunit -> NEWLINE
 p17
@@ -17942,7 +17942,7 @@ I1
 g14
 Vbash.py
 p18
-I112
+I113
 tp19
 a(Vword_list -> WORD
 p20
@@ -17953,7 +17953,7 @@ Vp_word_list_word
 p22
 Vbash.py
 p23
-I120
+I121
 tp24
 a(Vword_list -> word_list newline_list WORD
 p25
@@ -17964,7 +17964,7 @@ Vp_word_list_list
 p27
 Vbash.py
 p28
-I128
+I129
 tp29
 a(Vredirection -> > WORD
 p30
@@ -17975,7 +17975,7 @@ Vp_redirection
 p32
 Vbash.py
 p33
-I136
+I137
 tp34
 a(Vredirection -> < WORD
 p35
@@ -17984,7 +17984,7 @@ I2
 g32
 Vbash.py
 p36
-I137
+I138
 tp37
 a(Vredirection -> NUMBER > WORD
 p38
@@ -17993,7 +17993,7 @@ I3
 g32
 Vbash.py
 p39
-I138
+I139
 tp40
 a(Vredirection -> NUMBER < WORD
 p41
@@ -18002,7 +18002,7 @@ I3
 g32
 Vbash.py
 p42
-I139
+I140
 tp43
 a(Vredirection -> REDIR_WORD > WORD
 p44
@@ -18011,7 +18011,7 @@ I3
 g32
 Vbash.py
 p45
-I140
+I141
 tp46
 a(Vredirection -> REDIR_WORD < WORD
 p47
@@ -18020,7 +18020,7 @@ I3
 g32
 Vbash.py
 p48
-I141
+I142
 tp49
 a(Vredirection -> GREATER_GREATER WORD
 p50
@@ -18029,7 +18029,7 @@ I2
 g32
 Vbash.py
 p51
-I142
+I143
 tp52
 a(Vredirection -> NUMBER GREATER_GREATER WORD
 p53
@@ -18038,7 +18038,7 @@ I3
 g32
 Vbash.py
 p54
-I143
+I144
 tp55
 a(Vredirection -> REDIR_WORD GREATER_GREATER WORD
 p56
@@ -18047,7 +18047,7 @@ I3
 g32
 Vbash.py
 p57
-I144
+I145
 tp58
 a(Vredirection -> GREATER_BAR WORD
 p59
@@ -18056,7 +18056,7 @@ I2
 g32
 Vbash.py
 p60
-I145
+I146
 tp61
 a(Vredirection -> NUMBER GREATER_BAR WORD
 p62
@@ -18065,7 +18065,7 @@ I3
 g32
 Vbash.py
 p63
-I146
+I147
 tp64
 a(Vredirection -> REDIR_WORD GREATER_BAR WORD
 p65
@@ -18074,7 +18074,7 @@ I3
 g32
 Vbash.py
 p66
-I147
+I148
 tp67
 a(Vredirection -> LESS_GREATER WORD
 p68
@@ -18083,7 +18083,7 @@ I2
 g32
 Vbash.py
 p69
-I148
+I149
 tp70
 a(Vredirection -> NUMBER LESS_GREATER WORD
 p71
@@ -18092,7 +18092,7 @@ I3
 g32
 Vbash.py
 p72
-I149
+I150
 tp73
 a(Vredirection -> REDIR_WORD LESS_GREATER WORD
 p74
@@ -18101,7 +18101,7 @@ I3
 g32
 Vbash.py
 p75
-I150
+I151
 tp76
 a(Vredirection -> LESS_LESS WORD
 p77
@@ -18110,7 +18110,7 @@ I2
 g32
 Vbash.py
 p78
-I151
+I152
 tp79
 a(Vredirection -> NUMBER LESS_LESS WORD
 p80
@@ -18119,7 +18119,7 @@ I3
 g32
 Vbash.py
 p81
-I152
+I153
 tp82
 a(Vredirection -> REDIR_WORD LESS_LESS WORD
 p83
@@ -18128,7 +18128,7 @@ I3
 g32
 Vbash.py
 p84
-I153
+I154
 tp85
 a(Vredirection -> LESS_LESS_MINUS WORD
 p86
@@ -18137,7 +18137,7 @@ I2
 g32
 Vbash.py
 p87
-I154
+I155
 tp88
 a(Vredirection -> NUMBER LESS_LESS_MINUS WORD
 p89
@@ -18146,7 +18146,7 @@ I3
 g32
 Vbash.py
 p90
-I155
+I156
 tp91
 a(Vredirection -> REDIR_WORD LESS_LESS_MINUS WORD
 p92
@@ -18155,7 +18155,7 @@ I3
 g32
 Vbash.py
 p93
-I156
+I157
 tp94
 a(Vredirection -> LESS_LESS_LESS WORD
 p95
@@ -18164,7 +18164,7 @@ I2
 g32
 Vbash.py
 p96
-I157
+I158
 tp97
 a(Vredirection -> NUMBER LESS_LESS_LESS WORD
 p98
@@ -18173,7 +18173,7 @@ I3
 g32
 Vbash.py
 p99
-I158
+I159
 tp100
 a(Vredirection -> REDIR_WORD LESS_LESS_LESS WORD
 p101
@@ -18182,7 +18182,7 @@ I3
 g32
 Vbash.py
 p102
-I159
+I160
 tp103
 a(Vredirection -> LESS_AND NUMBER
 p104
@@ -18191,7 +18191,7 @@ I2
 g32
 Vbash.py
 p105
-I160
+I161
 tp106
 a(Vredirection -> NUMBER LESS_AND NUMBER
 p107
@@ -18200,7 +18200,7 @@ I3
 g32
 Vbash.py
 p108
-I161
+I162
 tp109
 a(Vredirection -> REDIR_WORD LESS_AND NUMBER
 p110
@@ -18209,7 +18209,7 @@ I3
 g32
 Vbash.py
 p111
-I162
+I163
 tp112
 a(Vredirection -> GREATER_AND NUMBER
 p113
@@ -18218,7 +18218,7 @@ I2
 g32
 Vbash.py
 p114
-I163
+I164
 tp115
 a(Vredirection -> NUMBER GREATER_AND NUMBER
 p116
@@ -18227,7 +18227,7 @@ I3
 g32
 Vbash.py
 p117
-I164
+I165
 tp118
 a(Vredirection -> REDIR_WORD GREATER_AND NUMBER
 p119
@@ -18236,7 +18236,7 @@ I3
 g32
 Vbash.py
 p120
-I165
+I166
 tp121
 a(Vredirection -> LESS_AND WORD
 p122
@@ -18245,7 +18245,7 @@ I2
 g32
 Vbash.py
 p123
-I166
+I167
 tp124
 a(Vredirection -> NUMBER LESS_AND WORD
 p125
@@ -18254,7 +18254,7 @@ I3
 g32
 Vbash.py
 p126
-I167
+I168
 tp127
 a(Vredirection -> REDIR_WORD LESS_AND WORD
 p128
@@ -18263,7 +18263,7 @@ I3
 g32
 Vbash.py
 p129
-I168
+I169
 tp130
 a(Vredirection -> GREATER_AND WORD
 p131
@@ -18272,7 +18272,7 @@ I2
 g32
 Vbash.py
 p132
-I169
+I170
 tp133
 a(Vredirection -> NUMBER GREATER_AND WORD
 p134
@@ -18281,7 +18281,7 @@ I3
 g32
 Vbash.py
 p135
-I170
+I171
 tp136
 a(Vredirection -> REDIR_WORD GREATER_AND WORD
 p137
@@ -18290,7 +18290,7 @@ I3
 g32
 Vbash.py
 p138
-I171
+I172
 tp139
 a(Vredirection -> GREATER_AND -
 p140
@@ -18299,7 +18299,7 @@ I2
 g32
 Vbash.py
 p141
-I172
+I173
 tp142
 a(Vredirection -> NUMBER GREATER_AND -
 p143
@@ -18308,7 +18308,7 @@ I3
 g32
 Vbash.py
 p144
-I173
+I174
 tp145
 a(Vredirection -> REDIR_WORD GREATER_AND -
 p146
@@ -18317,7 +18317,7 @@ I3
 g32
 Vbash.py
 p147
-I174
+I175
 tp148
 a(Vredirection -> LESS_AND -
 p149
@@ -18326,7 +18326,7 @@ I2
 g32
 Vbash.py
 p150
-I175
+I176
 tp151
 a(Vredirection -> NUMBER LESS_AND -
 p152
@@ -18335,7 +18335,7 @@ I3
 g32
 Vbash.py
 p153
-I176
+I177
 tp154
 a(Vredirection -> REDIR_WORD LESS_AND -
 p155
@@ -18344,7 +18344,7 @@ I3
 g32
 Vbash.py
 p156
-I177
+I178
 tp157
 a(Vredirection -> AND_GREATER WORD
 p158
@@ -18353,7 +18353,7 @@ I2
 g32
 Vbash.py
 p159
-I178
+I179
 tp160
 a(Vredirection -> AND_GREATER_GREATER WORD
 p161
@@ -18362,7 +18362,7 @@ I2
 g32
 Vbash.py
 p162
-I179
+I180
 tp163
 a(Vsimple_command_element -> WORD
 p164
@@ -18373,7 +18373,7 @@ Vp_simple_command_element_word
 p166
 Vbash.py
 p167
-I187
+I188
 tp168
 a(Vsimple_command_element -> assignment_word
 p169
@@ -18384,7 +18384,7 @@ Vp_simple_command_element_assignment
 p171
 Vbash.py
 p172
-I195
+I196
 tp173
 a(Vsimple_command_element -> redirection
 p174
@@ -18395,7 +18395,7 @@ Vp_simple_command_element_redirection
 p176
 Vbash.py
 p177
-I203
+I204
 tp178
 a(Vredirection_list -> redirection
 p179
@@ -18406,7 +18406,7 @@ Vp_redirection_list
 p181
 Vbash.py
 p182
-I211
+I212
 tp183
 a(Vredirection_list -> redirection_list redirection
 p184
@@ -18415,7 +18415,7 @@ I2
 g181
 Vbash.py
 p185
-I212
+I213
 tp186
 a(Vsimple_command -> simple_command_element
 p187
@@ -18426,7 +18426,7 @@ Vp_simple_command
 p189
 Vbash.py
 p190
-I220
+I221
 tp191
 a(Vsimple_command -> simple_command curly_off simple_command_element
 p192
@@ -18435,7 +18435,7 @@ I3
 g189
 Vbash.py
 p193
-I221
+I222
 tp194
 a(Vcommand -> simple_command curly_on
 p195
@@ -18446,7 +18446,7 @@ Vp_command
 p197
 Vbash.py
 p198
-I229
+I230
 tp199
 a(Vcommand -> shell_command
 p200
@@ -18455,7 +18455,7 @@ I1
 g197
 Vbash.py
 p201
-I230
+I231
 tp202
 a(Vcommand -> shell_command redirection_list
 p203
@@ -18464,7 +18464,7 @@ I2
 g197
 Vbash.py
 p204
-I231
+I232
 tp205
 a(Vcommand -> function_def
 p206
@@ -18473,7 +18473,7 @@ I1
 g197
 Vbash.py
 p207
-I232
+I233
 tp208
 a(Vcommand -> coproc
 p209
@@ -18482,7 +18482,7 @@ I1
 g197
 Vbash.py
 p210
-I233
+I234
 tp211
 a(Vshell_command -> for_command
 p212
@@ -18493,7 +18493,7 @@ Vp_shell_commend
 p214
 Vbash.py
 p215
-I243
+I244
 tp216
 a(Vshell_command -> case_command
 p217
@@ -18502,7 +18502,7 @@ I1
 g214
 Vbash.py
 p218
-I244
+I245
 tp219
 a(Vshell_command -> WHILE compound_list DO compound_list DONE
 p220
@@ -18511,7 +18511,7 @@ I5
 g214
 Vbash.py
 p221
-I245
+I246
 tp222
 a(Vshell_command -> UNTIL compound_list DO compound_list DONE
 p223
@@ -18520,7 +18520,7 @@ I5
 g214
 Vbash.py
 p224
-I246
+I247
 tp225
 a(Vshell_command -> select_command
 p226
@@ -18529,7 +18529,7 @@ I1
 g214
 Vbash.py
 p227
-I247
+I248
 tp228
 a(Vshell_command -> if_command
 p229
@@ -18538,7 +18538,7 @@ I1
 g214
 Vbash.py
 p230
-I248
+I249
 tp231
 a(Vshell_command -> subshell
 p232
@@ -18547,7 +18547,7 @@ I1
 g214
 Vbash.py
 p233
-I249
+I250
 tp234
 a(Vshell_command -> group_command
 p235
@@ -18556,7 +18556,7 @@ I1
 g214
 Vbash.py
 p236
-I250
+I251
 tp237
 a(Vshell_command -> arith_command
 p238
@@ -18565,7 +18565,7 @@ I1
 g214
 Vbash.py
 p239
-I251
+I252
 tp240
 a(Vshell_command -> cond_command
 p241
@@ -18574,7 +18574,7 @@ I1
 g214
 Vbash.py
 p242
-I252
+I253
 tp243
 a(Vshell_command -> arith_for_command
 p244
@@ -18583,7 +18583,7 @@ I1
 g214
 Vbash.py
 p245
-I253
+I254
 tp246
 a(Vfor_command -> FOR WORD newline_list DO compound_list DONE
 p247
@@ -18594,7 +18594,7 @@ Vp_for_command
 p249
 Vbash.py
 p250
-I261
+I262
 tp251
 a(Vfor_command -> FOR WORD newline_list LBRACE compound_list }
 p252
@@ -18603,7 +18603,7 @@ I6
 g249
 Vbash.py
 p253
-I262
+I263
 tp254
 a(Vfor_command -> FOR WORD ; newline_list DO compound_list DONE
 p255
@@ -18612,7 +18612,7 @@ I7
 g249
 Vbash.py
 p256
-I263
+I264
 tp257
 a(Vfor_command -> FOR WORD ; newline_list LBRACE compound_list }
 p258
@@ -18621,7 +18621,7 @@ I7
 g249
 Vbash.py
 p259
-I264
+I265
 tp260
 a(Vfor_command -> FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
 p261
@@ -18630,7 +18630,7 @@ I10
 g249
 Vbash.py
 p262
-I265
+I266
 tp263
 a(Vfor_command -> FOR WORD newline_list IN word_list list_terminator newline_list LBRACE compound_list }
 p264
@@ -18639,7 +18639,7 @@ I10
 g249
 Vbash.py
 p265
-I266
+I267
 tp266
 a(Vfor_command -> FOR WORD newline_list IN number_list list_terminator newline_list DO compound_list DONE
 p267
@@ -18648,7 +18648,7 @@ I10
 g249
 Vbash.py
 p268
-I267
+I268
 tp269
 a(Vfor_command -> FOR WORD newline_list IN number_list list_terminator newline_list LBRACE compound_list }
 p270
@@ -18657,7 +18657,7 @@ I10
 g249
 Vbash.py
 p271
-I268
+I269
 tp272
 a(Vfor_command -> FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE
 p273
@@ -18666,7 +18666,7 @@ I9
 g249
 Vbash.py
 p274
-I269
+I270
 tp275
 a(Vfor_command -> FOR WORD newline_list IN list_terminator newline_list LBRACE compound_list }
 p276
@@ -18675,7 +18675,7 @@ I9
 g249
 Vbash.py
 p277
-I270
+I271
 tp278
 a(Varith_for_command -> FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE
 p279
@@ -18686,7 +18686,7 @@ Vp_arith_for_command
 p281
 Vbash.py
 p282
-I278
+I279
 tp283
 a(Varith_for_command -> FOR ARITH_FOR_EXPRS list_terminator newline_list LBRACE compound_list }
 p284
@@ -18695,7 +18695,7 @@ I7
 g281
 Vbash.py
 p285
-I279
+I280
 tp286
 a(Varith_for_command -> FOR ARITH_FOR_EXPRS DO compound_list DONE
 p287
@@ -18704,7 +18704,7 @@ I5
 g281
 Vbash.py
 p288
-I280
+I281
 tp289
 a(Varith_for_command -> FOR ARITH_FOR_EXPRS LBRACE compound_list }
 p290
@@ -18713,7 +18713,7 @@ I5
 g281
 Vbash.py
 p291
-I281
+I282
 tp292
 a(Vselect_command -> SELECT WORD newline_list DO list DONE
 p293
@@ -18724,7 +18724,7 @@ Vp_select_command
 p295
 Vbash.py
 p296
-I289
+I290
 tp297
 a(Vselect_command -> SELECT WORD newline_list LBRACE list }
 p298
@@ -18733,7 +18733,7 @@ I6
 g295
 Vbash.py
 p299
-I290
+I291
 tp300
 a(Vselect_command -> SELECT WORD ; newline_list DO list DONE
 p301
@@ -18742,7 +18742,7 @@ I7
 g295
 Vbash.py
 p302
-I291
+I292
 tp303
 a(Vselect_command -> SELECT WORD ; newline_list LBRACE list }
 p304
@@ -18751,7 +18751,7 @@ I7
 g295
 Vbash.py
 p305
-I292
+I293
 tp306
 a(Vselect_command -> SELECT WORD newline_list IN word_list list_terminator newline_list DO list DONE
 p307
@@ -18760,7 +18760,7 @@ I10
 g295
 Vbash.py
 p308
-I293
+I294
 tp309
 a(Vselect_command -> SELECT WORD newline_list IN word_list list_terminator newline_list LBRACE list }
 p310
@@ -18769,7 +18769,7 @@ I10
 g295
 Vbash.py
 p311
-I294
+I295
 tp312
 a(Vcase_command -> CASE WORD newline_list IN newline_list ESAC
 p313
@@ -18780,7 +18780,7 @@ Vp_case_command
 p315
 Vbash.py
 p316
-I302
+I303
 tp317
 a(Vcase_command -> CASE WORD newline_list IN case_clause_sequence newline_list ESAC
 p318
@@ -18789,7 +18789,7 @@ I7
 g315
 Vbash.py
 p319
-I303
+I304
 tp320
 a(Vcase_command -> CASE WORD newline_list IN case_clause ESAC
 p321
@@ -18798,7 +18798,7 @@ I6
 g315
 Vbash.py
 p322
-I304
+I305
 tp323
 a(Vfunction_def -> WORD ( ) newline_list function_body
 p324
@@ -18809,7 +18809,7 @@ Vp_function_def_without_keyword
 p326
 Vbash.py
 p327
-I312
+I313
 tp328
 a(Vfunction_def -> FUNCTION WORD ( ) newline_list function_body
 p329
@@ -18820,7 +18820,7 @@ Vp_function_def_with_keyword_and_parens
 p331
 Vbash.py
 p332
-I320
+I321
 tp333
 a(Vfunction_def -> FUNCTION WORD newline_list function_body
 p334
@@ -18831,7 +18831,7 @@ Vp_function_def
 p336
 Vbash.py
 p337
-I328
+I329
 tp338
 a(Vfunction_body -> shell_command
 p339
@@ -18842,7 +18842,7 @@ Vp_function_body
 p341
 Vbash.py
 p342
-I336
+I337
 tp343
 a(Vfunction_body -> shell_command redirection_list
 p344
@@ -18851,7 +18851,7 @@ I2
 g341
 Vbash.py
 p345
-I337
+I338
 tp346
 a(Vsubshell -> ( compound_list )
 p347
@@ -18862,7 +18862,7 @@ Vp_subshell
 p349
 Vbash.py
 p350
-I345
+I346
 tp351
 a(Vcoproc -> COPROC shell_command
 p352
@@ -18873,7 +18873,7 @@ Vp_coproc
 p354
 Vbash.py
 p355
-I351
+I352
 tp356
 a(Vcoproc -> COPROC shell_command redirection_list
 p357
@@ -18882,7 +18882,7 @@ I3
 g354
 Vbash.py
 p358
-I352
+I353
 tp359
 a(Vcoproc -> COPROC WORD shell_command
 p360
@@ -18891,7 +18891,7 @@ I3
 g354
 Vbash.py
 p361
-I353
+I354
 tp362
 a(Vcoproc -> COPROC WORD shell_command redirection_list
 p363
@@ -18900,7 +18900,7 @@ I4
 g354
 Vbash.py
 p364
-I354
+I355
 tp365
 a(Vcoproc -> COPROC simple_command
 p366
@@ -18909,7 +18909,7 @@ I2
 g354
 Vbash.py
 p367
-I355
+I356
 tp368
 a(Vif_command -> IF compound_list THEN compound_list FI
 p369
@@ -18920,7 +18920,7 @@ Vp_if_command
 p371
 Vbash.py
 p372
-I363
+I364
 tp373
 a(Vif_command -> IF compound_list THEN compound_list ELSE compound_list FI
 p374
@@ -18929,7 +18929,7 @@ I7
 g371
 Vbash.py
 p375
-I364
+I365
 tp376
 a(Vif_command -> IF compound_list THEN compound_list elif_clause FI
 p377
@@ -18938,7 +18938,7 @@ I6
 g371
 Vbash.py
 p378
-I365
+I366
 tp379
 a(Vgroup_command -> LBRACE compound_list }
 p380
@@ -18949,7 +18949,7 @@ Vp_group_command
 p382
 Vbash.py
 p383
-I373
+I374
 tp384
 a(Varith_command -> ARITH_CMD
 p385
@@ -18960,7 +18960,7 @@ Vp_arith_command
 p387
 Vbash.py
 p388
-I379
+I380
 tp389
 a(Vcond_command -> COND_START COND_CMD COND_END
 p390
@@ -18971,7 +18971,7 @@ Vp_cond_command
 p392
 Vbash.py
 p393
-I385
+I386
 tp394
 a(Velif_clause -> ELIF compound_list THEN compound_list
 p395
@@ -18982,7 +18982,7 @@ Vp_elif_clause
 p397
 Vbash.py
 p398
-I391
+I392
 tp399
 a(Velif_clause -> ELIF compound_list THEN compound_list ELSE compound_list
 p400
@@ -18991,7 +18991,7 @@ I6
 g397
 Vbash.py
 p401
-I392
+I393
 tp402
 a(Velif_clause -> ELIF compound_list THEN compound_list elif_clause
 p403
@@ -19000,7 +19000,7 @@ I5
 g397
 Vbash.py
 p404
-I393
+I394
 tp405
 a(Vcase_clause -> pattern_list
 p406
@@ -19011,7 +19011,7 @@ Vp_case_clause
 p408
 Vbash.py
 p409
-I401
+I402
 tp410
 a(Vcase_clause -> case_clause_sequence pattern_list
 p411
@@ -19020,7 +19020,7 @@ I2
 g408
 Vbash.py
 p412
-I402
+I403
 tp413
 a(Vpattern_list -> newline_list pattern ) compound_list
 p414
@@ -19031,7 +19031,7 @@ Vp_pattern_list
 p416
 Vbash.py
 p417
-I410
+I411
 tp418
 a(Vpattern_list -> newline_list pattern ) newline_list
 p419
@@ -19040,7 +19040,7 @@ I4
 g416
 Vbash.py
 p420
-I411
+I412
 tp421
 a(Vpattern_list -> newline_list ( pattern ) compound_list
 p422
@@ -19049,7 +19049,7 @@ I5
 g416
 Vbash.py
 p423
-I412
+I413
 tp424
 a(Vpattern_list -> newline_list ( pattern ) newline_list
 p425
@@ -19058,7 +19058,7 @@ I5
 g416
 Vbash.py
 p426
-I413
+I414
 tp427
 a(Vcase_clause_sequence -> pattern_list SEMI_SEMI
 p428
@@ -19069,7 +19069,7 @@ Vp_case_clause_sequence
 p430
 Vbash.py
 p431
-I421
+I422
 tp432
 a(Vcase_clause_sequence -> case_clause_sequence pattern_list SEMI_SEMI
 p433
@@ -19078,7 +19078,7 @@ I3
 g430
 Vbash.py
 p434
-I422
+I423
 tp435
 a(Vcase_clause_sequence -> pattern_list SEMI_AND
 p436
@@ -19087,7 +19087,7 @@ I2
 g430
 Vbash.py
 p437
-I423
+I424
 tp438
 a(Vcase_clause_sequence -> case_clause_sequence pattern_list SEMI_AND
 p439
@@ -19096,7 +19096,7 @@ I3
 g430
 Vbash.py
 p440
-I424
+I425
 tp441
 a(Vcase_clause_sequence -> pattern_list SEMI_SEMI_AND
 p442
@@ -19105,7 +19105,7 @@ I2
 g430
 Vbash.py
 p443
-I425
+I426
 tp444
 a(Vcase_clause_sequence -> case_clause_sequence pattern_list SEMI_SEMI_AND
 p445
@@ -19114,7 +19114,7 @@ I3
 g430
 Vbash.py
 p446
-I426
+I427
 tp447
 a(Vpattern -> WORD
 p448
@@ -19125,7 +19125,7 @@ Vp_pattern
 p450
 Vbash.py
 p451
-I434
+I435
 tp452
 a(Vpattern -> pattern | WORD
 p453
@@ -19134,7 +19134,7 @@ I3
 g450
 Vbash.py
 p454
-I435
+I436
 tp455
 a(Vlist -> newline_list list0
 p456
@@ -19145,7 +19145,7 @@ Vp_list
 p458
 Vbash.py
 p459
-I443
+I444
 tp460
 a(Vcompound_list -> list
 p461
@@ -19156,7 +19156,7 @@ Vp_compound_list
 p463
 Vbash.py
 p464
-I449
+I450
 tp465
 a(Vcompound_list -> newline_list list1
 p466
@@ -19165,7 +19165,7 @@ I2
 g463
 Vbash.py
 p467
-I450
+I451
 tp468
 a(Vlist0 -> list1 NEWLINE newline_list
 p469
@@ -19176,7 +19176,7 @@ Vp_list0
 p471
 Vbash.py
 p472
-I458
+I459
 tp473
 a(Vlist0 -> list1 & newline_list
 p474
@@ -19185,7 +19185,7 @@ I3
 g471
 Vbash.py
 p475
-I459
+I460
 tp476
 a(Vlist0 -> list1 ; newline_list
 p477
@@ -19194,7 +19194,7 @@ I3
 g471
 Vbash.py
 p478
-I460
+I461
 tp479
 a(Vlist1 -> list1 AND_AND newline_list list1
 p480
@@ -19205,7 +19205,7 @@ Vp_list1
 p482
 Vbash.py
 p483
-I468
+I469
 tp484
 a(Vlist1 -> list1 OR_OR newline_list list1
 p485
@@ -19214,7 +19214,7 @@ I4
 g482
 Vbash.py
 p486
-I469
+I470
 tp487
 a(Vlist1 -> list1 & newline_list list1
 p488
@@ -19223,7 +19223,7 @@ I4
 g482
 Vbash.py
 p489
-I470
+I471
 tp490
 a(Vlist1 -> list1 ; newline_list list1
 p491
@@ -19232,7 +19232,7 @@ I4
 g482
 Vbash.py
 p492
-I471
+I472
 tp493
 a(Vlist1 -> list1 NEWLINE newline_list list1
 p494
@@ -19241,7 +19241,7 @@ I4
 g482
 Vbash.py
 p495
-I472
+I473
 tp496
 a(Vlist1 -> pipeline_command
 p497
@@ -19250,7 +19250,7 @@ I1
 g482
 Vbash.py
 p498
-I473
+I474
 tp499
 a(Vsimple_list_terminator -> NEWLINE
 p500
@@ -19261,7 +19261,7 @@ Vp_simple_list_terminator
 p502
 Vbash.py
 p503
-I481
+I482
 tp504
 a(Vlist_terminator -> NEWLINE
 p505
@@ -19272,7 +19272,7 @@ Vp_list_terminator
 p507
 Vbash.py
 p508
-I487
+I488
 tp509
 a(Vlist_terminator -> ;
 p510
@@ -19281,7 +19281,7 @@ I1
 g507
 Vbash.py
 p511
-I488
+I489
 tp512
 a(Vnewline_list -> <empty>
 p513
@@ -19292,7 +19292,7 @@ Vp_newline_list
 p515
 Vbash.py
 p516
-I496
+I497
 tp517
 a(Vnewline_list -> newline_list NEWLINE
 p518
@@ -19301,7 +19301,7 @@ I2
 g515
 Vbash.py
 p519
-I497
+I499
 tp520
 a(Vsimple_list -> simple_list1
 p521
@@ -19312,7 +19312,7 @@ Vp_simple_list
 p523
 Vbash.py
 p524
-I505
+I506
 tp525
 a(Vsimple_list -> simple_list1 &
 p526
@@ -19321,7 +19321,7 @@ I2
 g523
 Vbash.py
 p527
-I506
+I507
 tp528
 a(Vsimple_list -> simple_list1 ;
 p529
@@ -19330,7 +19330,7 @@ I2
 g523
 Vbash.py
 p530
-I507
+I508
 tp531
 a(Vsimple_list1 -> simple_list1 AND_AND newline_list simple_list1
 p532
@@ -19341,7 +19341,7 @@ Vp_simple_list1_list_with_newlines
 p534
 Vbash.py
 p535
-I517
+I518
 tp536
 a(Vsimple_list1 -> simple_list1 OR_OR newline_list simple_list1
 p537
@@ -19350,7 +19350,7 @@ I4
 g534
 Vbash.py
 p538
-I518
+I519
 tp539
 a(Vsimple_list1 -> simple_list1 & simple_list1
 p540
@@ -19361,7 +19361,7 @@ Vp_simple_list1_list
 p542
 Vbash.py
 p543
-I528
+I529
 tp544
 a(Vsimple_list1 -> simple_list1 ; simple_list1
 p545
@@ -19370,7 +19370,7 @@ I3
 g542
 Vbash.py
 p546
-I529
+I530
 tp547
 a(Vsimple_list1 -> pipeline_command
 p548
@@ -19381,7 +19381,7 @@ Vp_simple_list1_command
 p550
 Vbash.py
 p551
-I539
+I540
 tp552
 a(Vpipeline_command -> pipeline
 p553
@@ -19392,7 +19392,7 @@ Vp_pipeline_command_unmodified
 p555
 Vbash.py
 p556
-I547
+I548
 tp557
 a(Vpipeline_command -> BANG pipeline_command
 p558
@@ -19403,7 +19403,7 @@ Vp_pipeline_command_modified
 p560
 Vbash.py
 p561
-I555
+I556
 tp562
 a(Vpipeline_command -> timespec pipeline_command
 p563
@@ -19412,7 +19412,7 @@ I2
 g560
 Vbash.py
 p564
-I556
+I557
 tp565
 a(Vpipeline_command -> timespec list_terminator
 p566
@@ -19421,7 +19421,7 @@ I2
 g560
 Vbash.py
 p567
-I557
+I558
 tp568
 a(Vpipeline_command -> BANG list_terminator
 p569
@@ -19430,7 +19430,7 @@ I2
 g560
 Vbash.py
 p570
-I558
+I559
 tp571
 a(Vpipeline -> pipeline | newline_list pipeline
 p572
@@ -19441,7 +19441,7 @@ Vp_pipeline_with_pipe
 p574
 Vbash.py
 p575
-I568
+I569
 tp576
 a(Vpipeline -> pipeline BAR_AND newline_list pipeline
 p577
@@ -19450,7 +19450,7 @@ I4
 g574
 Vbash.py
 p578
-I569
+I570
 tp579
 a(Vpipeline -> command
 p580
@@ -19461,7 +19461,7 @@ Vp_pipeline_with_command
 p582
 Vbash.py
 p583
-I579
+I580
 tp584
 a(Vtimespec -> TIME
 p585
@@ -19472,7 +19472,7 @@ Vp_timespec
 p587
 Vbash.py
 p588
-I587
+I588
 tp589
 a(Vtimespec -> TIME TIMEOPT
 p590
@@ -19481,7 +19481,7 @@ I2
 g587
 Vbash.py
 p591
-I588
+I589
 tp592
 a(Vtimespec -> TIME TIMEOPT TIMEIGN
 p593
@@ -19490,7 +19490,7 @@ I3
 g587
 Vbash.py
 p594
-I589
+I590
 tp595
 a(Vnumber_list -> NUMBER
 p596
@@ -19501,7 +19501,7 @@ Vp_number_list_number
 p598
 Vbash.py
 p599
-I601
+I602
 tp600
 a(Vnumber_list -> number_list newline_list NUMBER
 p601
@@ -19512,7 +19512,7 @@ Vp_number_list_list
 p603
 Vbash.py
 p604
-I609
+I610
 tp605
 a(Vassignment_word -> WORD = assignment_off ( newline_list word_list newline_list ) assignment_on
 p606
@@ -19523,7 +19523,7 @@ Vp_assignment_word_array
 p608
 Vbash.py
 p609
-I617
+I618
 tp610
 a(Vassignment_word -> WORD = NUMBER
 p611
@@ -19534,7 +19534,7 @@ Vp_assignment_word_number
 p613
 Vbash.py
 p614
-I630
+I631
 tp615
 a(Vassignment_word -> WORD = assignment_off WORD assignment_on
 p616
@@ -19545,7 +19545,7 @@ Vp_assignment_word_word
 p618
 Vbash.py
 p619
-I643
+I644
 tp620
 a(Vassignment_off -> <empty>
 p621
@@ -19556,7 +19556,7 @@ Vp_assignment_off
 p623
 Vbash.py
 p624
-I662
+I663
 tp625
 a(Vassignment_on -> <empty>
 p626
@@ -19567,7 +19567,7 @@ Vp_assignment_on
 p628
 Vbash.py
 p629
-I667
+I668
 tp630
 a(Vsimple_command_element -> NUMBER
 p631
@@ -19578,7 +19578,7 @@ Vp_simple_command_element_number
 p633
 Vbash.py
 p634
-I672
+I673
 tp635
 a(Vcurly_off -> <empty>
 p636
@@ -19589,7 +19589,7 @@ Vp_curly_off
 p638
 Vbash.py
 p639
-I680
+I681
 tp640
 a(Vcurly_on -> <empty>
 p641
@@ -19600,6 +19600,6 @@ Vp_curly_on
 p643
 Vbash.py
 p644
-I685
+I686
 tp645
 a.
