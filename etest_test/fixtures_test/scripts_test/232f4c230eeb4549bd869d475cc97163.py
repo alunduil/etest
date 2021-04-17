@@ -1,3 +1,4 @@
+"""Array variable assignment."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -5,25 +6,23 @@
 
 # flake8: noqa (inline bash script with tabs)
 
+import textwrap
+
 from etest_test.fixtures_test.scripts_test import SCRIPTS
 
-_ = '''
-FOO=( bar )
-'''
-
 _ = {
-    'uuid': '232f4c230eeb4549bd869d475cc97163',
-
-    'description': 'array variable assignment',
-
-    'text': _,
-
-    'symbols': {
-        'FOO': ( 'bar', ),
+    "uuid": "232f4c230eeb4549bd869d475cc97163",
+    "description": "array variable assignment",
+    "text": textwrap.dedent(
+        """
+        FOO=( bar )
+        """,
+    ),
+    "symbols": {
+        "FOO": ("bar",),
     },
-
-    'correct': None,
+    "correct": None,
 }
 
-SCRIPTS.setdefault('all', []).append(_)
-SCRIPTS.setdefault('bash', []).append(_)
+SCRIPTS.setdefault("all", []).append(_)
+SCRIPTS.setdefault("bash", []).append(_)

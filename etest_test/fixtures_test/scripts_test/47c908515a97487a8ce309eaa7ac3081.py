@@ -1,3 +1,4 @@
+"""Dangling double quote."""
 # Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
 #
 # etest is freely distributable under the terms of an MIT-style license.
@@ -5,22 +6,20 @@
 
 # flake8: noqa (inline bash script with tabs)
 
+import textwrap
+
 from etest_test.fixtures_test.scripts_test import SCRIPTS
 
-_ = '''
-FOO="
-'''
-
 _ = {
-    'uuid': '40e465907f16472db2828d3998a03ae0',
-
-    'description': 'dangling double quote',
-
-    'text': _,
-
-    'symbols': {
-    },
+    "uuid": "40e465907f16472db2828d3998a03ae0",
+    "description": "dangling double quote",
+    "text": textwrap.dedent(
+        """
+        FOO="
+        """,
+    ),
+    "symbols": {},
 }
 
-SCRIPTS.setdefault('all', []).append(_)
-SCRIPTS.setdefault('bash', []).append(_)
+SCRIPTS.setdefault("all", []).append(_)
+SCRIPTS.setdefault("bash", []).append(_)
