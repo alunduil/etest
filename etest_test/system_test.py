@@ -11,6 +11,7 @@ import traceback
 import unittest
 
 import click.testing
+import pytest
 
 from etest import etest, information
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
@@ -60,6 +61,7 @@ class TestEtestCliEbuild(unittest.TestCase):
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(os.path.join(FIXTURES_DIRECTORY, "overlay"))
 
+    @pytest.mark.skip("Takes far too long to run.")
     def test_etest_quiet_ebuild(self):
         """Run etest --quiet."""
         _ = self.runner.invoke(etest, ["--quiet"])
@@ -71,6 +73,7 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertEqual(0, _.exit_code)
 
+    @pytest.mark.skip("Takes far too long to run.")
     def test_etest_verbose_ebuild(self):
         """Run etest --verbose."""
         _ = self.runner.invoke(etest, ["--verbose"])
@@ -102,6 +105,7 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertEqual(0, _.exit_code)
 
+    @pytest.mark.skip("Takes far too long to run.")
     def test_etest_ebuild(self):
         """Run etest."""
         _ = self.runner.invoke(etest, [])
@@ -116,6 +120,7 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertEqual(0, _.exit_code)
 
+    @pytest.mark.skip("Takes far too long to run.")
     def test_etest_specific_ebuild(self):
         """Run etest app-portage/etest."""
         _ = self.runner.invoke(etest, ["app-portage/etest"])
