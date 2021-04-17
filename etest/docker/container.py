@@ -18,6 +18,7 @@ def commit(*args, **kwargs):
 
 
 def create(*args, **kwargs):
+<<<<<<< HEAD
     """Create Docker container."""
     return common.CLIENT.create_container(*args, **kwargs)
 
@@ -29,17 +30,29 @@ def logs(*args, **kwargs):
 
 def remove(container, *args, **kwargs):
     """Remove Docker container."""
+=======
+    container = common.CLIENT.containers.create(*args, **kwargs)
+    
+    CONTAINERS.append(container)
+    return container
+
+
+def logs(*args, **kwargs):
+    return common.API_CLIENT.logs(*args, **kwargs)
+
+
+def remove(container, container_name, *args, **kwargs):
+>>>>>>> 73e7e50... Migrate to docker 5.
     CONTAINERS.remove(container)
-    return common.CLIENT.remove_container(container, *args, **kwargs)
+    return common.API_CLIENT.remove_container(container_name, *args, **kwargs)
 
 
 def start(container, *args, **kwargs):
     """Start Docker container."""
     if not CREATE:
         return False
-
-    CONTAINERS.append(container)
-    common.CLIENT.start(container, *args, **kwargs)
+    
+    container.start()
 
     return True
 
@@ -50,5 +63,9 @@ def stop(container, *args, **kwargs):
 
 
 def wait(*args, **kwargs):
+<<<<<<< HEAD
     """Wait for Docker container."""
     return common.CLIENT.wait(*args, **kwargs)
+=======
+    return common.API_CLIENT.wait(*args, **kwargs)
+>>>>>>> 73e7e50... Migrate to docker 5.
