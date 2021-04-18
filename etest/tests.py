@@ -105,12 +105,12 @@ class Test(object):
             container_name = str(uuid.uuid4())
 
             container = docker.container.create(
-                image = image_name,
-                name = container_name,
-                environment = self.environment,
-                volumes = [
-                    '/overlay',
-                    '/usr/portage',
+                image=image_name,
+                name=container_name,
+                environment=self.environment,
+                volumes=[
+                    "/overlay",
+                    "/usr/portage",
                 ],
                 entrypoint=(command[0],),
                 command=command[1:],
@@ -119,8 +119,8 @@ class Test(object):
             start_time = datetime.datetime.now()
 
             is_interrupted = not docker.container.start(
-                container = container,
-                binds = {
+                container=container,
+                binds={
                     self.ebuild.overlay.directory: {
                         "bind": "/overlay",
                         "ro": True,
@@ -141,8 +141,8 @@ class Test(object):
             self.output += docker.container.logs(container_name).decode(encoding="utf-8")
 
             if self.failed:
-                docker.container.remove(container, container_name, v = True)
-                self.failed_command = ' '.join(command)
+                docker.container.remove(container, container_name, v=True)
+                self.failed_command = " ".join(command)
                 break
 
             tag_name = str(self.commands.index(command))
@@ -156,7 +156,7 @@ class Test(object):
             image_name = self.name + ":" + tag_name
             image_names.append(image_name)
 
-            docker.container.remove(container, container_name, v = True)
+            docker.container.remove(container, container_name, v=True)
 
         for image_name in image_names:
             docker.image.remove(image_name)

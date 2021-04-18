@@ -31,4 +31,4 @@ if len(os.environ.get("DOCKER_TLS_VERIFY", "")):
     )
 
 CLIENT = docker.from_env()
-API_CLIENT = docker.APIClient(base_url = BASE_URL, tls = TLS_CONFIG)
+API_CLIENT = docker.APIClient(base_url=BASE_URL, tls=TLS_CONFIG)
