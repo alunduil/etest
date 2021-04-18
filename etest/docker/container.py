@@ -48,7 +48,7 @@ def start(container, *args, **kwargs):
 
 def stop(container, *args, **kwargs):
     """Stop a Docker container."""
-    return common.CLIENT.stop(container, *args, **kwargs)
+    return common.API_CLIENT.stop(container, *args, **kwargs)
 
 
 def wait(*args, **kwargs):
