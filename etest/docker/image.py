@@ -19,18 +19,18 @@ def pull(image_name):
     image_id = None
 
     try:
-        image_id = common.CLIENT.inspect_image(image_name)["Id"]
+        image_id = common.API_CLIENT.inspect_image(image_name)["Id"]
     except docker.errors.APIError as error:
         if error.response.status_code != 404:
             raise error
 
     repository, tag = image_name.split(":")
 
-    common.CLIENT.pull(repository=repository, tag=tag)
+    common.API_CLIENT.pull(repository=repository, tag=tag)
 
-    if image_id is not None and image_id != common.CLIENT.inspect_image(image_name)["Id"]:
+    if image_id is not None and image_id != common.API_CLIENT.inspect_image(image_name)["Id"]:
         try:
-            common.CLIENT.remove_image(image_id)
+            common.API_CLIENT.remove_image(image_id)
         except docker.errors.APIError as error:
             if error.response.status_code not in [404, 409]:
                 raise error
