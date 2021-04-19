@@ -23,7 +23,7 @@ class BaseEtestTest(unittest.TestCase):
     @property
     def real_module(self):
         """Name of the real module."""
-        return re.sub(r"\.[^.]+", "", self.__module__.replace("test_", ""), 1)
+        return re.sub(r"\.[^.]+", "", self.__module__.replace("_test", ""), 1)
 
     def _patch(self, name):
         logger.debug("mocking %s", self.real_module + "." + name)
