@@ -74,6 +74,8 @@ class BaseTestMetaTest(type):
 
                 self.test = tests.Test(self.mocked_ebuild, **kwargs)
 
+                print(f"test: {test}")
+                print(f"prop: {prop}")
                 self.assertEqual(getattr(self.test, prop), test[prop])
 
             case.__name__ = "test_property_" + prop + "_" + str(test["uuid"])

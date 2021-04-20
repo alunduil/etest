@@ -96,7 +96,7 @@ class Test(object):
 
     def run(self):
         """Run the test."""
-        docker.image.pull(self.base_docker_image)
+        docker.pull(self.base_docker_image)
 
         image_name = self.base_docker_image
         image_names = []

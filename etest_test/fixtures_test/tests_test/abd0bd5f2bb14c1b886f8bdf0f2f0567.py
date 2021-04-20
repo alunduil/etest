@@ -13,7 +13,7 @@ _ = {
     "with_test_phase": True,
     "base_docker_image": "alunduil/etest:latest",
     "use_flags": (),
-    "name": "=app-portage/etest-9999[test]",
+    "name": "=app-portage_etest-9999[test]",
     "commands": [
         ("bash", "-c", "echo app-portage/etest test >> /etc/portage/package.env"),
         ("bash", "-c", "echo app-portage/etest '-*'  >> /etc/portage/package.use/etest"),

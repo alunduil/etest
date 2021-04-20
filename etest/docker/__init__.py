@@ -5,3 +5,6 @@
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 from etest.docker import container, image  # noqa: F401
+from etest.docker.image import pull
+
+__all__ = ("pull",)
