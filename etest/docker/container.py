@@ -17,9 +17,27 @@ def commit(*args, **kwargs):
     return common.CLIENT.commit(*args, **kwargs)
 
 
-def create(*args, **kwargs):
+def create(overlay, *args, **kwargs):
     """Create a Docker container."""
-    container = common.CLIENT.containers.create(*args, **kwargs)
+    container_data = common.API_CLIENT.create_container(
+        *args,
+        **kwargs,
+        host_config=common.API_CLIENT.create_host_config(
+            binds={
+                overlay: {
+                    "bind": "/overlay",
+                    "ro": True,
+                },
+                # TODO: Retrieve this from environment.
+                "/usr/portage": {
+                    "bind": "/usr/portage",
+                    "ro": True,
+                },
+            },
+        )
+    )
+    # TODO: Handle container_data["Warnings"]
+    container = common.CLIENT.containers.get(container_data["Id"])
 
     CONTAINERS.append(container)
     return container
