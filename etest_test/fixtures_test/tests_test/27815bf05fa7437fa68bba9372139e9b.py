@@ -13,7 +13,7 @@ _ = {
     "with_test_phase": False,
     "base_docker_image": "alunduil/etest:latest",
     "use_flags": (),
-    "name": "=app-portage/etest-9999[]",
+    "name": "=app-portage_etest-9999[]",
     "commands": [
         ("bash", "-c", "echo app-portage/etest '-*'  >> /etc/portage/package.use/etest"),
         ("bash", "-c", "emerge -q -f --autounmask-write =app-portage/etest-9999 >/dev/null 2>&1 || true"),
