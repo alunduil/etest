@@ -55,6 +55,9 @@ class Test(object):
         """Shell commands for the test."""
         _ = []
 
+#       Use for log testing, remove when merging with master
+#        _.append(("bash", "-c", "ls /overlay"))
+
         if self.with_test_phase:
             _.append(("bash", "-c", "echo {} test >> /etc/portage/package.env".format(self.ebuild.name)))
 
@@ -66,7 +69,7 @@ class Test(object):
             ),
         )
 
-        _.append(("bash", "-c", "emerge -q -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)))
+        _.append(("bash", "-c", "emerge -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)))
         _.append(("bash", "-c", "etc-update --automode -5 >/dev/null 2>&1"))
 
         _.append(("emerge", "-q", "--backtrack=130", self.ebuild.cpv))
@@ -128,7 +131,7 @@ class Test(object):
             self.time += datetime.datetime.now() - start_time
 
             # TODO: retrieve build log, etc
-            self.output += docker.container.logs(container_name).decode(encoding="utf-8")
+            self.output += container.logs().decode(encoding="utf-8")
 
             if self.failed:
                 docker.container.remove(container, container_name, v=True)

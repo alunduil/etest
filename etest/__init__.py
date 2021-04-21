@@ -70,6 +70,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
         elif verbose:
             with output_lock:
                 echo_check_verbose(check)
+                click.echo(check.output)
         else:
             with output_lock:
                 echo_check(check)
