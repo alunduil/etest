@@ -37,7 +37,6 @@ def create(overlay: str, *args, **kwargs):
         )
     )
 
-    print(container_data)
     container = common.CLIENT.containers.get(container_data["Id"])
 
     CONTAINERS.append(container)

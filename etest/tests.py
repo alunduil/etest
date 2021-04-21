@@ -122,15 +122,12 @@ class Test(object):
             is_interrupted = not docker.container.start(
                 container=container,
             )
-            print(is_interrupted)
             
             exit_code = docker.container.wait(container_name)['StatusCode']
-            print(exit_code)
             self.failed = is_interrupted or bool(exit_code)
 
             self.time += datetime.datetime.now() - start_time
 
-            # TODO: retrieve build log, etc
             self.output += docker.container.logs(container_name).decode(encoding="utf-8")
 
             if self.failed:
@@ -140,15 +137,14 @@ class Test(object):
 
             tag_name = str(self.commands.index(command))
 
-            print(container.id)
-            print(type(container.id))
+            commit_name = self.name.replace("=", "").replace("[", "").replace("]", "")
             docker.container.commit(
                 container,
-                repository=self.name,
+                repository=commit_name,
                 tag=tag_name,
             )
 
-            image_name = self.name + ":" + tag_name
+            image_name = commit_name + ":" + tag_name
             image_names.append(image_name)
 
             docker.container.remove(container, container_name, v=True)

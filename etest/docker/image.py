@@ -11,7 +11,7 @@ from etest.docker import common
 
 def remove(*args, **kwargs):
     """Remove a Docker image."""
-    return common.CLIENT.remove_image(*args, **kwargs)
+    return common.API_CLIENT.remove_image(*args, **kwargs)
 
 
 def pull(image_name):
