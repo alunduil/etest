@@ -55,8 +55,8 @@ class Test(object):
         """Shell commands for the test."""
         _ = []
 
-#       Use for log testing, remove when merging with master
-#        _.append(("bash", "-c", "ls /overlay"))
+        #       Use for log testing, remove when merging with master
+        #        _.append(("bash", "-c", "ls /overlay"))
 
         if self.with_test_phase:
             _.append(("bash", "-c", "echo {} test >> /etc/portage/package.env".format(self.ebuild.name)))
