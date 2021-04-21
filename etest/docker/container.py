@@ -6,13 +6,15 @@
 
 from typing import List
 
+from docker.models.containers import Container
+
 from etest.docker import common
 
 CONTAINERS: List = []
 CREATE = True
 
 
-def commit(container, *args, **kwargs):
+def commit(container: Container, *args, **kwargs):
     """Commit a Docker container."""
     return container.commit(*args, **kwargs)
 
@@ -48,13 +50,13 @@ def logs(*args, **kwargs):
     return common.API_CLIENT.logs(*args, **kwargs)
 
 
-def remove(container, container_name, *args, **kwargs):
+def remove(container: Container, container_name: str, *args, **kwargs):
     """Remove a Docker container."""
     CONTAINERS.remove(container)
     return common.API_CLIENT.remove_container(container_name, *args, **kwargs)
 
 
-def start(container):
+def start(container: Container):
     """Start a Docker container."""
     if not CREATE:
         return False
@@ -64,7 +66,7 @@ def start(container):
     return True
 
 
-def stop(container, *args, **kwargs):
+def stop(container: Container, *args, **kwargs):
     """Stop a Docker container."""
     return common.API_CLIENT.stop(container, *args, **kwargs)
 
