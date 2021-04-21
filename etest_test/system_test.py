@@ -13,42 +13,10 @@ import unittest
 import click.testing
 import pytest
 
-from etest import etest, information
+from etest import etest
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
 
 logger = logging.getLogger(__name__)
-
-
-class TestEtestCliStandardOptions(unittest.TestCase):
-    """Test CLI Standard Options."""
-
-    def setUp(self):
-        """Set up test cases."""
-        self.runner = click.testing.CliRunner()
-
-    def test_etest_help(self):
-        """Run etest --help."""
-        _ = self.runner.invoke(etest, ["--help"])
-
-        logger.debug("etest --help:\n%s", _.output)
-
-        logger.debug("exception: %s", _.exception)
-        logger.debug("traceback:\n%s", _.exc_info)
-
-        self.assertEqual(0, _.exit_code)
-
-    def test_etest_version(self):
-        """Run etest --version."""
-        _ = self.runner.invoke(etest, ["--version"])
-
-        logger.debug("etest --version:\n%s", _.output)
-
-        logger.debug("exception: %s", _.exception)
-        logger.debug("traceback:\n%s", _.exc_info)
-
-        self.assertEqual("etest, version " + information.VERSION + "\n", _.output)
-
-        self.assertEqual(0, _.exit_code)
 
 
 class TestEtestCliEbuild(unittest.TestCase):
