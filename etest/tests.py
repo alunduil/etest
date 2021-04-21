@@ -105,6 +105,7 @@ class Test(object):
             container_name = str(uuid.uuid4())
 
             container = docker.container.create(
+                overlay=self.ebuild.overlay.directory,
                 image=image_name,
                 name=container_name,
                 environment=self.environment,
@@ -120,17 +121,6 @@ class Test(object):
 
             is_interrupted = not docker.container.start(
                 container=container,
-                binds={
-                    self.ebuild.overlay.directory: {
-                        "bind": "/overlay",
-                        "ro": True,
-                    },
-                    # TODO: Retrieve this from environment.
-                    "/usr/portage": {
-                        "bind": "/usr/portage",
-                        "ro": True,
-                    },
-                },
             )
 
             self.failed = is_interrupted or bool(docker.container.wait(container_name))
