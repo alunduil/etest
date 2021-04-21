@@ -17,7 +17,7 @@ def commit(*args, **kwargs):
     return common.CLIENT.commit(*args, **kwargs)
 
 
-def create(overlay : str, *args, **kwargs):
+def create(overlay: str, *args, **kwargs):
     """Create a Docker container."""
     container_data = common.API_CLIENT.create_container(
         *args,
