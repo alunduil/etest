@@ -12,9 +12,9 @@ CONTAINERS: List = []
 CREATE = True
 
 
-def commit(*args, **kwargs):
+def commit(container, *args, **kwargs):
     """Commit a Docker container."""
-    return common.CLIENT.commit(*args, **kwargs)
+    return container.commit(*args, **kwargs)
 
 
 def create(overlay: str, *args, **kwargs):
@@ -37,6 +37,7 @@ def create(overlay: str, *args, **kwargs):
         )
     )
 
+    print(container_data)
     container = common.CLIENT.containers.get(container_data["Id"])
 
     CONTAINERS.append(container)
@@ -58,7 +59,7 @@ def start(container):
     """Start a Docker container."""
     if not CREATE:
         return False
-
+    
     container.start()
 
     return True

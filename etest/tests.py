@@ -122,8 +122,11 @@ class Test(object):
             is_interrupted = not docker.container.start(
                 container=container,
             )
-
-            self.failed = is_interrupted or bool(docker.container.wait(container_name))
+            print(is_interrupted)
+            
+            exit_code = docker.container.wait(container_name)['StatusCode']
+            print(exit_code)
+            self.failed = is_interrupted or bool(exit_code)
 
             self.time += datetime.datetime.now() - start_time
 
@@ -137,8 +140,10 @@ class Test(object):
 
             tag_name = str(self.commands.index(command))
 
+            print(container.id)
+            print(type(container.id))
             docker.container.commit(
-                container_name,
+                container,
                 repository=self.name,
                 tag=tag_name,
             )
