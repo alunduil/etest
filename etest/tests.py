@@ -69,7 +69,7 @@ class Test(object):
             ),
         )
 
-        _.append(("bash", "-c", "emerge -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)))
+        _.append(("bash", "-c", "emerge -q -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)))
         _.append(("bash", "-c", "etc-update --automode -5 >/dev/null 2>&1"))
 
         _.append(("emerge", "-q", "--backtrack=130", self.ebuild.cpv))
@@ -123,7 +123,7 @@ class Test(object):
             start_time = datetime.datetime.now()
 
             is_interrupted = not docker.container.start(
-                container=container,
+                container=container
             )
 
             self.failed = is_interrupted or bool(docker.container.wait(container_name))
