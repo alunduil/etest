@@ -58,7 +58,7 @@ def start(container):
     """Start a Docker container."""
     if not CREATE:
         return False
-    
+
     container.start()
 
     return True

@@ -122,8 +122,8 @@ class Test(object):
             is_interrupted = not docker.container.start(
                 container=container,
             )
-            
-            exit_code = docker.container.wait(container_name)['StatusCode']
+
+            exit_code = docker.container.wait(container_name)["StatusCode"]
             self.failed = is_interrupted or bool(exit_code)
 
             self.time += datetime.datetime.now() - start_time
