@@ -17,7 +17,7 @@ def commit(*args, **kwargs):
     return common.CLIENT.commit(*args, **kwargs)
 
 
-def create(overlay, *args, **kwargs):
+def create(overlay : str, *args, **kwargs):
     """Create a Docker container."""
     container_data = common.API_CLIENT.create_container(
         *args,
@@ -36,7 +36,7 @@ def create(overlay, *args, **kwargs):
             },
         )
     )
-    # TODO: Handle container_data["Warnings"]
+    
     container = common.CLIENT.containers.get(container_data["Id"])
 
     CONTAINERS.append(container)
@@ -54,7 +54,7 @@ def remove(container, container_name, *args, **kwargs):
     return common.API_CLIENT.remove_container(container_name, *args, **kwargs)
 
 
-def start(container, *args, **kwargs):
+def start(container):
     """Start a Docker container."""
     if not CREATE:
         return False

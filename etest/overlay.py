@@ -28,7 +28,7 @@ class Overlay(object):
             _ = os.path.dirname(_)
         else:
             raise InvalidOverlayError("not in a valid ebuild repository directory")
-
+        
         return _
 
     @property
