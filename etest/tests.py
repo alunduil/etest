@@ -120,7 +120,7 @@ class Test(object):
             start_time = datetime.datetime.now()
 
             is_interrupted = not docker.container.start(
-                container=container,
+                container=container
             )
 
             self.failed = is_interrupted or bool(docker.container.wait(container_name))
