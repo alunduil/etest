@@ -123,11 +123,10 @@ class Test(object):
                 container=container,
             )
 
-            self.failed = is_interrupted or bool(docker.container.wait(container_name))
+            self.failed = is_interrupted or bool(docker.container.wait(container_name)["StatusCode"])
 
             self.time += datetime.datetime.now() - start_time
 
-            # TODO: retrieve build log, etc
             self.output += docker.container.logs(container_name).decode(encoding="utf-8")
 
             if self.failed:
@@ -137,16 +136,15 @@ class Test(object):
 
             tag_name = str(self.commands.index(command))
 
-            docker.container.commit(
-                container_name,
+            image_name = docker.container.commit(
+                container=container,
                 repository=self.name,
                 tag=tag_name,
             )
 
-            image_name = self.name + ":" + tag_name
             image_names.append(image_name)
 
-            docker.container.remove(container, container_name, v=True)
+            docker.container.remove(container, v=True)
 
         for image_name in image_names:
             docker.image.remove(image_name)
