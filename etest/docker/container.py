@@ -39,6 +39,10 @@ def create(overlay: str, *args, **kwargs):
                     "bind": "/usr/portage",
                     "ro": True,
                 },
+                "/var/db/repos/gentoo": {
+                    "bind": "/var/db/repos/gentoo",
+                    "ro": True,
+                },
             },
         )
     )
