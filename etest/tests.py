@@ -138,7 +138,7 @@ class Test(object):
 
             image_name = docker.container.commit(
                 container=container,
-                repo_=self.name,
+                repository=self.name,
                 tag=tag_name,
             )
 
