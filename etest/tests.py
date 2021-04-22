@@ -123,8 +123,7 @@ class Test(object):
                 container=container,
             )
 
-            exit_code = docker.container.wait(container_name)["StatusCode"]
-            self.failed = is_interrupted or bool(exit_code)
+            self.failed = is_interrupted or bool(docker.container.wait(container_name)["StatusCode"])
 
             self.time += datetime.datetime.now() - start_time
 
@@ -137,17 +136,15 @@ class Test(object):
 
             tag_name = str(self.commands.index(command))
 
-            commit_name = self.name.replace("=", "").replace("[", "").replace("]", "")
-            docker.container.commit(
-                container,
-                repository=commit_name,
+            image_name = docker.container.commit(
+                container=container,
+                repo_=self.name,
                 tag=tag_name,
             )
 
-            image_name = commit_name + ":" + tag_name
             image_names.append(image_name)
 
-            docker.container.remove(container, container_name, v=True)
+            docker.container.remove(container, v=True)
 
         for image_name in image_names:
             docker.image.remove(image_name)

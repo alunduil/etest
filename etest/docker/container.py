@@ -14,9 +14,13 @@ CONTAINERS: List = []
 CREATE = True
 
 
-def commit(container: Container, *args, **kwargs):
+def commit(container: Container, tag: str, repo_: str, *args, **kwargs):
     """Commit a Docker container."""
-    return container.commit(*args, **kwargs)
+    repo = repo_.replace("=", "").replace("[", "").replace("]", "")
+
+    container.commit(repository=repo, tag=tag, *args, **kwargs)
+
+    return repo + ":" + tag
 
 
 def create(overlay: str, *args, **kwargs):
@@ -50,10 +54,10 @@ def logs(*args, **kwargs):
     return common.API_CLIENT.logs(*args, **kwargs)
 
 
-def remove(container: Container, container_name: str, *args, **kwargs):
+def remove(container: Container, *args, **kwargs):
     """Remove a Docker container."""
     CONTAINERS.remove(container)
-    return common.API_CLIENT.remove_container(container_name, *args, **kwargs)
+    return container.remove(**kwargs)
 
 
 def start(container: Container):
