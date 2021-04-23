@@ -16,7 +16,8 @@ CREATE = True
 
 def commit(container: Container, tag: str, repository: str, *args, **kwargs):
     """Commit a Docker container."""
-    repo = repository.replace("=", "").replace("[", "").replace("]", "")
+    print(repository)
+    repo = repository.replace("=", "").replace("[", "").replace("]", "").replace(",", "")
 
     container.commit(repository=repo, tag=tag, *args, **kwargs)
 

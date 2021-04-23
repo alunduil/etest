@@ -1,8 +1,9 @@
-FROM gentoo/stage3-amd64:latest
+FROM gentoo/stage3:amd64
 MAINTAINER Alex Brandt <alunduil@gentoo.org>
 
 # Set a locale
-RUN sed -e '/en_US/s/^#//' -i /etc/locale.gen
+RUN echo en_US.UTF8 UTF-8 >> /etc/locale.gen
+RUN echo en_US ISO-8859-1 >> /etc/locale.gen
 RUN locale-gen
 RUN eselect locale set en_US.utf8
 
@@ -31,3 +32,7 @@ RUN echo 'FEATURES="test"' >> /etc/portage/env/test
 RUN touch /etc/portage/package.env
 
 RUN mkdir /overlay
+
+RUN mkdir /etc/portage/package.accept_keywords
+
+RUN emerge --sync

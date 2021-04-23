@@ -66,6 +66,16 @@ class Test(object):
             ),
         )
 
+        _.append(
+            (
+                "bash",
+                "-c",
+                "echo {} ~amd64 >> /etc/portage/package.accept_keywords/etest".format(
+                    self.ebuild.name,
+                ),
+            ),
+        )
+
         _.append(("bash", "-c", "emerge -q -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)))
         _.append(("bash", "-c", "etc-update --automode -5 >/dev/null 2>&1"))
 
