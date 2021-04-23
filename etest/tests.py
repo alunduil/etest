@@ -71,7 +71,7 @@ class Test(object):
                 "bash",
                 "-c",
                 "mkdir -p /etc/portage/package.accept_keywords && echo {} ~amd64 >> /etc/portage/package.accept_keywords/etest".format(
-                    self.ebuild.name
+                    self.ebuild.name,
                 ),
             ),
         )
@@ -122,7 +122,6 @@ class Test(object):
                 volumes=[
                     "/overlay",
                     "/usr/portage",
-                    "/var/db/repos/gentoo",
                 ],
                 entrypoint=(command[0],),
                 command=command[1:],
