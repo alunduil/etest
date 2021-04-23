@@ -70,7 +70,7 @@ class Test(object):
             (
                 "bash",
                 "-c",
-                "mkdir -p /etc/portage/package.accept_keywords && echo {} ~amd64 >> /etc/portage/package.accept_keywords/etest".format(
+                "echo {} ~amd64 >> /etc/portage/package.accept_keywords/etest".format(
                     self.ebuild.name,
                 ),
             ),
