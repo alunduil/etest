@@ -4,6 +4,7 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+import re
 from typing import List
 
 from docker.models.containers import Container
@@ -16,8 +17,7 @@ CREATE = True
 
 def commit(container: Container, tag: str, repository: str, *args, **kwargs):
     """Commit a Docker container."""
-    print(repository)
-    repo = repository.replace("=", "").replace("[", "").replace("]", "").replace(",", "")
+    repo = re.sub("[\\[\\]=,]", "", repository).lower()
 
     container.commit(repository=repo, tag=tag, *args, **kwargs)
 

@@ -49,7 +49,6 @@ click = "^7.1.2"
 docker = "^5.0.0"
 ply = "^3.11"
 python = "^3.8"
-pytest = "^6.2.3"
 
 [tool.poetry.dev-dependencies]
 coveralls = "^2.1.1"
