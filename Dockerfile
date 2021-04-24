@@ -17,23 +17,24 @@ ENV PORTAGE_ELOG_SYSTEM save
 ENV PORTAGE_RO_DISTDIRS /usr/portage/distfiles
 ENV PORTDIR_OVERLAY /overlay
 
-RUN mkdir /tmp/distfiles.d
+RUN mkdir -p /tmp/distfiles.d
 RUN chown root:portage /tmp/distfiles.d
 RUN chmod 0775 /tmp/distfiles.d
 
-RUN mkdir /tmp/etest.logs.d
+RUN mkdir -p /tmp/etest.logs.d
 RUN chown portage:portage /tmp/etest.logs.d
 RUN chmod 2775 /tmp/etest.logs.d
 
 RUN echo 'FEATURES="collision-protect parallel-fetch strict"' >> /etc/portage/make.conf
 
-RUN mkdir /etc/portage/env
+RUN mkdir -p /etc/portage/env
 RUN echo 'FEATURES="test"' >> /etc/portage/env/test
 
-RUN touch /etc/portage/package.env
+RUN rm -rf /etc/portage/package.env
+RUN echo "" >> /etc/portage/package.env
 
-RUN mkdir /overlay
+RUN mkdir -p /overlay
 
-RUN mkdir /etc/portage/package.accept_keywords
+RUN mkdir -p /etc/portage/package.accept_keywords
 
 RUN emerge --sync
