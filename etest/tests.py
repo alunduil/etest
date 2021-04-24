@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class Test(object):
     """A single test."""
 
-    def __init__(self, ebuild, with_test_phase=False, base_docker_image="alunduil/etest:latest", **kwargs):
+    def __init__(self, ebuild, arch, with_test_phase=False, **kwargs):
         """Construct a test."""
         self.ebuild = ebuild
 
@@ -33,7 +33,8 @@ class Test(object):
         self.time = datetime.timedelta(0)
         self.output = ""
 
-        self.base_docker_image = base_docker_image
+        self.arch = arch
+        self.base_docker_image = f"alunduil/etest:{arch}"
 
     @functools.cached_property
     def name(self):
@@ -70,8 +71,9 @@ class Test(object):
             (
                 "bash",
                 "-c",
-                "echo {} ~amd64 >> /etc/portage/package.accept_keywords/etest".format(
+                "echo {} ~{} >> /etc/portage/package.accept_keywords/etest".format(
                     self.ebuild.name,
+                    self.arch,
                 ),
             ),
         )
@@ -106,7 +108,7 @@ class Test(object):
 
     def run(self):
         """Run the test."""
-        docker.pull(self.base_docker_image)
+        # docker.pull(self.base_docker_image)
 
         image_name = self.base_docker_image
         image_names = []
@@ -163,9 +165,11 @@ class Test(object):
 class Tests(object):
     """Collection of tests."""
 
-    def __init__(self, ebuild_selector=()):
+    def __init__(self, arch, ebuild_selector=()):
         """Construct a collection of tests."""
         self.overlay = overlay.Overlay()
+
+        self.arch = arch
 
         # NOTE: raises InvalidOverlayError when necessary
         logger.debug("self.overlay.directory: %s", self.overlay.directory)
@@ -192,6 +196,6 @@ class Tests(object):
                 for use_flags_combination in itertools.chain.from_iterable(
                     itertools.combinations(use_flags, _) for _ in range(len(use_flags) + 1)
                 ):
-                    yield Test(ebuild, use_flags=use_flags_combination, with_test_phase=False)
+                    yield Test(ebuild, use_flags=use_flags_combination, with_test_phase=False, arch=self.arch)
                     if "test" not in ebuild.restrictions:
-                        yield Test(ebuild, use_flags=use_flags_combination, with_test_phase=True)
+                        yield Test(ebuild, use_flags=use_flags_combination, with_test_phase=True, arch=self.arch)

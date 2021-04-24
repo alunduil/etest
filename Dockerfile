@@ -1,4 +1,5 @@
-FROM gentoo/stage3:amd64
+ARG ARCH=amd64
+FROM gentoo/stage3:${ARCH}
 MAINTAINER Alex Brandt <alunduil@gentoo.org>
 
 # Set a locale

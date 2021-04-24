@@ -47,9 +47,10 @@ def echo_check_verbose(check):
 @click.option("-j", "--jobs", default=1, help="number of test to run simultaneously")
 @click.option("-q", "--quiet", is_flag=True, default=False, help="suppress all output")
 @click.option("-v", "--verbose", is_flag=True, default=False, help="provide more output")
+@click.option("-a", "--arch", default="amd64", help="architecture to test against")
 @click.version_option(information.VERSION)
 @click.argument("ebuilds", nargs=-1)
-def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
+def etest(dry_run, fast, jobs, quiet, verbose, arch, ebuilds):
     """Test one or more ebuilds."""
     signal.signal(signal.SIGINT, sigint_handler)
 
@@ -79,7 +80,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
 
         jobs_limit_sem.release()
 
-    for check in tests.Tests(ebuilds):
+    for check in tests.Tests(arch, ebuilds):
         jobs_limit_sem.acquire()
 
         if fast and len(failures):
