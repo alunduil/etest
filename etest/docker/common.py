@@ -16,7 +16,7 @@ if len(os.environ.get("DOCKER_TLS_VERIFY", "")):
     if BASE_URL is None:
         raise RuntimeError("DOCKER_HOST not set.")
 
-    BASE_URL = "https://{}".format(BASE_URL.split("://", 1)[-1])
+    BASE_URL = f"https://{BASE_URL.split('://', 1)[-1]}"
 
     CERT_PATH = os.environ.get("DOCKER_CERT_PATH", "")
     if not len(CERT_PATH):

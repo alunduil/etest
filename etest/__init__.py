@@ -12,7 +12,7 @@ import threading
 
 import click
 
-from etest import docker, information, tests
+from etest import docker, information, qemu, tests
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -60,6 +60,9 @@ def etest(dry_run, fast, jobs, quiet, verbose, arch, ebuilds):
     output_lock = threading.Lock()
     jobs_limit_sem = threading.BoundedSemaphore(value=jobs)
 
+    if arch != "amd64":
+        qemu.start()
+
     def _(check):
         if not dry_run:
             check.run()
@@ -89,6 +92,8 @@ def etest(dry_run, fast, jobs, quiet, verbose, arch, ebuilds):
 
         threading.Thread(target=_, args=(check,)).start()
 
+    qemu.exit()
+
     while threading.active_count() > 1:
         threading.enumerate().pop().join()
 
@@ -109,7 +114,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, arch, ebuilds):
             click.echo()
 
         click.echo("-" * min(click.get_terminal_size()[0], 72))
-        click.echo("{} tests ran in {} seconds".format(len(elapsed_times), elapsed_time.total_seconds()))
+        click.echo(f"{len(elapsed_times)} tests ran in {elapsed_time.total_seconds()} seconds.")
         if len(failures):
             click.secho("{} tests FAILED".format(len(failures)), fg="red")
 

@@ -57,13 +57,13 @@ class Test(object):
         _ = []
 
         if self.with_test_phase:
-            _.append(("bash", "-c", "echo {} test >> /etc/portage/package.env".format(self.ebuild.name)))
+            _.append(("bash", "-c", f"echo {self.ebuild.name} test >> /etc/portage/package.env"))
 
         _.append(
             (
                 "bash",
                 "-c",
-                "echo {} '-*' {} >> /etc/portage/package.use/etest".format(self.ebuild.name, " ".join(self.use_flags)),
+                f"echo {self.ebuild.name} '-*' {' '.join(self.use_flags)} >> /etc/portage/package.use/etest",
             ),
         )
 
@@ -71,14 +71,11 @@ class Test(object):
             (
                 "bash",
                 "-c",
-                "echo {} ~{} >> /etc/portage/package.accept_keywords/etest".format(
-                    self.ebuild.name,
-                    self.arch,
-                ),
+                f"echo {self.ebuild.name} ~{self.arch} >> /etc/portage/package.accept_keywords/etest",
             ),
         )
 
-        _.append(("bash", "-c", "emerge -q -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)))
+        _.append(("bash", "-c", f"emerge -q -f --autounmask-write {self.ebuild.cpv} >/dev/null 2>&1 || true"))
         _.append(("bash", "-c", "etc-update --automode -5 >/dev/null 2>&1"))
 
         _.append(("emerge", "-q", "--backtrack=130", self.ebuild.cpv))
@@ -93,7 +90,7 @@ class Test(object):
         if "python" in self.ebuild.compat:
             _["PYTHON_TARGETS"] = " ".join(self.ebuild.compat["python"])
 
-            # Things still want python2…☹
+            # Things still want python2.7
             if "python2_7" not in _["PYTHON_TARGETS"]:
                 _["PYTHON_TARGETS"] += " python2_7"
 

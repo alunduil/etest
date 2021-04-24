@@ -24,7 +24,11 @@ def pull(image_name):
         if error.response.status_code != 404:
             raise error
 
-    repository, tag = image_name.split(":")
+    try:
+        repository, tag = image_name.split(":")
+    except ValueError:
+        repository = image_name
+        tag = None
 
     common.API_CLIENT.pull(repository=repository, tag=tag)
 
