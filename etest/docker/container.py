@@ -24,30 +24,35 @@ def commit(container: Container, tag: str, repository: str, *args, **kwargs):
     return repo + ":" + tag
 
 
-def create(overlay="", autoconf=True, *args, **kwargs):
+def create(overlay: str, *args, **kwargs):
     """Create a Docker container."""
-    if autoconf:
-        container_data = common.API_CLIENT.create_container(
-            *args,
-            **kwargs,
-            host_config=common.API_CLIENT.create_host_config(
-                binds={
-                    overlay: {
-                        "bind": "/overlay",
-                        "ro": True,
-                    },
-                    # TODO: Retrieve this from environment.
-                    "/usr/portage": {
-                        "bind": "/usr/portage",
-                        "ro": True,
-                    },
+    container_data = common.API_CLIENT.create_container(
+        *args,
+        **kwargs,
+        host_config=common.API_CLIENT.create_host_config(
+            binds={
+                overlay: {
+                    "bind": "/overlay",
+                    "ro": True,
                 },
-            )
+                # TODO: Retrieve this from environment.
+                "/usr/portage": {
+                    "bind": "/usr/portage",
+                    "ro": True,
+                },
+            },
         )
+    )
 
-        container = common.CLIENT.containers.get(container_data["Id"])
-    else:
-        container = common.CLIENT.containers.create(*args, **kwargs)
+    container = common.CLIENT.containers.get(container_data["Id"])
+
+    CONTAINERS.append(container)
+    return container
+
+
+def create_simple(*args, **kwargs):
+    """Create a simple docker container."""
+    container = common.CLIENT.containers.create(*args, **kwargs)
 
     CONTAINERS.append(container)
     return container

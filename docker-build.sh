@@ -39,25 +39,25 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
-if [ "$arch" = "ppc64" ] ; then arch="ppc64le" ; fi
 
 if [ $all ]
 	then echo "all"
 else
 	# We have to dance around x86 needing more privileges :/
-	if [ $arch ] ; then
-		docker buildx build . --build-arg ARCH=$arch --tag etest/pre-sync:$arch
-		docker run --name sync --privileged etest/pre-sync:$arch /bin/bash -c "emerge-webrsync"
-		docker commit sync alunduil/etest:$arch
+	if [ "$arch" ] ; then
+		if [ "$arch" = "ppc64" ] ; then img_arch="ppc64le" ; else img_arch=$arch ; fi
+		docker buildx build . --build-arg ARCH="$img_arch" --tag etest/pre-sync:"$arch"
+		docker run --name sync --privileged etest/pre-sync:"$arch" /bin/bash -c "emerge-webrsync"
+		docker commit sync alunduil/etest:"$arch"
 		docker rm sync
-		docker image rm etest/pre-sync:$arch
+		docker image rm etest/pre-sync:"$arch"
 	else
 		arch="amd64"
-		docker buildx build . --build-arg ARCH=$arch --tag etest/pre-sync:$arch
-                docker run --name sync --privileged etest/pre-sync:$arch /bin/bash -c "emerge-webrsync"
-                docker commit sync alunduil/etest:$arch
+		docker buildx build . --build-arg ARCH="$arch" --tag etest/pre-sync:"$arch"
+                docker run --name sync --privileged etest/pre-sync:"$arch" /bin/bash -c "emerge-webrsync"
+                docker commit sync alunduil/etest:"$arch"
                 docker rm sync
-                docker image rm etest/pre-sync:$arch
+                docker image rm etest/pre-sync:"$arch"
 	fi
 fi
 

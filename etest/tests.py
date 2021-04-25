@@ -12,6 +12,7 @@ import os
 import uuid
 
 from etest import docker, overlay
+from etest.ebuild import Ebuild
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 class Test(object):
     """A single test."""
 
-    def __init__(self, ebuild, arch, with_test_phase=False, **kwargs):
+    def __init__(self, ebuild: Ebuild, arch: str, with_test_phase: bool = False, **kwargs):
         """Construct a test."""
         self.ebuild = ebuild
 
@@ -33,15 +34,12 @@ class Test(object):
         self.time = datetime.timedelta(0)
         self.output = ""
 
-        arch = arch.lower()
         self.arch = arch
+
+        self.base_docker_image = f"alunduil/etest:{self.arch}"
 
         if self.arch in ["armv5", "armv7"]:
             self.arch = "arm"
-        elif self.arch == "ppc64":
-            arch = "ppc64le"
-
-        self.base_docker_image = f"alunduil/etest:{arch}"
 
     @functools.cached_property
     def name(self):
@@ -169,7 +167,7 @@ class Test(object):
 class Tests(object):
     """Collection of tests."""
 
-    def __init__(self, arch, ebuild_selector=()):
+    def __init__(self, arch: str, ebuild_selector=()):
         """Construct a collection of tests."""
         self.overlay = overlay.Overlay()
 

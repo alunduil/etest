@@ -7,22 +7,28 @@
 from etest import docker
 
 
-def start():
-    """Start the QEMU interpreter."""
-    docker.pull("multiarch/qemu-user-static")
+class qemu:
+    """QEMU interpreter management."""
 
-    global QEMU_CONTAINER
+    def __init__(self, arch: str):
+        """Initialize."""
+        if arch != "amd64":
+            self.enabled = True
 
-    QEMU_CONTAINER = docker.container.create(
-        autoconf=False,
-        image="multiarch/qemu-user-static",
-        privileged=True,
-        command="--reset -p yes",
-    )
+    def __enter__(self):
+        """Start the QEMU interpreter."""
+        if self.enabled:
+            docker.pull("multiarch/qemu-user-static:latest")
 
-    docker.container.start(QEMU_CONTAINER)
+            self.container = docker.container.create_simple(
+                image="multiarch/qemu-user-static",
+                privileged=True,
+                command="--reset -p yes",
+            )
 
+            docker.container.start(self.container)
 
-def exit():
-    """Kill the QEMU interpreter."""
-    docker.container.remove(QEMU_CONTAINER)
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        """Kill the QEMU interpreter."""
+        if self.enabled:
+            docker.container.remove(self.container)

@@ -19,15 +19,15 @@ logger.propagate = False
 logger.addHandler(logging.NullHandler())
 
 
-def echo_check(check):
+def echo_check(check: tests.Test):
     """Print a check status."""
     if check.failed:
         click.secho("F", nl=False, fg="red")
     else:
-        click.secho("·", nl=False, fg="green")
+        click.secho("OK", nl=False, fg="green")
 
 
-def echo_check_verbose(check):
+def echo_check_verbose(check: tests.Test):
     """Print a check if verbose was requested."""
     click.echo("[", nl=False)
     if check.failed:
@@ -47,10 +47,16 @@ def echo_check_verbose(check):
 @click.option("-j", "--jobs", default=1, help="number of test to run simultaneously")
 @click.option("-q", "--quiet", is_flag=True, default=False, help="suppress all output")
 @click.option("-v", "--verbose", is_flag=True, default=False, help="provide more output")
-@click.option("-a", "--arch", default="amd64", help="architecture to test against")
+@click.option(
+    "-a",
+    "--arch",
+    default="amd64",
+    type=click.Choice(["amd64", "x86", "arm64", "armv5", "armv7", "ppc64"], case_sensitive=False),
+    help="architecture to test against",
+)
 @click.version_option(information.VERSION)
 @click.argument("ebuilds", nargs=-1)
-def etest(dry_run, fast, jobs, quiet, verbose, arch, ebuilds):
+def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, arch: str, ebuilds: str):
     """Test one or more ebuilds."""
     signal.signal(signal.SIGINT, sigint_handler)
 
@@ -60,43 +66,39 @@ def etest(dry_run, fast, jobs, quiet, verbose, arch, ebuilds):
     output_lock = threading.Lock()
     jobs_limit_sem = threading.BoundedSemaphore(value=jobs)
 
-    if arch != "amd64":
-        qemu.start()
+    with qemu.qemu(arch):
 
-    def _(check):
-        if not dry_run:
-            check.run()
+        def _(check):
+            if not dry_run:
+                check.run()
 
-        elapsed_times.append(check.time)
+            elapsed_times.append(check.time)
 
-        if quiet:
-            pass
-        elif verbose:
-            with output_lock:
-                echo_check_verbose(check)
-        else:
-            with output_lock:
-                echo_check(check)
+            if quiet:
+                pass
+            elif verbose:
+                with output_lock:
+                    echo_check_verbose(check)
+            else:
+                with output_lock:
+                    echo_check(check)
 
-        if check.failed:
-            failures.append(check)
+            if check.failed:
+                failures.append(check)
 
-        jobs_limit_sem.release()
-
-    for check in tests.Tests(arch, ebuilds):
-        jobs_limit_sem.acquire()
-
-        if fast and len(failures):
             jobs_limit_sem.release()
-            break
 
-        threading.Thread(target=_, args=(check,)).start()
+        for check in tests.Tests(arch, ebuilds):
+            jobs_limit_sem.acquire()
 
-    if arch != "amd64":
-        qemu.exit()
+            if fast and len(failures):
+                jobs_limit_sem.release()
+                break
 
-    while threading.active_count() > 1:
-        threading.enumerate().pop().join()
+            threading.Thread(target=_, args=(check,)).start()
+
+        while threading.active_count() > 1:
+            threading.enumerate().pop().join()
 
     elapsed_time = sum(elapsed_times, datetime.timedelta())
 

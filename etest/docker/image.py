@@ -14,7 +14,7 @@ def remove(*args, **kwargs):
     return common.API_CLIENT.remove_image(*args, **kwargs)
 
 
-def pull(image_name):
+def pull(image_name: str):
     """Pull Docker image by name and clean up any old images."""
     image_id = None
 
@@ -24,11 +24,7 @@ def pull(image_name):
         if error.response.status_code != 404:
             raise error
 
-    try:
-        repository, tag = image_name.split(":")
-    except ValueError:
-        repository = image_name
-        tag = None
+    repository, tag = image_name.split(":")
 
     common.API_CLIENT.pull(repository=repository, tag=tag)
 
