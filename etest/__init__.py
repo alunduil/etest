@@ -92,7 +92,8 @@ def etest(dry_run, fast, jobs, quiet, verbose, arch, ebuilds):
 
         threading.Thread(target=_, args=(check,)).start()
 
-    qemu.exit()
+    if arch != "amd64":
+        qemu.exit()
 
     while threading.active_count() > 1:
         threading.enumerate().pop().join()

@@ -33,7 +33,14 @@ class Test(object):
         self.time = datetime.timedelta(0)
         self.output = ""
 
+        arch = arch.lower()
         self.arch = arch
+
+        if self.arch in ["armv5", "armv7"]:
+            self.arch = "arm"
+        elif self.arch == "ppc64":
+            arch = "ppc64le"
+
         self.base_docker_image = f"alunduil/etest:{arch}"
 
     @functools.cached_property
