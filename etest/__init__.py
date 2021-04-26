@@ -50,6 +50,7 @@ def echo_check_verbose(check: tests.Test):
 @click.option(
     "-a",
     "--arch",
+    "--architecture",
     default="amd64",
     type=click.Choice(["amd64", "x86", "arm64", "armv5", "armv7", "ppc64"], case_sensitive=False),
     help="architecture to test against",

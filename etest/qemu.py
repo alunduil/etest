@@ -14,6 +14,8 @@ class qemu:
         """Initialize."""
         if arch != "amd64":
             self.enabled = True
+        else:
+            self.enabled = False
 
     def __enter__(self):
         """Start the QEMU interpreter."""
