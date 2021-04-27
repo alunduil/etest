@@ -16,7 +16,6 @@ CREATE = True
 
 def commit(container: Container, tag: str, repository: str, *args, **kwargs):
     """Commit a Docker container."""
-    print(repository)
     repo = repository.replace("=", "").replace("[", "").replace("]", "").replace(",", "")
 
     container.commit(repository=repo, tag=tag, *args, **kwargs)
@@ -87,3 +86,12 @@ def stop(container: Container, *args, **kwargs):
 def wait(*args, **kwargs):
     """Wait for Docker container."""
     return common.API_CLIENT.wait(*args, **kwargs)
+
+
+def run(name: str, *args, **kwargs):
+    """Run a Docker container."""
+    logs = common.CLIENT.containers.run(name=name, **kwargs)
+    container = common.CLIENT.containers.get(name)
+    CONTAINERS.append(container)
+
+    return {"Container": container, "Logs": logs}

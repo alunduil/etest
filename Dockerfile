@@ -1,12 +1,6 @@
 ARG PROFILE=amd64
-ARG LIBC=glibc
 FROM gentoo/stage3:${PROFILE}
 MAINTAINER Alex Brandt <alunduil@gentoo.org>
-
-# Compile and set a locale
-RUN if [ $LIBC = "glibc" ] ; then \
-	echo en_US.UTF8 UTF-8 >> /etc/locale.gen && echo en_US ISO-8859-1 >> /etc/locale.gen && locale-gen && eselect locale set en_US.utf8 ; \
-fi
 
 # Set environment variables
 ENV DISTDIR /tmp/distfiles.d
@@ -40,10 +34,3 @@ RUN mkdir -p /overlay
 RUN mkdir -p /etc/portage/package.accept_keywords
 
 RUN mkdir -p /etc/portage/repos.conf
-RUN if [ $LIBC = "musl" ] ; then \
-	touch /etc/portage/repos.conf/musl.conf && \
-	echo "[musl] \
-	location = /var/db/repos/musl \
-	sync-type = git \
-	sync-uri = https://github.com/gentoo-mirror/musl.git" >> /etc/portage/repos.conf/musl.conf ; \
-fi

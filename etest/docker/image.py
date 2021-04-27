@@ -9,6 +9,11 @@ import docker
 from etest.docker import common
 
 
+def build(*args, **kwargs):
+    """Build a docker image."""
+    return common.CLIENT.images.build(*args, **kwargs)
+
+
 def remove(*args, **kwargs):
     """Remove a Docker image."""
     return common.API_CLIENT.remove_image(*args, **kwargs)
