@@ -10,7 +10,9 @@ import itertools
 import logging
 import os
 import uuid
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
+import etest.ebuild
 from etest import docker, overlay
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,13 @@ logger = logging.getLogger(__name__)
 class Test(object):
     """A single test."""
 
-    def __init__(self, ebuild, with_test_phase=False, base_docker_image="alunduil/etest:latest", **kwargs):
+    def __init__(
+        self,
+        ebuild: etest.ebuild.Ebuild,
+        with_test_phase: bool = False,
+        base_docker_image: str = "alunduil/etest:latest",
+        **kwargs: Any
+    ) -> None:
         """Construct a test."""
         self.ebuild = ebuild
 
@@ -28,7 +36,7 @@ class Test(object):
         self.use_flags = kwargs.get("use_flags", [])
 
         self.failed = False
-        self.failed_command = None
+        self.failed_command: Optional[str] = None
 
         self.time = datetime.timedelta(0)
         self.output = ""
@@ -36,29 +44,29 @@ class Test(object):
         self.base_docker_image = base_docker_image
 
     @functools.cached_property
-    def name(self):
+    def name(self) -> str:
         """Name used to identify the test."""
-        _ = self.ebuild.cpv.replace("/", "_") + "[" + ",".join(self.use_flags)
+        n = self.ebuild.cpv.replace("/", "_") + "[" + ",".join(self.use_flags)
 
         if self.with_test_phase:
             if len(self.use_flags):
-                _ += ","
+                n += ","
 
-            _ += "test"
+            n += "test"
 
-        _ += "]"
+        n += "]"
 
-        return _
+        return n
 
     @functools.cached_property
-    def commands(self):
+    def commands(self) -> List[Any]:
         """Shell commands for the test."""
-        _ = []
+        commands = []
 
         if self.with_test_phase:
-            _.append(("bash", "-c", "echo {} test >> /etc/portage/package.env".format(self.ebuild.name)))
+            commands.append(("bash", "-c", "echo {} test >> /etc/portage/package.env".format(self.ebuild.name)))
 
-        _.append(
+        commands.append(
             (
                 "bash",
                 "-c",
@@ -66,7 +74,7 @@ class Test(object):
             ),
         )
 
-        _.append(
+        commands.append(
             (
                 "bash",
                 "-c",
@@ -76,35 +84,37 @@ class Test(object):
             ),
         )
 
-        _.append(("bash", "-c", "emerge -q -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)))
-        _.append(("bash", "-c", "etc-update --automode -5 >/dev/null 2>&1"))
+        commands.append(
+            ("bash", "-c", "emerge -q -f --autounmask-write {} >/dev/null 2>&1 || true".format(self.ebuild.cpv)),
+        )
+        commands.append(("bash", "-c", "etc-update --automode -5 >/dev/null 2>&1"))
 
-        _.append(("emerge", "-q", "--backtrack=130", self.ebuild.cpv))
+        commands.append(("emerge", "-q", "--backtrack=130", self.ebuild.cpv))  # type: ignore
 
-        return _
+        return commands
 
     @functools.cached_property
-    def environment(self):
+    def environment(self) -> Dict[str, str]:
         """Create a shell environment for the test."""
-        _ = {}
+        e = {}
 
         if "python" in self.ebuild.compat:
-            _["PYTHON_TARGETS"] = " ".join(self.ebuild.compat["python"])
+            e["PYTHON_TARGETS"] = " ".join(self.ebuild.compat["python"])
 
             # Things still want python2…☹
-            if "python2_7" not in _["PYTHON_TARGETS"]:
-                _["PYTHON_TARGETS"] += " python2_7"
+            if "python2_7" not in e["PYTHON_TARGETS"]:
+                e["PYTHON_TARGETS"] += " python2_7"
 
             # No time to test pypy right now
-            if "pypy3" in _["PYTHON_TARGETS"]:
-                _["PYTHON_TARGETS"] = _["PYTHON_TARGETS"].replace("pypy3", "")
+            if "pypy3" in e["PYTHON_TARGETS"]:
+                e["PYTHON_TARGETS"] = e["PYTHON_TARGETS"].replace("pypy3", "")
 
-            if "pypy" in _["PYTHON_TARGETS"]:
-                _["PYTHON_TARGETS"] = _["PYTHON_TARGETS"].replace("pypy", "")
+            if "pypy" in e["PYTHON_TARGETS"]:
+                e["PYTHON_TARGETS"] = e["PYTHON_TARGETS"].replace("pypy", "")
 
-        return _
+        return e
 
-    def run(self):
+    def run(self) -> None:
         """Run the test."""
         docker.pull(self.base_docker_image)
 
@@ -163,14 +173,17 @@ class Test(object):
 class Tests(object):
     """Collection of tests."""
 
-    def __init__(self, ebuild_selector=()):
+    def __init__(self, ebuild_selector: Optional[Tuple[str]] = None):
         """Construct a collection of tests."""
         self.overlay = overlay.Overlay()
 
         # NOTE: raises InvalidOverlayError when necessary
         logger.debug("self.overlay.directory: %s", self.overlay.directory)
 
-        self.ebuild_selector = [_.replace(".ebuild", "") for _ in ebuild_selector]
+        if ebuild_selector:
+            self.ebuild_selector = [_.replace(".ebuild", "") for _ in ebuild_selector]
+        else:
+            self.ebuild_selector = []
 
         if not len(self.ebuild_selector):
             _ = os.path.relpath(self.overlay.directory)
@@ -178,7 +191,7 @@ class Tests(object):
             if _.startswith(".."):
                 self.ebuild_selector.append(os.getcwd().replace(self.overlay.directory, "").strip("/"))
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Test, None, None]:
         """Iterate over the contained tests."""
         for ebuild in self.overlay.ebuilds:
             if not len(self.ebuild_selector) or any([_ in ebuild.cpv for _ in self.ebuild_selector]):

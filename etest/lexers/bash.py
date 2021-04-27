@@ -5,6 +5,7 @@
 
 import logging
 import os
+from typing import Any, Optional
 
 import click
 import ply.lex
@@ -33,10 +34,10 @@ reserved = (
 
 
 class BashLexer(object):
-    def __init__(self):
-        self.lexer = None
+    def __init__(self) -> None:
+        self.lexer: Optional[ply.lex.Lexer] = None
 
-    def build(self, *args, **kwargs):
+    def build(self, *args: Any, **kwargs: Any) -> None:
         self.lexer = ply.lex.lex(module=self, outputdir=os.path.dirname(__file__), errorlog=logger, *args, **kwargs)
         self.lexer.assignment = True
         self.lexer.curly = True
@@ -95,11 +96,11 @@ class BashLexer(object):
     t_AND_GREATER = r"&<"
     t_AND_GREATER_GREATER = r"&<<"
 
-    def t_ARITH_CMD(self, t):
+    def t_ARITH_CMD(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r"arith cmd"
         return t
 
-    def t_ARITH_FOR_EXPRS(self, t):
+    def t_ARITH_FOR_EXPRS(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r"arith for exprs"
         return t
 
@@ -110,14 +111,14 @@ class BashLexer(object):
 
     t_conditional_COND_CMD = r".*?(?=]])"  # We don't parse conditionals
 
-    def t_conditional_COND_END(self, t):
+    def t_conditional_COND_END(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r"]]"
 
         t.lexer.begin("INITIAL")
 
         return t
 
-    def t_COND_START(self, t):
+    def t_COND_START(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r"\[\["
 
         if t.lexer.lexstate == "INITIAL":
@@ -134,24 +135,25 @@ class BashLexer(object):
     t_LESS_LESS_LESS = r"<<<"
     t_LESS_LESS_MINUS = r"<<-"
 
-    def t_newline(self, t):
+    def t_newline(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r"\n"
+
         t.lexer.lineno += 1
         t.type = "NEWLINE"
         return t
 
-    def t_NEWLINE_ESCAPED(self, t):
+    def t_NEWLINE_ESCAPED(self, t: ply.lex.LexToken) -> None:
         r"\\\n"
         t.lexer.lineno += 1
 
-    def t_NUMBER(self, t):
+    def t_NUMBER(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r"\d+"
         t.value = int(t.value)
         return t
 
     t_OR_OR = r"\|\|"
 
-    def t_REDIR_WORD(self, t):
+    def t_REDIR_WORD(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r"stdin|stdout|stderr"
         return t
 
@@ -164,10 +166,11 @@ class BashLexer(object):
 
     t_ignore_WHITESPACE = r"(?!\n)\s"
 
-    def t_WORD(self, t):
+    def t_WORD(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         r'(?:(?:[-a-zA-Z/\.!+\\_*{][^;\s"\'()]*)|(?:(?<=\$)|\$)\((?:[^\)]|(?:\\\\)*\\\))+\)|\$\{(?:[^\}]|(?:\\\\)*\\\})+\}|"(?:[^"]|(?:\\\\)*\\")*"|\'(?:[^\']|(?:\\\\)*\\\')*\')+'
 
         logger.debug("t.lexer.assignment: %s", t.lexer.assignment)
+
         logger.debug(
             "t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != =: %s",
             t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != "=",
@@ -371,7 +374,7 @@ class BashLexer(object):
     t_ignore = ""
     t_conditional_ignore = ""
 
-    def t_error(self, t):
+    def t_error(self, t: ply.lex.LexToken) -> ply.lex.LexToken:
         line_start = t.lexer.lexdata.rfind("\n", 0, t.lexpos)
 
         if line_start < 0:

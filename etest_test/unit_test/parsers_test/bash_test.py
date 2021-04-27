@@ -8,6 +8,7 @@ import copy
 import logging
 import os
 import unittest
+from typing import Any, Callable, Dict, Mapping, Tuple, TypeVar
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
@@ -15,46 +16,51 @@ from etest_test.fixtures_test.scripts_test import SCRIPTS
 
 logger = logging.getLogger(__name__)
 
+TC = TypeVar("TC", bound=unittest.TestCase)
+
 
 class BaseParserMetaTest(type):
     """Bash Parser Metatest."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(cls, name: str, bases: Tuple[type, ...], dct: Dict[str, Any]) -> None:
         """Construct a Bash Parser Meta Test."""
         super(BaseParserMetaTest, cls).__init__(name, bases, dct)
 
-        def gen_script_case(script):
-            def case(self):
-                self.lexer = BashLexer()
-                self.lexer.build()
+        def gen_script_case(
+            script: Mapping[str, Any],
+        ) -> Callable[[TC], None]:
+            def case(self: TC) -> None:
+                lexer = BashLexer()
+                lexer.build()
 
-                self.parser = BashParser()
-                self.parser.build(
+                parser = BashParser()
+                parser.build(
                     debug=1,
                     debugfile=os.path.join(os.path.dirname(__file__), "parser.out"),
                     debuglog=None,
                 )
 
+                assert parser.parser is not None
+
                 if "correct" in script:
                     logger.debug("script[text]: %r", script["text"])
 
-                    self.parser.parser.parse(
+                    assert parser is not None
+                    assert parser.parser is not None
+
+                    parser.parser.parse(
                         debug=logger,
                         input=script["text"],
-                        lexer=self.lexer.lexer,
+                        lexer=lexer.lexer,
                     )
 
-                    self.assertEqual(script["symbols"], self.parser.symbols)
+                    self.assertEqual(script["symbols"], parser.symbols)
                 else:
-                    self.assertRaises(
-                        BashSyntaxError,
-                        self.parser.parser.parse,
-                        input=script["text"],
-                        lexer=self.lexer.lexer,
-                    )
+                    with self.assertRaises(BashSyntaxError):
+                        parser.parser.parse(input=script["text"], lexer=lexer.lexer)
 
-            case.__name__ = "test_" + script["uuid"]
-            case.__doc__ = "parsers.bash—{0[uuid]}—{0[description]}".format(script)
+            case.__name__ = f"test_{script['uuid']}"
+            case.__doc__ = f"parsers.bash—{script['uuid']}—{script['description']}"
 
             return case
 

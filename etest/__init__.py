@@ -9,6 +9,8 @@ import logging
 import signal
 import sys
 import threading
+from types import FrameType
+from typing import Optional, Tuple
 
 import click
 
@@ -19,7 +21,7 @@ logger.propagate = False
 logger.addHandler(logging.NullHandler())
 
 
-def echo_check(check):
+def echo_check(check: tests.Test) -> None:
     """Print a check status."""
     if check.failed:
         click.secho("F", nl=False, fg="red")
@@ -27,7 +29,7 @@ def echo_check(check):
         click.secho("·", nl=False, fg="green")
 
 
-def echo_check_verbose(check):
+def echo_check_verbose(check: tests.Test) -> None:
     """Print a check if verbose was requested."""
     click.echo("[", nl=False)
     if check.failed:
@@ -49,7 +51,7 @@ def echo_check_verbose(check):
 @click.option("-v", "--verbose", is_flag=True, default=False, help="provide more output")
 @click.version_option(information.VERSION)
 @click.argument("ebuilds", nargs=-1)
-def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
+def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, ebuilds: Optional[Tuple[str]]) -> None:
     """Test one or more ebuilds."""
     signal.signal(signal.SIGINT, sigint_handler)
 
@@ -59,7 +61,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
     output_lock = threading.Lock()
     jobs_limit_sem = threading.BoundedSemaphore(value=jobs)
 
-    def _(check):
+    def _(check: tests.Test) -> None:
         if not dry_run:
             check.run()
 
@@ -115,7 +117,7 @@ def etest(dry_run, fast, jobs, quiet, verbose, ebuilds):
     sys.exit(len(failures))
 
 
-def sigint_handler(signum, frame):
+def sigint_handler(signals: signal.Signals, frame: FrameType) -> None:
     """Interrupt signal handler."""
     docker.container.CREATE = False
 
