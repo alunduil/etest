@@ -4,7 +4,6 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import functools
 import importlib
 import itertools
 import logging
@@ -12,34 +11,6 @@ import os
 import sys
 
 logger = logging.getLogger(__name__)
-
-
-def mock(name):
-    """Mock the given name."""
-    _foo = "foo"
-    logger.debug(f"_foo: {_foo}")
-
-    def _(func):
-        @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
-            logger.info("STARTING: mock " + name)
-
-            if name in self.mocks_mask:
-                logger.info("STOPPING: mock " + name + "—MASKED")
-
-                setattr(self, "is_mocked_" + name, False)
-                return False
-
-            func(self, *args, **kwargs)
-
-            logger.info("STOPPING: mock " + name)
-
-            setattr(self, "is_mocked_" + name, True)
-            return True
-
-        return wrapper
-
-    return _
 
 
 def import_directory(module_basename, directory, update_path=False):

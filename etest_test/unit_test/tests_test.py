@@ -15,11 +15,8 @@ import logging
 import os
 import unittest
 import unittest.mock
-from typing import Set
 
-from etest import tests
-from etest_test import helpers_test
-from etest_test.common_test import BaseEtestTest
+import etest.tests as sut
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
 from etest_test.fixtures_test.ebuilds_test import EBUILDS
 from etest_test.fixtures_test.tests_test import TESTS
@@ -42,7 +39,7 @@ class BaseTestMetaTest(type):
             kwargs.setdefault("use_flags", test.get("use_flags", []))
 
             def case(self):
-                self.test = tests.Test(self.mocked_ebuild, **kwargs)
+                self.test = sut.Test(self.mocked_ebuild, **kwargs)
 
                 self.assertEqual(self.test.ebuild, self.mocked_ebuild)
                 self.assertEqual(self.test.with_test_phase, test["with_test_phase"])
@@ -72,7 +69,7 @@ class BaseTestMetaTest(type):
                 type(self.mocked_ebuild).cpv = unittest.mock.PropertyMock(return_value=test["ebuild"]["cpv"])
                 type(self.mocked_ebuild).name = unittest.mock.PropertyMock(return_value=test["ebuild"]["name"])
 
-                self.test = tests.Test(self.mocked_ebuild, **kwargs)
+                self.test = sut.Test(self.mocked_ebuild, **kwargs)
 
                 print(f"test: {test}")
                 print(f"prop: {prop}")
@@ -95,13 +92,11 @@ class BaseTestMetaTest(type):
             kwargs.setdefault("use_flags", test.get("use_flags", []))
 
             def case(self):
-                self.test = tests.Test(self.mocked_ebuild, **kwargs)
+                self.test = sut.Test(self.mocked_ebuild, **kwargs)
 
-                self.mock_docker()
-
-                self.test.run()
-
-                self.mocked_docker.pull.assert_called_once()
+                with unittest.mock.patch.object(sut, "docker") as mocked_docker:
+                    self.test.run()
+                    mocked_docker.pull.assert_called_once()
 
             case.__name__ = "test_run_" + str(test["uuid"])
             case.__doc__ = "test.Test(mocked_ebuild, with_test_phase = {0[with_test_phase]}, base_docker_image = {0[base_docker_image]}, use_flags = {0[use_flags]}).run()".format(
@@ -125,11 +120,8 @@ class BaseTestMetaTest(type):
             setattr(cls, _.__name__, _)
 
 
-class TestUnitTest(BaseEtestTest, metaclass=BaseTestMetaTest):
+class TestUnitTest(unittest.TestCase, metaclass=BaseTestMetaTest):
     """Tests for Test Case."""
-
-    mocks_mask: Set = set()
-    mocks: Set = set()
 
     def setUp(self):
         """Set Up Test Case."""
@@ -137,19 +129,9 @@ class TestUnitTest(BaseEtestTest, metaclass=BaseTestMetaTest):
 
         self.mocked_ebuild = unittest.mock.MagicMock()
 
-    mocks.add("docker")
 
-    @helpers_test.mock("docker")
-    def mock_docker(self):
-        """Mock docker."""
-        self._patch("docker")
-
-
-class TestsUnitTest(BaseEtestTest):
+class TestsUnitTest(unittest.TestCase):
     """Tests for Tests Container."""
-
-    mocks_mask: Set = set()
-    mocks: Set = set()
 
     def setUp(self):
         """Set Up Test Case."""
@@ -160,7 +142,13 @@ class TestsUnitTest(BaseEtestTest):
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 
-        self.mock_overlay()
+        patcher = unittest.mock.patch.object(sut, "overlay")
+        self.mocked_overlay = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        self.mocked_overlay_overlay = unittest.mock.MagicMock()
+        self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay
+
         type(self.mocked_overlay_overlay).directory = unittest.mock.PropertyMock(return_value=self.mocked_directory)
 
         ebuilds = []
@@ -179,26 +167,19 @@ class TestsUnitTest(BaseEtestTest):
 
         type(self.mocked_overlay_overlay).ebuilds = unittest.mock.PropertyMock(return_value=ebuilds)
 
-        self._patch("Test")
-
-    mocks.add("overlay")
-
-    @helpers_test.mock("overlay")
-    def mock_overlay(self):
-        """Mock overlay."""
-        self._patch("overlay")
-        self.mocked_overlay_overlay = unittest.mock.MagicMock()
-        self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay
+        patcher = unittest.mock.patch.object(sut, "Test")
+        self.mocked_Test = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_tests(self):
         """tests.Tests()."""
-        self.tests = tests.Tests()
+        self.tests = sut.Tests()
         self.assertEqual(self.tests.ebuild_selector, [])
         self.assertEqual(len(list(self.tests)), len(self.test_calls))
         self.assertEqual(self.mocked_Test.mock_calls, self.test_calls)
 
     def test_tests_with_filter_with_version(self):
         """tests.Tests(('etest-9999.ebuild',))."""
-        self.tests = tests.Tests(("etest-9999.ebuild",))
+        self.tests = sut.Tests(("etest-9999.ebuild",))
         self.assertEqual(self.tests.ebuild_selector, ["etest-9999"])
         self.assertEqual(len(list(self.tests)), 2)

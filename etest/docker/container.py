@@ -4,7 +4,6 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-import re
 from typing import List
 
 from docker.models.containers import Container

@@ -9,10 +9,8 @@ import logging
 import os
 import unittest
 import unittest.mock
-from typing import Set
 
 from etest.ebuild import Ebuild
-from etest_test.common_test import BaseEtestTest
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
 from etest_test.fixtures_test.ebuilds_test import EBUILDS
 
@@ -72,11 +70,8 @@ class BaseEbuildMetaTest(type):
                 setattr(cls, _.__name__, _)
 
 
-class EbuildUnitTest(BaseEtestTest, metaclass=BaseEbuildMetaTest):
+class EbuildUnitTest(unittest.TestCase, metaclass=BaseEbuildMetaTest):
     """Ebuild Unit Test."""
-
-    mocks_mask: Set[str] = BaseEtestTest.mocks_mask
-    mocks: Set[str] = BaseEtestTest.mocks
 
     def setUp(self):
         """Set up test cases."""

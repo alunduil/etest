@@ -8,28 +8,23 @@ import functools
 import logging
 import os
 import tempfile
-from typing import Set
+import unittest.mock
 
-from etest import overlay
-from etest_test.common_test import BaseEtestTest
+import etest.overlay as sut
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
 
 logger = logging.getLogger(__name__)
 
 
-class BaseOverlayTest(BaseEtestTest):
+@unittest.mock.patch.object(sut, "ebuild")
+class BaseOverlayTest(unittest.TestCase):
     """Overlay test."""
-
-    mocks_mask: Set = set()
-    mocks: Set = set()
 
     def setUp(self):
         """Set up test cases."""
         super().setUp()
 
-        self.mock_ebuild()
-
-        self.overlay = overlay.Overlay()
+        self.overlay = sut.Overlay()
 
 
 class InvalidOverlayUnitTest(BaseOverlayTest):
@@ -37,7 +32,7 @@ class InvalidOverlayUnitTest(BaseOverlayTest):
 
     def test_invalid_overlay(self):
         """overlay.Overlay()—invalid overlay."""
-        self.assertRaises(overlay.InvalidOverlayError, getattr, self.overlay, "directory")
+        self.assertRaises(sut.InvalidOverlayError, getattr, self.overlay, "directory")
 
 
 class ValidEmptyOverlayUnitTest(BaseOverlayTest):
