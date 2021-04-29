@@ -24,4 +24,9 @@ import click
 @click.option("--name", type=Path, default=os.path.basename(sys.argv[0]), help="Name of the directory?")
 def main(hardened: bool, multilib: bool, systemd: bool, architecture: str, environment: List[str], name: Path) -> None:
     """Build the etest image."""
-    pass
+    click.echo(f"hardened: {hardened}")
+    click.echo(f"multilib: {multilib}")
+    click.echo(f"systemd: {systemd}")
+    click.echo(f"architecture: {architecture}")
+    click.echo(f"environment: {environment}")
+    click.echo(f"name: {name}")
