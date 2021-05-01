@@ -21,7 +21,7 @@ def echo_check(check: tests.Test) -> None:
     if check.failed:
         click.secho("F", nl=False, fg="red")
     else:
-        click.secho("·", nl=False, fg="green")
+        click.secho(".", nl=False, fg="green")
 
 
 def echo_check_verbose(check: tests.Test) -> None:
