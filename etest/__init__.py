@@ -9,10 +9,12 @@ import logging
 import signal
 import sys
 import threading
+from typing import List
 
 import click
 
 from etest import docker, information, qemu, tests
+from etest.profile import Profile
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -24,7 +26,7 @@ def echo_check(check: tests.Test):
     if check.failed:
         click.secho("F", nl=False, fg="red")
     else:
-        click.secho("OK", nl=False, fg="green")
+        click.secho(".", nl=False, fg="green")
 
 
 def echo_check_verbose(check: tests.Test):
@@ -42,22 +44,42 @@ def echo_check_verbose(check: tests.Test):
 
 
 @click.command()
-@click.option("-d", "--dry-run", is_flag=True, default=False, help="report actions but do not run tests")
-@click.option("-f", "--fast", is_flag=True, default=False, help="stop at first failure")
-@click.option("-j", "--jobs", default=1, help="number of test to run simultaneously")
-@click.option("-q", "--quiet", is_flag=True, default=False, help="suppress all output")
-@click.option("-v", "--verbose", is_flag=True, default=False, help="provide more output")
+@click.option("-d", "--dry-run", is_flag=True, default=False, help="Report actions but do not run tests.")
+@click.option("-f", "--fast", is_flag=True, default=False, help="Stop at first failure.")
+@click.option("-j", "--jobs", default=1, help="Number of test to run simultaneously.")
+@click.option("-q", "--quiet", is_flag=True, default=False, help="Suppress all output.")
+@click.option("-v", "--verbose", is_flag=True, default=False, help="Provide more output.")
+@click.option("--hardened/--no-hardened", default=False, help="Use a hardened profile.")
+@click.option("--multilib/--no-multilib", default=True, help="Use a multilib profile.")
+@click.option("--systemd/--no-systemd", default=False, help="Use a systemd profile.")
 @click.option(
-    "-a",
-    "--arch",
     "--architecture",
-    default="amd64",
+    "--arch",
     type=click.Choice(["amd64", "x86", "arm64", "armv5", "armv7", "ppc64"], case_sensitive=False),
-    help="architecture to test against",
+    default="amd64",
+    help="Architecture for the built image.",
+)
+@click.option(
+    "--libc",
+    type=click.Choice(["glibc", "musl", "uclibc"], case_sensitive=False),
+    default="glibc",
+    help="libc for the built image.",
 )
 @click.version_option(information.VERSION)
 @click.argument("ebuilds", nargs=-1)
-def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, arch: str, ebuilds: str):
+def etest(
+    dry_run: bool,
+    fast: bool,
+    jobs: int,
+    quiet: bool,
+    verbose: bool,
+    hardened: bool,
+    multilib: bool,
+    systemd: bool,
+    architecture: str,
+    libc: str,
+    ebuilds: List[str],
+):
     """Test one or more ebuilds."""
     signal.signal(signal.SIGINT, sigint_handler)
 
@@ -67,7 +89,10 @@ def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, arch
     output_lock = threading.Lock()
     jobs_limit_sem = threading.BoundedSemaphore(value=jobs)
 
-    with qemu.qemu(arch):
+    profile = Profile(quiet, architecture, libc, hardened, multilib, systemd)
+    profile.build()
+
+    with qemu.qemu(profile.arch):
 
         def _(check):
             if not dry_run:
@@ -89,7 +114,7 @@ def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, arch
 
             jobs_limit_sem.release()
 
-        for check in tests.Tests(arch, ebuilds):
+        for check in tests.Tests(profile, ebuilds):
             jobs_limit_sem.acquire()
 
             if fast and len(failures):
