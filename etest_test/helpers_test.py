@@ -13,7 +13,7 @@ import sys
 logger = logging.getLogger(__name__)
 
 
-def import_directory(module_basename, directory, update_path=False):
+def import_directory(module_basename: str, directory: str, update_path: bool = False) -> None:
     """Load all modules in a given directory recursively.
 
     All python modules in the given directory will be imported.
@@ -53,7 +53,7 @@ def import_directory(module_basename, directory, update_path=False):
             name = module_basename + "." + name
 
             known_symbols = set()
-            name = ".".join([_ for _ in name.split(".") if _ not in known_symbols and not known_symbols.add(_)])
+            name = ".".join([_ for _ in name.split(".") if _ not in known_symbols and not known_symbols.add(_)])  # type: ignore
 
             if len(name):
                 module_names.append(name)

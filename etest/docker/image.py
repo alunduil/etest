@@ -4,17 +4,19 @@
 # etest is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+from typing import Any
+
 import docker
 
 from etest.docker import common
 
 
-def remove(*args, **kwargs):
+def remove(*args: Any, **kwargs: Any) -> Any:
     """Remove a Docker image."""
     return common.API_CLIENT.remove_image(*args, **kwargs)
 
 
-def pull(image_name):
+def pull(image_name: str) -> None:
     """Pull Docker image by name and clean up any old images."""
     image_id = None
 

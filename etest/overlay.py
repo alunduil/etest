@@ -7,6 +7,7 @@
 import functools
 import logging
 import os
+from typing import Generator
 
 from etest import ebuild
 
@@ -17,22 +18,22 @@ class Overlay(object):
     """A portage defined overlay."""
 
     @functools.cached_property
-    def directory(self):
+    def directory(self) -> str:
         """Directory containing overlay."""
-        _ = os.getcwd()
+        path = os.getcwd()
 
-        while _ != "/":
-            if os.path.exists(os.path.join(_, "metadata", "layout.conf")):
+        while path != "/":
+            if os.path.exists(os.path.join(path, "metadata", "layout.conf")):
                 break
 
-            _ = os.path.dirname(_)
+            path = os.path.dirname(path)
         else:
             raise InvalidOverlayError("not in a valid ebuild repository directory")
 
-        return _
+        return path
 
     @property
-    def ebuilds(self):
+    def ebuilds(self) -> Generator[ebuild.Ebuild, None, None]:
         """Contained ebuilds in overlay."""
         for path, directories, files in os.walk(self.directory):
             if "files" in directories:

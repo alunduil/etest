@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class BaseOverlayTest(unittest.TestCase):
     """Overlay test."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test cases."""
         super().setUp()
 
@@ -30,7 +30,7 @@ class BaseOverlayTest(unittest.TestCase):
 class InvalidOverlayUnitTest(BaseOverlayTest):
     """Invalid overlays."""
 
-    def test_invalid_overlay(self):
+    def test_invalid_overlay(self) -> None:
         """overlay.Overlay()—invalid overlay."""
         self.assertRaises(sut.InvalidOverlayError, getattr, self.overlay, "directory")
 
@@ -38,7 +38,7 @@ class InvalidOverlayUnitTest(BaseOverlayTest):
 class ValidEmptyOverlayUnitTest(BaseOverlayTest):
     """Empty overlays."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test cases."""
         super().setUp()
 
@@ -57,11 +57,11 @@ class ValidEmptyOverlayUnitTest(BaseOverlayTest):
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 
-    def test_empty_overlay_discovery(self):
+    def test_empty_overlay_discovery(self) -> None:
         """overlay.Overlay().directory—empty overlay."""
         self.assertEqual(self.overlay.directory, self.mocked_directory)
 
-    def test_empty_overlay_ebuilds(self):
+    def test_empty_overlay_ebuilds(self) -> None:
         """len(list(overlay.Overlay().ebuilds)) == 0—empty overlay."""
         self.assertEqual(0, len(list(self.overlay.ebuilds)))
 
@@ -69,7 +69,7 @@ class ValidEmptyOverlayUnitTest(BaseOverlayTest):
 class ValidNonEmptyOverlayUnitTest(BaseOverlayTest):
     """Check Empty Overlays."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test cases."""
         super().setUp()
 
@@ -78,11 +78,11 @@ class ValidNonEmptyOverlayUnitTest(BaseOverlayTest):
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 
-    def test_nonempty_overlay_discovery(self):
+    def test_nonempty_overlay_discovery(self) -> None:
         """overlay.Overlay().directory—nonempty overlay."""
         self.assertEqual(self.overlay.directory, self.mocked_directory)
 
-    def test_nonempty_overlay_ebuilds(self):
+    def test_nonempty_overlay_ebuilds(self) -> None:
         """len(list(overlay.Overlay().ebuilds)) == 1—nonempty overlay."""
         self.assertEqual(1, len(list(self.overlay.ebuilds)))
 
@@ -90,7 +90,7 @@ class ValidNonEmptyOverlayUnitTest(BaseOverlayTest):
 class ValidNonEmptyOverlaySubdirectoryUnitTest(BaseOverlayTest):
     """Check Non-empty Overlay Subdirectory Tests."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test cases."""
         super().setUp()
 
@@ -100,10 +100,10 @@ class ValidNonEmptyOverlaySubdirectoryUnitTest(BaseOverlayTest):
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
 
-    def test_nonempty_overlay_discovery(self):
+    def test_nonempty_overlay_discovery(self) -> None:
         """overlay.Overlay().directory—nonempty overlay,subdirectory."""
         self.assertEqual(self.overlay.directory, self.mocked_overlay_directory)
 
-    def test_nonempty_overlay_ebuilds(self):
+    def test_nonempty_overlay_ebuilds(self) -> None:
         """Number of ebuilds equals 1 for non-empty subdirectories."""
         self.assertEqual(1, len(list(self.overlay.ebuilds)))

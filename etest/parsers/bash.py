@@ -6,6 +6,7 @@
 import logging
 import os
 import re
+from typing import Any, Dict, Generator, List, Tuple, Union
 
 import ply.yacc
 
@@ -14,7 +15,7 @@ from etest.lexers.bash import BashLexer, BashSyntaxError
 logger = logging.getLogger(__name__)
 
 
-def split_expansion(text):
+def split_expansion(text: str) -> Generator[str, None, None]:
     """Properly split an expansion's items at commas."""
 
     expansion = ""
@@ -37,7 +38,7 @@ def split_expansion(text):
     yield expansion
 
 
-def expand_word(word):
+def expand_word(word: str) -> Tuple[Any, ...]:
     """Expand any BASH expansions and return the resulting tuple of words."""
 
     logger.debug("word: %s", word)
@@ -80,12 +81,12 @@ class BashParser(object):
         ("right", "|", "BAR_AND"),
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.parser = None
 
-        self.symbols = {}
+        self.symbols: Dict[str, Union[str, int]] = {}
 
-    def build(self, *args, **kwargs):
+    def build(self, *args: Any, **kwargs: Any) -> None:
         self.parser = ply.yacc.yacc(
             module=self,
             outputdir=os.path.dirname(__file__),
@@ -99,7 +100,7 @@ class BashParser(object):
     # Modified Productions from the BASH Grammar
     #
 
-    def p_inputunit_list(self, p):
+    def p_inputunit_list(self, p: ply.yacc.YaccProduction) -> None:
         """inputunit_list : inputunit
         | inputunit_list inputunit
 
@@ -108,7 +109,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("inputunit_list: p[%d]: %s", _, p[_])
 
-    def p_inputunit(self, p):
+    def p_inputunit(self, p: ply.yacc.YaccProduction) -> None:
         """inputunit : simple_list simple_list_terminator
         | NEWLINE
 
@@ -117,7 +118,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("inputunit: p[%d]: %s", _, p[_])
 
-    def p_word_list_word(self, p):
+    def p_word_list_word(self, p: ply.yacc.YaccProduction) -> None:
         """word_list : WORD"""
 
         p[0] = expand_word(p[1])
@@ -125,7 +126,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("world_list: p[%d]: %s", _, p[_])
 
-    def p_word_list_list(self, p):
+    def p_word_list_list(self, p: ply.yacc.YaccProduction) -> None:
         """word_list : word_list newline_list WORD"""
 
         p[0] = p[1] + expand_word(p[3])
@@ -133,7 +134,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("world_list: p[%d]: %s", _, p[_])
 
-    def p_redirection(self, p):
+    def p_redirection(self, p: ply.yacc.YaccProduction) -> None:
         """redirection : '>' WORD
         | '<' WORD
         | NUMBER '>' WORD
@@ -184,7 +185,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("redirection: p[%d]: %s", _, p[_])
 
-    def p_simple_command_element_word(self, p):
+    def p_simple_command_element_word(self, p: ply.yacc.YaccProduction) -> None:
         """simple_command_element : WORD"""
 
         p[0] = ("WORD", p[1])
@@ -192,7 +193,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_command_element: p[%d]: %s", _, p[_])
 
-    def p_simple_command_element_assignment(self, p):
+    def p_simple_command_element_assignment(self, p: ply.yacc.YaccProduction) -> None:
         """simple_command_element : assignment_word"""
 
         p[0] = ("ASSIGNMENT", p[1])
@@ -200,7 +201,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_command_element: p[%d]: %s", _, p[_])
 
-    def p_simple_command_element_redirection(self, p):
+    def p_simple_command_element_redirection(self, p: ply.yacc.YaccProduction) -> None:
         """simple_command_element : redirection"""
 
         p[0] = ("REDIRECTION",)
@@ -208,7 +209,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_command_element: p[%d]: %s", _, p[_])
 
-    def p_redirection_list(self, p):
+    def p_redirection_list(self, p: ply.yacc.YaccProduction) -> None:
         """redirection_list : redirection
         | redirection_list redirection
 
@@ -217,7 +218,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("redirection_list: p[%d]: %s", _, p[_])
 
-    def p_simple_command(self, p):
+    def p_simple_command(self, p: ply.yacc.YaccProduction) -> None:
         """simple_command : simple_command_element
         | simple_command curly_off simple_command_element
 
@@ -226,7 +227,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_command: p[%d]: %s", _, p[_])
 
-    def p_command(self, p):
+    def p_command(self, p: ply.yacc.YaccProduction) -> None:
         """command : simple_command curly_on
         | shell_command
         | shell_command redirection_list
@@ -240,7 +241,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("command: p[%d]: %s", _, p[_])
 
-    def p_shell_commend(self, p):
+    def p_shell_commend(self, p: ply.yacc.YaccProduction) -> None:
         """shell_command : for_command
         | case_command
         | WHILE compound_list DO compound_list DONE
@@ -258,7 +259,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("shell_command: p[%d]: %s", _, p[_])
 
-    def p_for_command(self, p):
+    def p_for_command(self, p: ply.yacc.YaccProduction) -> None:
         """for_command : FOR WORD newline_list DO compound_list DONE
         | FOR WORD newline_list LBRACE compound_list '}'
         | FOR WORD ';' newline_list DO compound_list DONE
@@ -275,7 +276,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("for_command: p[%d]: %s", _, p[_])
 
-    def p_arith_for_command(self, p):
+    def p_arith_for_command(self, p: ply.yacc.YaccProduction) -> None:
         """arith_for_command : FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE
         | FOR ARITH_FOR_EXPRS list_terminator newline_list LBRACE compound_list '}'
         | FOR ARITH_FOR_EXPRS DO compound_list DONE
@@ -286,7 +287,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("arith_for_command: p[%d]: %s", _, p[_])
 
-    def p_select_command(self, p):
+    def p_select_command(self, p: ply.yacc.YaccProduction) -> None:
         """select_command : SELECT WORD newline_list DO list DONE
         | SELECT WORD newline_list LBRACE list '}'
         | SELECT WORD ';' newline_list DO list DONE
@@ -299,7 +300,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("select_command: p[%d]: %s", _, p[_])
 
-    def p_case_command(self, p):
+    def p_case_command(self, p: ply.yacc.YaccProduction) -> None:
         """case_command : CASE WORD newline_list IN newline_list ESAC
         | CASE WORD newline_list IN case_clause_sequence newline_list ESAC
         | CASE WORD newline_list IN case_clause ESAC
@@ -309,7 +310,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("case_command: p[%d]: %s", _, p[_])
 
-    def p_function_def_without_keyword(self, p):
+    def p_function_def_without_keyword(self, p: ply.yacc.YaccProduction) -> None:
         """function_def : WORD '(' ')' newline_list function_body"""
 
         p[0] = ("FUNCTION", p[1], p[5])
@@ -317,7 +318,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("function_def: p[%d]: %s", _, p[_])
 
-    def p_function_def_with_keyword_and_parens(self, p):
+    def p_function_def_with_keyword_and_parens(self, p: ply.yacc.YaccProduction) -> None:
         """function_def : FUNCTION WORD '(' ')' newline_list function_body"""
 
         p[0] = (p[1], p[2], p[6])
@@ -325,7 +326,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("function_def: p[%d]: %s", _, p[_])
 
-    def p_function_def(self, p):
+    def p_function_def(self, p: ply.yacc.YaccProduction) -> None:
         """function_def : FUNCTION WORD newline_list function_body"""
 
         p[0] = (p[1], p[2], p[4])
@@ -333,7 +334,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("function_def: p[%d]: %s", _, p[_])
 
-    def p_function_body(self, p):
+    def p_function_body(self, p: ply.yacc.YaccProduction) -> None:
         """function_body : shell_command
         | shell_command redirection_list
 
@@ -342,13 +343,13 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("function_body: p[%d]: %s", _, p[_])
 
-    def p_subshell(self, p):
+    def p_subshell(self, p: ply.yacc.YaccProduction) -> None:
         """subshell : '(' compound_list ')' """
 
         for _ in range(len(p)):
             logger.debug("subshell: p[%d]: %s", _, p[_])
 
-    def p_coproc(self, p):
+    def p_coproc(self, p: ply.yacc.YaccProduction) -> None:
         """coproc : COPROC shell_command
         | COPROC shell_command redirection_list
         | COPROC WORD shell_command
@@ -360,7 +361,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("coproc: p[%d]: %s", _, p[_])
 
-    def p_if_command(self, p):
+    def p_if_command(self, p: ply.yacc.YaccProduction) -> None:
         """if_command : IF compound_list THEN compound_list FI
         | IF compound_list THEN compound_list ELSE compound_list FI
         | IF compound_list THEN compound_list elif_clause FI
@@ -370,25 +371,25 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("subshell: p[%d]: %s", _, p[_])
 
-    def p_group_command(self, p):
+    def p_group_command(self, p: ply.yacc.YaccProduction) -> None:
         """group_command : LBRACE compound_list '}' """
 
         for _ in range(len(p)):
             logger.debug("group_command: p[%d]: %s", _, p[_])
 
-    def p_arith_command(self, p):
+    def p_arith_command(self, p: ply.yacc.YaccProduction) -> None:
         """arith_command : ARITH_CMD"""
 
         for _ in range(len(p)):
             logger.debug("arith_command: p[%d]: %s", _, p[_])
 
-    def p_cond_command(self, p):
+    def p_cond_command(self, p: ply.yacc.YaccProduction) -> None:
         """cond_command : COND_START COND_CMD COND_END"""
 
         for _ in range(len(p)):
             logger.debug("cond_command: p[%d]: %s", _, p[_])
 
-    def p_elif_clause(self, p):
+    def p_elif_clause(self, p: ply.yacc.YaccProduction) -> None:
         """elif_clause : ELIF compound_list THEN compound_list
         | ELIF compound_list THEN compound_list ELSE compound_list
         | ELIF compound_list THEN compound_list elif_clause
@@ -398,7 +399,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("elif_clause: p[%d]: %s", _, p[_])
 
-    def p_case_clause(self, p):
+    def p_case_clause(self, p: ply.yacc.YaccProduction) -> None:
         """case_clause : pattern_list
         | case_clause_sequence pattern_list
 
@@ -407,7 +408,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("case_clause: p[%d]: %s", _, p[_])
 
-    def p_pattern_list(self, p):
+    def p_pattern_list(self, p: ply.yacc.YaccProduction) -> None:
         """pattern_list : newline_list pattern ')' compound_list
         | newline_list pattern ')' newline_list
         | newline_list '(' pattern ')' compound_list
@@ -418,7 +419,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("pattern_list: p[%d]: %s", _, p[_])
 
-    def p_case_clause_sequence(self, p):
+    def p_case_clause_sequence(self, p: ply.yacc.YaccProduction) -> None:
         """case_clause_sequence : pattern_list SEMI_SEMI
         | case_clause_sequence pattern_list SEMI_SEMI
         | pattern_list SEMI_AND
@@ -431,7 +432,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("case_clause_sequence: p[%d]: %s", _, p[_])
 
-    def p_pattern(self, p):
+    def p_pattern(self, p: ply.yacc.YaccProduction) -> None:
         """pattern : WORD
         | pattern '|' WORD
 
@@ -440,13 +441,13 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("pattern: p[%d]: %s", _, p[_])
 
-    def p_list(self, p):
+    def p_list(self, p: ply.yacc.YaccProduction) -> None:
         """list : newline_list list0"""
 
         for _ in range(len(p)):
             logger.debug("list: p[%d]: %s", _, p[_])
 
-    def p_compound_list(self, p):
+    def p_compound_list(self, p: ply.yacc.YaccProduction) -> None:
         """compound_list : list
         | newline_list list1
 
@@ -455,7 +456,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("compound_list: p[%d]: %s", _, p[_])
 
-    def p_list0(self, p):
+    def p_list0(self, p: ply.yacc.YaccProduction) -> None:
         """list0 : list1 NEWLINE newline_list
         | list1 '&' newline_list
         | list1 ';' newline_list
@@ -465,7 +466,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("list0: p[%d]: %s", _, p[_])
 
-    def p_list1(self, p):
+    def p_list1(self, p: ply.yacc.YaccProduction) -> None:
         """list1 : list1 AND_AND newline_list list1
         | list1 OR_OR newline_list list1
         | list1 '&' newline_list list1
@@ -478,13 +479,13 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("list2: p[%d]: %s", _, p[_])
 
-    def p_simple_list_terminator(self, p):
+    def p_simple_list_terminator(self, p: ply.yacc.YaccProduction) -> None:
         """simple_list_terminator : NEWLINE"""
 
         for _ in range(len(p)):
             logger.debug("simple_list_terminator: p[%d]: %s", _, p[_])
 
-    def p_list_terminator(self, p):
+    def p_list_terminator(self, p: ply.yacc.YaccProduction) -> None:
         """list_terminator : NEWLINE
         | ';'
 
@@ -493,7 +494,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("list_terminator: p[%d]: %s", _, p[_])
 
-    def p_newline_list(self, p):
+    def p_newline_list(self, p: ply.yacc.YaccProduction) -> None:
         """newline_list :
 
         | newline_list NEWLINE
@@ -502,7 +503,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("newline_list: p[%d]: %s", _, p[_])
 
-    def p_simple_list(self, p):
+    def p_simple_list(self, p: ply.yacc.YaccProduction) -> None:
         """simple_list : simple_list1
         | simple_list1 '&'
         | simple_list1 ';'
@@ -514,7 +515,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_list: p[%d]: %s", _, p[_])
 
-    def p_simple_list1_list_with_newlines(self, p):
+    def p_simple_list1_list_with_newlines(self, p: ply.yacc.YaccProduction) -> None:
         """simple_list1 : simple_list1 AND_AND newline_list simple_list1
         | simple_list1 OR_OR newline_list simple_list1
 
@@ -525,7 +526,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_list1: p[%d]: %s", _, p[_])
 
-    def p_simple_list1_list(self, p):
+    def p_simple_list1_list(self, p: ply.yacc.YaccProduction) -> None:
         """simple_list1 : simple_list1 '&' simple_list1
         | simple_list1 ';' simple_list1
 
@@ -536,7 +537,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_list1: p[%d]: %s", _, p[_])
 
-    def p_simple_list1_command(self, p):
+    def p_simple_list1_command(self, p: ply.yacc.YaccProduction) -> None:
         """simple_list1 : pipeline_command"""
 
         p[0] = (p[1],)
@@ -544,7 +545,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_list1: p[%d]: %s", _, p[_])
 
-    def p_pipeline_command_unmodified(self, p):
+    def p_pipeline_command_unmodified(self, p: ply.yacc.YaccProduction) -> None:
         """pipeline_command : pipeline"""
 
         p[0] = (p[1],)
@@ -552,7 +553,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("pipeline_command: p[%d]: %s", _, p[_])
 
-    def p_pipeline_command_modified(self, p):
+    def p_pipeline_command_modified(self, p: ply.yacc.YaccProduction) -> None:
         """pipeline_command : BANG pipeline_command
         | timespec pipeline_command
         | timespec list_terminator
@@ -565,7 +566,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("pipeline_command: p[%d]: %s", _, p[_])
 
-    def p_pipeline_with_pipe(self, p):
+    def p_pipeline_with_pipe(self, p: ply.yacc.YaccProduction) -> None:
         """pipeline : pipeline '|' newline_list pipeline
         | pipeline BAR_AND newline_list pipeline
 
@@ -576,7 +577,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("pipeline: p[%d]: %s", _, p[_])
 
-    def p_pipeline_with_command(self, p):
+    def p_pipeline_with_command(self, p: ply.yacc.YaccProduction) -> None:
         """pipeline : command"""
 
         p[0] = (p[1],)
@@ -584,7 +585,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("pipeline: p[%d]: %s", _, p[_])
 
-    def p_timespec(self, p):
+    def p_timespec(self, p: ply.yacc.YaccProduction) -> None:
         """timespec : TIME
         | TIME TIMEOPT
         | TIME TIMEOPT TIMEIGN
@@ -598,7 +599,7 @@ class BashParser(object):
     # Additional Productions
     #
 
-    def p_number_list_number(self, p):
+    def p_number_list_number(self, p: ply.yacc.YaccProduction) -> None:
         """number_list : NUMBER"""
 
         p[0] = (p[1],)
@@ -606,7 +607,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("world_list: p[%d]: %s", _, p[_])
 
-    def p_number_list_list(self, p):
+    def p_number_list_list(self, p: ply.yacc.YaccProduction) -> None:
         """number_list : number_list newline_list NUMBER"""
 
         p[0] = p[1] + (p[3],)
@@ -614,7 +615,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("world_list: p[%d]: %s", _, p[_])
 
-    def p_assignment_word_array(self, p):
+    def p_assignment_word_array(self, p: ply.yacc.YaccProduction) -> None:
         """assignment_word : WORD '=' assignment_off '(' newline_list word_list newline_list ')' assignment_on"""
 
         if p[1] in self.symbols:
@@ -627,7 +628,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("assignment_word: p[%d]: %s", _, p[_])
 
-    def p_assignment_word_number(self, p):
+    def p_assignment_word_number(self, p: ply.yacc.YaccProduction) -> None:
         """assignment_word : WORD '=' NUMBER"""
 
         if p[1] in self.symbols:
@@ -640,7 +641,7 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("assignment_word: p[%d]: %s", _, p[_])
 
-    def p_assignment_word_word(self, p):
+    def p_assignment_word_word(self, p: ply.yacc.YaccProduction) -> None:
         """assignment_word : WORD '=' assignment_off WORD assignment_on"""
 
         if p[1] in self.symbols:
@@ -659,17 +660,17 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("assignment_word: p[%d]: %s", _, p[_])
 
-    def p_assignment_off(self, p):
+    def p_assignment_off(self, p: ply.yacc.YaccProduction) -> None:
         """assignment_off :"""
 
         p.lexer.assignment = False
 
-    def p_assignment_on(self, p):
+    def p_assignment_on(self, p: ply.yacc.YaccProduction) -> None:
         """assignment_on :"""
 
         p.lexer.assignment = True
 
-    def p_simple_command_element_number(self, p):
+    def p_simple_command_element_number(self, p: ply.yacc.YaccProduction) -> None:
         """simple_command_element : NUMBER"""
 
         p[0] = ("NUMBER", p[1])
@@ -677,17 +678,17 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("simple_command_element: p[%d]: %s", _, p[_])
 
-    def p_curly_off(self, p):
+    def p_curly_off(self, p: ply.yacc.YaccProduction) -> None:
         """curly_off :"""
 
         p.lexer.curly = False
 
-    def p_curly_on(self, p):
+    def p_curly_on(self, p: ply.yacc.YaccProduction) -> None:
         """curly_on :"""
 
         p.lexer.curly = True
 
-    def p_error(self, p):
+    def p_error(self, p: ply.yacc.YaccProduction) -> None:
         if p is None:
             raise BashSyntaxError("did not receive any input")
 

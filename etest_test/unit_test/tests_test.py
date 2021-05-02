@@ -15,6 +15,7 @@ import logging
 import os
 import unittest
 import unittest.mock
+from typing import Any, Callable, Dict, Tuple
 
 import etest.tests as sut
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
@@ -27,28 +28,28 @@ logger = logging.getLogger(__name__)
 class BaseTestMetaTest(type):
     """Base Test for Meta Tests."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(cls, name: str, bases: Tuple[type, ...], dct: Dict[str, Any]) -> None:
         """Construct a BaseTestMetaTest."""
         super(BaseTestMetaTest, cls).__init__(name, bases, dct)
 
-        def gen_constructor_case(test):
+        def gen_constructor_case(test: Dict[str, Any]) -> Callable[["TestUnitTest"], None]:
             kwargs = {
                 "base_docker_image": test["base_docker_image"],
                 "with_test_phase": test["with_test_phase"],
             }
             kwargs.setdefault("use_flags", test.get("use_flags", []))
 
-            def case(self):
-                self.test = sut.Test(self.mocked_ebuild, **kwargs)
+            def case(self: "TestUnitTest") -> None:
+                t = sut.Test(self.mocked_ebuild, **kwargs)
 
-                self.assertEqual(self.test.ebuild, self.mocked_ebuild)
-                self.assertEqual(self.test.with_test_phase, test["with_test_phase"])
-                self.assertEqual(self.test.use_flags, test["use_flags"])
-                self.assertFalse(self.test.failed)
-                self.assertIsNone(self.test.failed_command)
-                self.assertEqual(self.test.time, datetime.timedelta(0))
-                self.assertEqual(self.test.output, "")
-                self.assertEqual(self.test.base_docker_image, test["base_docker_image"])
+                self.assertEqual(t.ebuild, self.mocked_ebuild)
+                self.assertEqual(t.with_test_phase, test["with_test_phase"])
+                self.assertEqual(t.use_flags, test["use_flags"])
+                self.assertFalse(t.failed)
+                self.assertIsNone(t.failed_command)
+                self.assertEqual(t.time, datetime.timedelta(0))
+                self.assertEqual(t.output, "")
+                self.assertEqual(t.base_docker_image, test["base_docker_image"])
 
             case.__name__ = "test_constructor_" + str(test["uuid"])
             case.__doc__ = "test.Test(mocked_ebuild, with_test_phase = {0[with_test_phase]}, base_docker_image = {0[base_docker_image]}, use_flags = {0[use_flags]})".format(
@@ -57,23 +58,23 @@ class BaseTestMetaTest(type):
 
             return case
 
-        def gen_property_case(test, prop):
+        def gen_property_case(test: Dict[str, Any], prop: str) -> Callable[["TestUnitTest"], None]:
             kwargs = {
                 "base_docker_image": test["base_docker_image"],
                 "with_test_phase": test["with_test_phase"],
             }
             kwargs.setdefault("use_flags", test.get("use_flags", []))
 
-            def case(self):
+            def case(self: "TestUnitTest") -> None:
                 type(self.mocked_ebuild).compat = unittest.mock.PropertyMock(return_value=test["ebuild"]["compat"])
                 type(self.mocked_ebuild).cpv = unittest.mock.PropertyMock(return_value=test["ebuild"]["cpv"])
                 type(self.mocked_ebuild).name = unittest.mock.PropertyMock(return_value=test["ebuild"]["name"])
 
-                self.test = sut.Test(self.mocked_ebuild, **kwargs)
+                t = sut.Test(self.mocked_ebuild, **kwargs)
 
                 print(f"test: {test}")
                 print(f"prop: {prop}")
-                self.assertEqual(getattr(self.test, prop), test[prop])
+                self.assertEqual(getattr(t, prop), test[prop])
 
             case.__name__ = "test_property_" + prop + "_" + str(test["uuid"])
             case.__doc__ = "test.Test(mocked_ebuild, with_test_phase = {0[with_test_phase]}, base_docker_image = {0[base_docker_image]}, use_flags = {0[use_flags]}).{1} == '{2}'".format(
@@ -84,18 +85,18 @@ class BaseTestMetaTest(type):
 
             return case
 
-        def gen_run_case(test):
+        def gen_run_case(test: Dict[str, Any]) -> Callable[["TestUnitTest"], None]:
             kwargs = {
                 "base_docker_image": test["base_docker_image"],
                 "with_test_phase": test["with_test_phase"],
             }
             kwargs.setdefault("use_flags", test.get("use_flags", []))
 
-            def case(self):
-                self.test = sut.Test(self.mocked_ebuild, **kwargs)
+            def case(self: "TestUnitTest") -> None:
+                t = sut.Test(self.mocked_ebuild, **kwargs)
 
                 with unittest.mock.patch.object(sut, "docker") as mocked_docker:
-                    self.test.run()
+                    t.run()
                     mocked_docker.pull.assert_called_once()
 
             case.__name__ = "test_run_" + str(test["uuid"])
@@ -123,7 +124,7 @@ class BaseTestMetaTest(type):
 class TestUnitTest(unittest.TestCase, metaclass=BaseTestMetaTest):
     """Tests for Test Case."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set Up Test Case."""
         super().setUp()
 
@@ -133,7 +134,7 @@ class TestUnitTest(unittest.TestCase, metaclass=BaseTestMetaTest):
 class TestsUnitTest(unittest.TestCase):
     """Tests for Tests Container."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set Up Test Case."""
         super().setUp()
 
@@ -171,14 +172,14 @@ class TestsUnitTest(unittest.TestCase):
         self.mocked_Test = patcher.start()
         self.addCleanup(patcher.stop)
 
-    def test_tests(self):
+    def test_tests(self) -> None:
         """tests.Tests()."""
         self.tests = sut.Tests()
         self.assertEqual(self.tests.ebuild_selector, [])
         self.assertEqual(len(list(self.tests)), len(self.test_calls))
         self.assertEqual(self.mocked_Test.mock_calls, self.test_calls)
 
-    def test_tests_with_filter_with_version(self):
+    def test_tests_with_filter_with_version(self) -> None:
         """tests.Tests(('etest-9999.ebuild',))."""
         self.tests = sut.Tests(("etest-9999.ebuild",))
         self.assertEqual(self.tests.ebuild_selector, ["etest-9999"])

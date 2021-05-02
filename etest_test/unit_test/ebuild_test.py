@@ -9,6 +9,7 @@ import logging
 import os
 import unittest
 import unittest.mock
+from typing import Any, Callable, Dict, Tuple
 
 from etest.ebuild import Ebuild
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
@@ -20,35 +21,35 @@ logger = logging.getLogger(__name__)
 class BaseEbuildMetaTest(type):
     """Base Ebuild Metatest."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(cls, name: str, bases: Tuple[type, ...], dct: Dict[str, Any]) -> None:
         """Construct a base Ebuild meta test."""
         super(BaseEbuildMetaTest, cls).__init__(name, bases, dct)
 
-        def gen_constructor_case(ebuild):
-            def case(self):
-                self.ebuild = Ebuild(
+        def gen_constructor_case(ebuild: Dict[str, Any]) -> Callable[["EbuildUnitTest"], None]:
+            def case(self: "EbuildUnitTest") -> None:
+                e = Ebuild(
                     path=ebuild["path"],
                     overlay=self.mocked_overlay,
                 )
 
-                self.assertEqual(self.ebuild.path, ebuild["path"])
-                self.assertEqual(self.ebuild.overlay, self.mocked_overlay)
+                self.assertEqual(e.path, ebuild["path"])
+                self.assertEqual(e.overlay, self.mocked_overlay)
 
             case.__name__ = "test_constructor_" + str(ebuild["uuid"])
             case.__doc__ = "ebuild.Ebuild(path = '{0[path]}', overlay = mocked_overlay)".format(ebuild)
 
             return case
 
-        def gen_property_case(ebuild, prop):
-            def case(self):
-                self.ebuild = Ebuild(
+        def gen_property_case(ebuild: Dict[str, Any], prop: str) -> Callable[["EbuildUnitTest"], None]:
+            def case(self: "EbuildUnitTest") -> None:
+                e = Ebuild(
                     path=ebuild["path"],
                     overlay=self.mocked_overlay,
                 )
 
-                self.ebuild.parse = unittest.mock.MagicMock(return_value=ebuild["symbols"])
+                e.parse = unittest.mock.MagicMock(return_value=ebuild["symbols"])
 
-                self.assertEqual(getattr(self.ebuild, prop), ebuild[prop])
+                self.assertEqual(getattr(e, prop), ebuild[prop])
 
             case.__name__ = "test_property_" + prop + "_" + str(ebuild["uuid"])
             case.__doc__ = "ebuild.Ebuild(path = '{0[path]}', overlay = mocked_overlay).{1} == '{2}'".format(
@@ -73,7 +74,7 @@ class BaseEbuildMetaTest(type):
 class EbuildUnitTest(unittest.TestCase, metaclass=BaseEbuildMetaTest):
     """Ebuild Unit Test."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test cases."""
         super().setUp()
 
