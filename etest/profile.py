@@ -1,6 +1,13 @@
 """Profile definitions and builders."""
 
 
+arm_versions = {
+    "armv5": "armv5tel",
+    "armv6": "armv6j_hardfp",
+    "armv7": "armv7a_hardfp",
+}
+
+
 class InvalidProfileError(Exception):
     """The profile is invalid."""
 
@@ -30,6 +37,7 @@ class Profile:
         if "arm" in self.arch:
             if "armv" in self.arch:
                 self.pkg_arch = "arm"
+                self.docker_arch = arm_versions[self.arch]
 
             if self.hardened or self.libc != "glibc":
                 raise InvalidProfileError("The ARM architecture can't use a different libc or hardened profiles.")

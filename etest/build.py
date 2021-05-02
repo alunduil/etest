@@ -47,7 +47,7 @@ commands["uclibc"] = "/bin/bash -c emerge-webrsync"
 @click.option(
     "--architecture",
     "--arch",
-    type=click.Choice(["amd64", "x86", "arm64", "armv5", "armv7", "ppc64"], case_sensitive=False),
+    type=click.Choice(["amd64", "x86", "arm64", "armv5", "armv6", "armv7", "ppc64"], case_sensitive=False),
     default="amd64",
     help="Architecture for the built image.",
 )
