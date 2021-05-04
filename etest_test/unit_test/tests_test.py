@@ -3,11 +3,6 @@
 I'm not quite sure what this is anymore so we should update this
 documentation as we discover its purpose again.
 """
-# Copyright (C) 2014 by Alex Brandt <alunduil@alunduil.com>
-#
-# etest is freely distributable under the terms of an MIT-style license.
-# See COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 import copy
 import datetime
 import functools
