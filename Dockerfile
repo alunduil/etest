@@ -1,5 +1,5 @@
 FROM gentoo/stage3:amd64
-MAINTAINER Alex Brandt <alunduil@gentoo.org>
+MAINTAINER Alex Brandt <alunduil@gmail.com>
 
 # Set a locale
 RUN echo en_US.UTF8 UTF-8 >> /etc/locale.gen
