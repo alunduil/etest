@@ -155,5 +155,7 @@ Thumbs.db
 # profiling data
 .prof
 
+# vim swap files
+**.swp
 
 # End of https://www.toptal.com/developers/gitignore/api/python,direnv

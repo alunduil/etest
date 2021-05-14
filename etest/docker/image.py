@@ -38,3 +38,8 @@ def pull(image_name: str) -> None:
         except docker.errors.APIError as error:
             if error.response.status_code not in [404, 409]:
                 raise error
+
+
+def push(tag: str, repository: str = "alunduil/etest", *args, **kwargs):
+    """Push a built image to dockerhub."""
+    return common.CLIENT.images.push(repository=repository, tag=tag, *args, **kwargs)
