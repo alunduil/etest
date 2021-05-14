@@ -72,6 +72,8 @@ class _libc_commands(Enum):
     default=str(Path.cwd() / "Dockerfile"),
     help="Path to the Dockerfile.",
 )
+@click.option("-p", "--push", is_flag=True, default=False, help="Push an image after its built.")
+@click.option("--nobuild", is_flag=True, default=False, help="Skip building an image.")
 def main(
     quiet: bool,
     verbose: bool,
@@ -83,6 +85,8 @@ def main(
     environment: List[str],
     libc: str,
     path: str,
+    push: bool,
+    nobuild: bool,
 ) -> None:
     """Build the etest images."""
     profile = Profile(quiet, strict, architecture, libc, hardened, multilib, systemd)
@@ -90,7 +94,10 @@ def main(
     if verbose:
         click.echo(f"Current profile: {profile.profile}")
 
-    _build_image(quiet, verbose, profile, path)
+    if not nobuild:
+        _build_image(quiet, verbose, profile, path)
+    if push:
+        _push_image(profile)
 
 
 def _build_image(quiet: bool, verbose: bool, profile: Profile, path: str) -> None:
@@ -116,3 +123,8 @@ def _build_image(quiet: bool, verbose: bool, profile: Profile, path: str) -> Non
 
         stage2 = docker.common.CLIENT.containers.get(f"stage2-{profile.profile}")
         docker.container.remove(container=stage2, force=True)
+
+
+def _push_image(profile: Profile) -> None:
+    """Push the built image."""
+    return docker.image.push(tag=profile.profile)
