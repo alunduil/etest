@@ -85,6 +85,10 @@ class Profile:
             if self.libc == "glibc" and self.hardened:
                 self._error("The PPC64 architecture doesn't support hardened glibc.")
 
+        if self.arch == "x86":
+            if self.libc == "musl" and self.hardened:
+                self._error("The x86 architecture doesn't support hardened musl.")
+
         if self.arch != "amd64" and not self.multilib:
             self.multilib = True
             self._warn("--no-multilib is specific to AMD64.")
