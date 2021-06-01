@@ -37,7 +37,7 @@ class qemu:
 
             docker.container.start(self.container)
 
-    def __exit__(self, exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
         """Kill the QEMU interpreter."""
         if self.__enabled:
             self.logger.info("Exiting QEMU.")
