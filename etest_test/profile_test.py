@@ -1,4 +1,4 @@
-"""Tests for the profile builders."""
+"""Tests for etest.profile."""
 
 import logging
 from typing import Any
