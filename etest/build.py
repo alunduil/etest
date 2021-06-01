@@ -68,7 +68,7 @@ class _libc_commands(Enum):
 )
 @click.option(
     "--libc",
-    type=click.Choice(["glibc", "musl", "uclibc"], case_sensitive=False),
+    type=click.Choice([libc.name for libc in _libc_commands], case_sensitive=False),
     default="glibc",
     help="libc for the built image.",
 )
