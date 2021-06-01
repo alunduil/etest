@@ -150,6 +150,13 @@ jobs:
               uses: actions/setup-python@v2
               with:
                   python-version: '3.9'
+            - name: Cache dependencies
+              uses: actions/cache@v2
+              with:
+                  path: ~/.cache/poetry
+                  key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}  # yamllint disable-line
+                  restore-keys: |
+                      ${{ runner.os }}-poetry-
             - name: Install poetry
               run: pip install poetry
             - name: Set up etest
