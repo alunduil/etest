@@ -42,3 +42,7 @@ class qemu:
         if self.__enabled:
             self.logger.info("Exiting QEMU.")
             docker.container.remove(self.container)
+
+    def get_enabled(self) -> bool:
+        """Check if QEMU is enabled."""
+        return self.__enabled
