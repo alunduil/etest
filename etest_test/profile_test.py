@@ -81,6 +81,37 @@ def test_base_arm() -> None:
         assert result.libc == "glibc"
 
 
+def test_libc() -> None:
+    """Ensure alternative libcs work."""
+    arch = "amd64"
+
+    for libc in ["musl", "uclibc"]:
+        result_vanilla = sut.Profile(logger, False, arch, libc, False, True, False)
+        result_hardened = sut.Profile(logger, False, arch, libc, True, True, False)
+
+        # Check profile strings
+        assert result_vanilla.profile == f"{arch}-{libc}-vanilla"
+        assert result_vanilla.docker == f"{arch}-{libc}-vanilla"
+        assert result_hardened.profile == f"{arch}-{libc}-hardened"
+        assert result_hardened.docker == f"{arch}-{libc}-hardened"
+
+        # Check arch values
+        assert result_vanilla.arch == result_hardened.arch == arch
+        assert result_vanilla.pkg_arch == result_hardened.pkg_arch == arch
+        assert result_vanilla.docker_arch == result_hardened.docker_arch == arch
+
+        # Check profile options
+        assert result_vanilla.hardened is False
+        assert result_hardened.hardened is True
+        assert result_vanilla.multilib is True
+        assert result_hardened.multilib is True
+        assert result_vanilla.systemd is False
+        assert result_hardened.systemd is False
+
+        # Check libc
+        assert result_vanilla.libc == result_hardened.libc == libc
+
+
 def try_invalid_profile(*args: Any, **kwargs: Any) -> bool:
     """Try an invalid profile."""
     e = False
@@ -181,3 +212,10 @@ def test_no_multilib() -> None:
 
     # Systemd
     assert try_invalid_profile(logger, False, arch, "glibc", False, False, True)
+
+
+def test_warnings() -> None:
+    """Ensure warnings happen correctly."""
+    # No multilib warning
+    assert try_invalid_profile(logger, False, "armv7", "glibc", False, False, False) is False
+    assert try_invalid_profile(logger, True, "armv7", "glibc", False, False, False)
