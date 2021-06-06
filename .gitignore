@@ -180,7 +180,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# End of https://www.toptal.com/developers/gitignore/api/python,git
+# End of https://www.toptal.com/developers/gitignore/api/python,direnv
 
 # vim swap files
 **.swp

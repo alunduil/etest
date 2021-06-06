@@ -22,15 +22,15 @@ def test_help() -> None:
 
 
 def test_nobuild() -> None:
-    """Ensure etest-build outputs 4 info lines when not building."""
+    """Ensure etest-build outputs 3 info lines when not building."""
     runner = click.testing.CliRunner()
-    result = runner.invoke(sut.main, ["--nobuild", "-v", "INFO"])
+    result = runner.invoke(sut.main, ["--no-build", "--verbosity", "INFO"])
 
     assert result.exit_code == 0
 
     out = [o for o in result.output.splitlines() if o]
 
-    assert len(out) == 4
+    assert len(out) == 3
 
 
 def test_invalid_push(capfd: pytest.CaptureFixture[str]) -> None:
@@ -52,7 +52,7 @@ def test_amd64_build() -> None:
     """Ensure a base amd64 image builds correctly."""
     runner = click.testing.CliRunner()
     client = docker.APIClient(base_url="unix://var/run/docker.sock")
-    result = runner.invoke(sut.main, ["--arch", "amd64", "-v", "DEBUG"])
+    result = runner.invoke(sut.main, ["--arch", "amd64", "--verbosity", "DEBUG"])
     output = result.output.lower()
 
     print(output)
@@ -225,7 +225,7 @@ def test_container_cleanup(capfd: pytest.CaptureFixture[str]) -> None:
 def test_push() -> None:
     """Ensure etest-build can push."""
     runner = click.testing.CliRunner()
-    result = runner.invoke(sut.main, ["--nobuild", "--push", "-v", "DEBUG"])
+    result = runner.invoke(sut.main, ["--no-build", "--push", "--verbosity", "DEBUG"])
 
     assert result.exit_code == 0
 

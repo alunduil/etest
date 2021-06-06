@@ -78,8 +78,8 @@ class _libc_commands(Enum):
     default=str(Path.cwd() / "Dockerfile"),
     help="Path to the Dockerfile.",
 )
+@click.option("--build/--no-build", is_flag=True, default=True, help="Build an image.")
 @click.option("-p", "--push", is_flag=True, default=False, help="Push an image after its built.")
-@click.option("--nobuild", is_flag=True, default=False, help="Skip building an image.")
 def main(
     strict: bool,
     hardened: bool,
@@ -89,18 +89,19 @@ def main(
     environment: List[str],
     libc: str,
     path: str,
+    build: bool,
     push: bool,
-    nobuild: bool,
 ) -> None:
     """Build the etest images."""
     profile = Profile(logger, strict, architecture, libc, hardened, multilib, systemd)
 
     logger.debug(f"Package architecture: {profile.pkg_arch}.")
     logger.debug(f"Docker image: {profile.docker}.")
-    logger.info(f"Current profile: {profile.profile}.")
+    logger.debug(f"Current profile: {profile.profile}.")
 
-    if not nobuild:
+    if build:
         _build_image(profile, path)
+
     if push:
         push_logs = _push_image(profile)
         for line in push_logs.splitlines():
@@ -108,7 +109,7 @@ def main(
 
         logger.info("Push finished.")
 
-    logger.info("Build finished.")
+    logger.info("etest-build finished running.")
 
 
 def _build_image(profile: Profile, path: str) -> None:
