@@ -2,15 +2,23 @@
 
 from pathlib import Path
 from typing import Any
+import logging
 
 import docker
 
 from etest.docker import common
 
+_LOGGER = logging.getLogger()
+
 
 def build(path: Path, *args, **kwargs):
     """Build a docker image."""
-    return common.CLIENT.images.build(path=str(path.parent), *args, **kwargs)
+    image, logs = common.CLIENT.images.build(path=str(path.parent), *args, **kwargs)
+
+    for line in logs:
+        _LOGGER.debug(line.get("stream"))
+
+    return image
 
 
 def remove(*args: Any, **kwargs: Any) -> Any:

@@ -4,7 +4,10 @@ import logging
 from enum import Enum
 
 
-class _arm_mappings(Enum):
+_LOGGER = logging.getLogger()
+
+
+class _ARMIdentifier(Enum):
     armv5 = "armv5tel"
     armv6 = "armv6j_hardfp"
     armv7 = "armv7a_hardfp"
@@ -22,7 +25,6 @@ class Profile:
 
     def __init__(
         self,
-        logger: logging.Logger,
         strict: bool,
         arch: str,
         libc: str,
@@ -31,7 +33,6 @@ class Profile:
         systemd: bool,
     ) -> None:
         """Initialize parameters."""
-        self.logger = logger
         self.strict = strict
 
         self.arch = arch
@@ -45,27 +46,27 @@ class Profile:
 
         self.systemd = systemd
 
-        self.logger.info("Standarizing profile data.")
+        _LOGGER.info("Standarizing profile data.")
         self._standarize()
-        self.logger.info("Building profile strings.")
+        _LOGGER.info("Building profile strings.")
         self._build()
 
     def _warn(self, message: str) -> None:
         """Give a warning to the user."""
         if not self.strict:
-            self.logger.warning(message)
+            _LOGGER.warning(message)
         else:
             self._error(message)
 
     def _error(self, message: str) -> None:
         """Raise an error."""
-        self.logger.error(message)
+        _LOGGER.error(message)
         raise InvalidProfileError(message)
 
     def _standarize(self) -> None:
         """Sanitize profile settings."""
         if "arm" in self.arch:
-            self.docker_arch = _arm_mappings[self.arch].value
+            self.docker_arch = _ARMIdentifier[self.arch].value
 
             if "armv" in self.arch:
                 self.pkg_arch = "arm"
