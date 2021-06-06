@@ -13,8 +13,8 @@ from docker.errors import BuildError, ContainerError
 from etest import docker, qemu
 from etest.profile import Profile
 
-logger = logging.getLogger(__name__)
-click_log.basic_config(logger)
+_LOGGER = logging.getLogger()
+click_log.basic_config(_LOGGER)
 
 
 class _libc_commands(Enum):
@@ -44,7 +44,7 @@ class _libc_commands(Enum):
 
 
 @click.command(name="etest-build")
-@click_log.simple_verbosity_option(logger, default="WARNING")  # type: ignore
+@click_log.simple_verbosity_option(_LOGGER, default="WARNING")  # type: ignore
 @click.option("-s", "--strict", is_flag=True, default=False, help="Fail on warnings.")
 @click.option("--hardened/--no-hardened", default=False, help="Use a hardened profile.")
 @click.option("--multilib/--no-multilib", default=True, help="Use a multilib profile.")
@@ -82,23 +82,19 @@ def main(
     push: bool,
 ) -> None:
     """Build the etest images."""
-    profile = Profile(logger, strict, architecture, libc, hardened, multilib, systemd)
+    profile = Profile(strict, architecture, libc, hardened, multilib, systemd)
 
-    logger.debug(f"Package architecture: {profile.pkg_arch}.")
-    logger.debug(f"Docker image: {profile.docker}.")
-    logger.debug(f"Current profile: {profile.profile}.")
+    _LOGGER.debug(f"Package architecture: {profile.pkg_arch}.")
+    _LOGGER.debug(f"Docker image: {profile.docker}.")
+    _LOGGER.debug(f"Current profile: {profile.profile}.")
 
     if build:
         _build_image(profile, path)
 
     if push:
-        push_logs = _push_image(profile)
-        for line in push_logs.splitlines():
-            logger.debug(line)
+        _push_image(profile)
 
-        logger.info("Push finished.")
-
-    logger.info("etest-build finished running.")
+    _LOGGER.info("etest-build has finished running.")
 
 
 def _build_image(profile: Profile, path: str) -> None:
@@ -106,65 +102,66 @@ def _build_image(profile: Profile, path: str) -> None:
     stage1 = None
     stage2 = None
     try:
-        with qemu.qemu(logger, profile.arch):
-            logger.info("Building stage1 image.")
-            stage1, stage1_logs = docker.image.build(
+        with qemu.qemu(profile.arch):
+            _LOGGER.info("Building stage1 image.")
+            
+            _LOGGER.debug("Stage1 logs:")
+            stage1 = docker.image.build(
                 path=Path(path),
                 buildargs={"PROFILE": profile.docker},
                 tag=f"etest/stage1:{profile.profile}",
             )
 
-            logger.debug("Stage1 logs:")
-            for line in stage1_logs:
-                logger.debug(line.get("stream"))
-
-            logger.info("Building stage2 container.")
-            stage2, stage2_logs = docker.container.run(
+            _LOGGER.info("Building stage2 container.")            
+            
+            _LOGGER.debug("Stage2 logs:")
+            stage2 = docker.container.run(
                 image=f"etest/stage1:{profile.profile}",
                 command=textwrap.dedent(_libc_commands[profile.libc].value),
                 privileged=True,
                 name=f"stage2-{profile.profile}",
             )
 
-            logger.debug("Stage2 logs:")
-            for line in stage2_logs.split(b"\n"):
-                if line:
-                    logger.debug(line.decode())
-
-            logger.info("Committing the final image.")
+            _LOGGER.info("Committing the final image.")
             docker.container.commit(container=stage2, repository="ebuildtest/etest", tag=profile.profile)
     except BuildError as e:
-        logger.error("Etest encountered an error while building the stage1 image.")
-        logger.error(f"Reason: {e.msg}")
+        _LOGGER.error("Etest encountered an error while building the stage1 image.")
+        _LOGGER.error(f"Reason: {e.msg}")
 
-        logger.error("Logs:")
+        _LOGGER.error("Logs:")
 
         for line in e.build_log:
-            logger.error(line.get("stream", line.get("error")))
+            _LOGGER.error(line.get("stream", line.get("error")))
         raise e
     except ContainerError as e:
-        logger.error("Etest encountered an error while running the stage2 container.")
+        _LOGGER.error("Etest encountered an error while running the stage2 container.")
 
         msg = f"Reason: Command '{e.command}' in image '{e.image}'"
         msg += " returned non-zero exit status {e.exit_status}:"
 
-        logger.error(msg)
-        logger.error(f"{e.stderr}")
+        _LOGGER.error(msg)
+        _LOGGER.error(f"{e.stderr}")
 
         stage2 = docker.common.CLIENT.containers.get(f"stage2-{profile.profile}")
 
         raise e
     finally:
         if stage1:
-            logger.info("Cleaning up stage1 image.")
+            _LOGGER.info("Cleaning up stage1 image.")
             docker.image.remove(image=f"etest/stage1:{profile.profile}", force=True)
 
         if stage2:
-            logger.info("Cleaning up stage2 container.")
+            _LOGGER.info("Cleaning up stage2 container.")
             docker.container.remove(container=stage2, force=True)
 
 
-def _push_image(profile: Profile) -> Any:
+def _push_image(profile: Profile) -> None:
     """Push the built image."""
-    logger.info("Starting push.")
-    return docker.image.push(tag=profile.profile)
+    _LOGGER.info("Starting push.")
+    
+    push_logs = docker.image.push(tag=profile.profile)
+    
+    for line in push_logs.splitlines():
+        _LOGGER.debug(line)
+
+    _LOGGER.info("Push finished.")

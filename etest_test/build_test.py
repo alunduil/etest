@@ -1,7 +1,7 @@
 """Tests for etest.build."""
 
-import logging
 import textwrap
+import logging
 
 import click.testing
 import docker
@@ -9,8 +9,6 @@ import pytest
 
 import etest.build as sut
 from etest import profile
-
-logger = logging.getLogger(__name__)
 
 
 def test_help() -> None:
@@ -31,20 +29,6 @@ def test_nobuild() -> None:
     out = [o for o in result.output.splitlines() if o]
 
     assert len(out) == 3
-
-
-def test_invalid_push(capfd: pytest.CaptureFixture[str]) -> None:
-    """Ensure _push_image() fails when provided with an invalid profile."""
-    profile_ = profile.Profile(logger, False, "amd64", "glibc", False, True, False)
-    profile_.profile = "asdjadnancalca"  # Garbage in
-
-    push_log = sut._push_image(profile=profile_).splitlines()
-    out = [o for o in capfd.readouterr()[1].splitlines() if o]
-
-    assert len(push_log) == 2
-    assert "error" in push_log[1]
-
-    assert len(out) == 1
 
 
 @pytest.mark.slow
@@ -73,7 +57,7 @@ def test_amd64_build() -> None:
     assert "cleaning up stage1 image." in output
     assert "cleaning up stage2 container." in output
 
-    assert "build finished." in output
+    assert "etest-build has finished running." in output
 
     image_data = client.inspect_image("ebuildtest/etest:amd64")
 
@@ -170,7 +154,7 @@ def test_uclibc_build() -> None:
 @pytest.mark.slow
 def test_image_cleanup(capfd: pytest.CaptureFixture[str]) -> None:
     """Ensure the stage1 image is cleaned."""
-    profile_ = profile.Profile(logger, False, "amd64", "glibc", False, True, False)
+    profile_ = profile.Profile(False, "amd64", "glibc", False, True, False)
     profile_.profile = profile_.docker = "twitter"  # Garbage in
 
     client = docker.from_env()
@@ -197,7 +181,7 @@ def test_image_cleanup(capfd: pytest.CaptureFixture[str]) -> None:
 @pytest.mark.slow
 def test_container_cleanup(capfd: pytest.CaptureFixture[str]) -> None:
     """Ensure the stage2 container is cleaned."""
-    profile_ = profile.Profile(logger, False, "amd64", "uclibc", False, True, False)
+    profile_ = profile.Profile(False, "amd64", "uclibc", False, True, False)
     profile_.libc = "glibc"  # Garbage in
 
     client = docker.from_env()
@@ -232,5 +216,5 @@ def test_push() -> None:
     out = [o for o in result.output.splitlines() if "debug" not in o]
     out_debug = [o for o in result.output.splitlines() if "debug" in o]
 
-    assert len(out) == 6
+    assert len(out) == 3
     assert "error" not in out_debug

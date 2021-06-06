@@ -1,5 +1,6 @@
 """Docker container."""
 
+import logging
 from pathlib import Path
 from typing import Any, List, Optional
 
@@ -9,6 +10,8 @@ from etest.docker import common
 
 CONTAINERS: List[Container] = []
 CREATE = True
+
+_LOGGER = logging.getLogger()
 
 
 def commit(container: Container, tag: str, repository: str, *args: Any, **kwargs: Any) -> str:
@@ -95,10 +98,14 @@ def wait(*args: Any, **kwargs: Any) -> Any:
     return common.API_CLIENT.wait(*args, **kwargs)
 
 
-def run(name: str, *args, **kwargs):
+def run(name: str, *args: Any, **kwargs: Any) -> Container:
     """Run a Docker container."""
     logs = common.CLIENT.containers.run(name=name, **kwargs)
     container = common.CLIENT.containers.get(name)
     CONTAINERS.append(container)
 
-    return (container, logs)
+    for line in logs.split(b"\n"):
+        if line:
+            _LOGGER.debug(line.decode())
+
+    return container
