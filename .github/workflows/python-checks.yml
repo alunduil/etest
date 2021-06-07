@@ -52,6 +52,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   poetry run pytest
+                  poetry run coveralls
             - name: poetry build
               run: |
                   poetry build
