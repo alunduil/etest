@@ -8,12 +8,12 @@ import pytest
 import etest.qemu as sut
 
 
-def test_init() -> None:
+def test_non_amd64() -> None:
     """Ensure QEMU only opens on non-amd64 architectures."""
-    assert sut.qemu("amd64").get_enabled() is False
+    assert sut.qemu("amd64").enabled is False
 
     for arch in ["x86", "armv5", "armv6", "armv7", "arm64", "ppc64"]:
-        assert sut.qemu(arch).get_enabled()
+        assert sut.qemu(arch).enabled
 
 
 @pytest.mark.slow
@@ -35,8 +35,8 @@ def test_qemu_works(caplog: pytest.LogCaptureFixture) -> None:
     caplog.clear()
 
 
-def test_function_pass(caplog: pytest.LogCaptureFixture) -> None:
-    """Ensure __enter__ and __exit__ skip execution when necessary."""
+def test_enter_skip_on_amd64(caplog: pytest.LogCaptureFixture) -> None:
+    """Ensure __enter__ skips execution when it's innecessary."""
     caplog.set_level(logging.DEBUG)
     qemu = sut.qemu("amd64")
 
@@ -45,6 +45,12 @@ def test_function_pass(caplog: pytest.LogCaptureFixture) -> None:
     caplog.clear()
 
     assert not log
+
+
+def test_exit_skip_on_amd64(caplog: pytest.LogCaptureFixture) -> None:
+    """Ensure __exit__ skips execution when it's innecessary."""
+    caplog.set_level(logging.DEBUG)
+    qemu = sut.qemu("amd64")
 
     qemu.__exit__()
     log = caplog.text

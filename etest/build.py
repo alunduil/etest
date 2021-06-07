@@ -95,7 +95,7 @@ def main(
     profile = Profile(strict, architecture, libc, hardened, multilib, systemd)
 
     _LOGGER.debug(f"Package architecture: {profile.pkg_arch}.")
-    _LOGGER.debug(f"Docker image: {profile.docker}.")
+    _LOGGER.debug(f"Docker image: {profile.docker_profile}.")
     _LOGGER.debug(f"Current profile: {profile.profile}.")
 
     if build:
@@ -118,7 +118,7 @@ def _build_image(profile: Profile, path: str) -> None:
             _LOGGER.debug("Stage1 logs:")
             stage1 = docker.image.build(
                 path=Path(path),
-                buildargs={"PROFILE": profile.docker},
+                buildargs={"PROFILE": profile.docker_profile},
                 tag=f"etest/stage1:{profile.profile}",
             )
 
