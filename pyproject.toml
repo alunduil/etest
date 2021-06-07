@@ -50,6 +50,7 @@ docker = "^5.0.0"
 ply = "^3.11"
 python = "^3.8"
 click-log = "^0.3.2"
+pytest-mock = "^3.6.1"
 
 [tool.poetry.dev-dependencies]
 coveralls = "^2.1.1"

@@ -136,12 +136,12 @@ def _build_image(profile: Profile, path: str) -> None:
         _LOGGER.error("Etest encountered an error while running the stage2 container.")
 
         msg = f"Reason: Command '{e.command}' in image '{e.image}'"
-        msg += " returned non-zero exit status {e.exit_status}:"
+        msg += f" returned non-zero exit status {e.exit_status}:"
 
         _LOGGER.error(msg)
         _LOGGER.error(f"{e.stderr}")
 
-        stage2 = docker.common.CLIENT.containers.get(f"stage2-{profile.profile}")
+        stage2 = e.container
 
         raise e
     finally:
