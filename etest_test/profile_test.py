@@ -15,7 +15,7 @@ def test_base_arch() -> None:
 
         # Check profile strings
         assert result.profile == arch
-        assert result.docker == arch
+        assert result.docker_profile == arch
 
         # Check arch values
         assert result.arch == arch
@@ -40,7 +40,7 @@ def test_base_ppc64() -> None:
 
     # Check profile strings
     assert result.profile == arch
-    assert result.docker == docker_arch
+    assert result.docker_profile == docker_arch
 
     # Check arch values
     assert result.arch == arch
@@ -58,19 +58,19 @@ def test_base_ppc64() -> None:
 
 def test_base_arm() -> None:
     """Ensure ARM base arches work."""
-    docker_arm_mappings = {"armv5": "armv5tel", "armv6": "armv6j_hardfp", "armv7": "armv7a_hardfp"}
+    docker_profile_arm_mappings = {"armv5": "armv5tel", "armv6": "armv6j_hardfp", "armv7": "armv7a_hardfp"}
 
     for arch in ["armv5", "armv6", "armv7"]:
         result = sut.Profile(False, arch, "glibc", False, True, False)
 
         # Check profile strings
         assert result.profile == arch
-        assert result.docker == docker_arm_mappings[arch]
+        assert result.docker_profile == docker_profile_arm_mappings[arch]
 
         # Check arch values
         assert result.arch == arch
         assert result.pkg_arch == "arm"
-        assert result.docker_arch == docker_arm_mappings[arch]
+        assert result.docker_arch == docker_profile_arm_mappings[arch]
 
         # Check profile options
         assert result.hardened is False
@@ -91,9 +91,9 @@ def test_libc() -> None:
 
         # Check profile strings
         assert result_vanilla.profile == f"{arch}-{libc}-vanilla"
-        assert result_vanilla.docker == f"{arch}-{libc}-vanilla"
+        assert result_vanilla.docker_profile == f"{arch}-{libc}-vanilla"
         assert result_hardened.profile == f"{arch}-{libc}-hardened"
-        assert result_hardened.docker == f"{arch}-{libc}-hardened"
+        assert result_hardened.docker_profile == f"{arch}-{libc}-hardened"
 
         # Check arch values
         assert result_vanilla.arch == result_hardened.arch == arch

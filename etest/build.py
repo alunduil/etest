@@ -4,7 +4,6 @@ import logging
 import textwrap
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
 import click
 import click_log
@@ -85,7 +84,7 @@ def main(
     profile = Profile(strict, architecture, libc, hardened, multilib, systemd)
 
     _LOGGER.debug(f"Package architecture: {profile.pkg_arch}.")
-    _LOGGER.debug(f"Docker image: {profile.docker}.")
+    _LOGGER.debug(f"Docker image: {profile.docker_profile}.")
     _LOGGER.debug(f"Current profile: {profile.profile}.")
 
     if build:
@@ -104,16 +103,16 @@ def _build_image(profile: Profile, path: str) -> None:
     try:
         with qemu.qemu(profile.arch):
             _LOGGER.info("Building stage1 image.")
-            
+
             _LOGGER.debug("Stage1 logs:")
             stage1 = docker.image.build(
                 path=Path(path),
-                buildargs={"PROFILE": profile.docker},
+                buildargs={"PROFILE": profile.docker_profile},
                 tag=f"etest/stage1:{profile.profile}",
             )
 
-            _LOGGER.info("Building stage2 container.")            
-            
+            _LOGGER.info("Building stage2 container.")
+
             _LOGGER.debug("Stage2 logs:")
             stage2 = docker.container.run(
                 image=f"etest/stage1:{profile.profile}",
@@ -158,9 +157,9 @@ def _build_image(profile: Profile, path: str) -> None:
 def _push_image(profile: Profile) -> None:
     """Push the built image."""
     _LOGGER.info("Starting push.")
-    
+
     push_logs = docker.image.push(tag=profile.profile)
-    
+
     for line in push_logs.splitlines():
         _LOGGER.debug(line)
 
