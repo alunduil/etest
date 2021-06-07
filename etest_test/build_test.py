@@ -1,14 +1,13 @@
 """Tests for etest.build."""
 
-import textwrap
+import itertools
 
 import click.testing
 import docker
 import pytest
+from pytest_mock import MockerFixture
 
 import etest.build as sut
-
-# from etest import profile
 
 
 def test_help() -> None:
@@ -19,202 +18,189 @@ def test_help() -> None:
     assert result.exit_code == 0
 
 
-def test_nobuild() -> None:
-    """Ensure etest-build outputs 3 info lines when not building."""
-    runner = click.testing.CliRunner()
-    result = runner.invoke(sut.main, ["--no-build", "--verbosity", "INFO"])
+def test_nobuild(mocker: MockerFixture) -> None:
+    """Ensure etest-build doesn't call any functions when not building."""
+    # Mock build functions
+    build = mocker.patch(
+        "etest.build.docker.image.build",
+        return_value=True,
+    )
+    run = mocker.patch(
+        "etest.build.docker.container.run",
+        return_value=True,
+    )
+    commit = mocker.patch("etest.build.docker.container.commit")
 
+    # Mock cleanup functions
+    image_remove = mocker.patch("etest.build.docker.image.remove")
+    container_remove = mocker.patch("etest.build.docker.container.remove")
+
+    # Run the program
+    runner = click.testing.CliRunner()
+    result = runner.invoke(sut.main, ["--no-build", "--verbosity", "DEBUG"])
+
+    # Check for errors
     assert result.exit_code == 0
 
-    out = [o for o in result.output.splitlines() if o]
+    # Assert all functions have not been called
+    build.assert_not_called()
+    run.assert_not_called()
+    commit.assert_not_called()
+    image_remove.assert_not_called()
+    container_remove.assert_not_called()
 
-    assert len(out) == 2
 
+@pytest.mark.parametrize("arch", ["amd64", "x86", "armv5", "armv6", "armv7", "arm64", "ppc64"])
+def test_base_build(arch: str, mocker: MockerFixture) -> None:
+    """Ensure the base images build correctly."""
+    # Mock qemu management
+    mocker.patch("etest.build.qemu")
 
-@pytest.mark.slow
-def test_amd64_build() -> None:
-    """Ensure a base amd64 image builds correctly."""
+    # Mock build functions
+    build = mocker.patch(
+        "etest.build.docker.image.build",
+        return_value=True,
+    )
+    run = mocker.patch(
+        "etest.build.docker.container.run",
+        return_value=True,
+    )
+    commit = mocker.patch("etest.build.docker.container.commit")
+
+    # Mock cleanup functions
+    image_remove = mocker.patch("etest.build.docker.image.remove")
+    container_remove = mocker.patch("etest.build.docker.container.remove")
+
+    # Run the program
     runner = click.testing.CliRunner()
-    client = docker.APIClient(base_url="unix://var/run/docker.sock")
-    result = runner.invoke(sut.main, ["--arch", "amd64", "--verbosity", "DEBUG"])
-    output = result.output.lower()
+    result = runner.invoke(sut.main, ["--arch", arch, "--verbosity", "DEBUG"])
 
-    print(output)
-
-    assert result.exit_code == 0
-    assert "error" not in output
-
-    assert "current profile: amd64." in output
-
-    assert "building stage1 image." in output
-    assert "debug: stage1 logs:" in output
-
-    assert "building stage2 container." in output
-    assert "debug: stage2 logs:" in output
-
-    assert "committing the final image." in output
-
-    assert "cleaning up stage1 image." in output
-    assert "cleaning up stage2 container." in output
-
-    assert "etest-build has finished running." in output
-
-    image_data = client.inspect_image("ebuildtest/etest:amd64")
-
-    assert image_data["Architecture"] == "amd64"
-    assert image_data["Os"] == "linux"
-
-    assert image_data["ContainerConfig"]["Cmd"] == [
-        "/bin/bash",
-        "-c",
-        textwrap.dedent(sut._libc_commands["glibc"].value)[23:-2],
-    ]
-
-    assert image_data["ContainerConfig"]["Image"] == "etest/stage1:amd64"
-
-
-@pytest.mark.slow
-def test_arm64_build() -> None:
-    """Ensure a base arm64 image builds correctly."""
-    runner = click.testing.CliRunner()
-    client = docker.APIClient(base_url="unix://var/run/docker.sock")
-    result = runner.invoke(sut.main, ["--arch", "arm64"])
-
+    # Check for errors
     assert result.exit_code == 0
 
-    image_data = client.inspect_image("ebuildtest/etest:arm64")
+    # Assert all functions have been called
+    build.assert_called_once()
+    run.assert_called_once()
+    commit.assert_called_once()
+    image_remove.assert_called_once()
+    container_remove.assert_called_once()
 
-    assert image_data["Architecture"] == "arm64"
-    assert image_data["Os"] == "linux"
 
-    print(image_data["ContainerConfig"]["Cmd"])
-    print(
-        [
-            "/bin/bash",
-            "-c",
-            textwrap.dedent(sut._libc_commands["glibc"].value)[23:-2],
-        ],
+@pytest.mark.parametrize("libc", ["glibc", "musl", "uclibc"])
+@pytest.mark.parametrize("hardened", ["--hardened", "--no-hardened"])
+def test_alternate_libc_build(libc: str, hardened: str, mocker: MockerFixture) -> None:
+    """Ensure images with alternate libcs build correctly."""
+    # Mock build functions
+    build = mocker.patch(
+        "etest.build.docker.image.build",
+        return_value=True,
+    )
+    run = mocker.patch(
+        "etest.build.docker.container.run",
+        return_value=True,
+    )
+    commit = mocker.patch("etest.build.docker.container.commit")
+
+    # Mock cleanup functions
+    image_remove = mocker.patch("etest.build.docker.image.remove")
+    container_remove = mocker.patch("etest.build.docker.container.remove")
+
+    # Run the program
+    runner = click.testing.CliRunner()
+    result = runner.invoke(sut.main, ["--libc", libc, hardened, "--verbosity", "DEBUG"])
+
+    # Check for errors
+    assert result.exit_code == 0
+
+    # Assert all functions have been called
+    build.assert_called_once()
+    run.assert_called_once()
+    commit.assert_called_once()
+    image_remove.assert_called_once()
+    container_remove.assert_called_once()
+
+
+def test_builderror(mocker: MockerFixture) -> None:
+    """Ensure the program fails on a BuildError."""
+    # Raise a ContainerError
+    log = itertools.tee({"error": "mockup"})[0]
+    error = docker.errors.BuildError(reason="Mockup error.", build_log=log)
+
+    build = mocker.patch(
+        "etest.build.docker.image.build",
+        side_effect=error,
     )
 
-    assert image_data["ContainerConfig"]["Cmd"] == [
-        "/bin/bash",
-        "-c",
-        textwrap.dedent(sut._libc_commands["glibc"].value)[23:-2],
-    ]
-
-    assert image_data["ContainerConfig"]["Image"] == "etest/stage1:arm64"
-
-
-@pytest.mark.slow
-def test_musl_build() -> None:
-    """Ensure a base musl image builds correctly."""
+    # Run the program
     runner = click.testing.CliRunner()
-    client = docker.APIClient(base_url="unix://var/run/docker.sock")
-    result = runner.invoke(sut.main, ["--arch", "amd64", "--libc", "musl"])
+    result = runner.invoke(sut.main, ["--verbosity", "DEBUG"])
 
-    assert result.exit_code == 0
+    # Check if it triggered an error
+    assert result.exit_code == 1
 
-    image_data = client.inspect_image("ebuildtest/etest:amd64-musl-vanilla")
-
-    assert image_data["Architecture"] == "amd64"
-    assert image_data["Os"] == "linux"
-
-    assert image_data["ContainerConfig"]["Cmd"] == [
-        "/bin/bash",
-        "-c",
-        textwrap.dedent(sut._libc_commands["musl"].value)[23:-2],
-    ]
-
-    assert image_data["ContainerConfig"]["Image"] == "etest/stage1:amd64-musl-vanilla"
+    # Assert all functions have been called
+    build.assert_called_once()
 
 
-@pytest.mark.slow
-def test_uclibc_build() -> None:
-    """Ensure a base uclibc image builds correctly."""
+def test_cleanup(mocker: MockerFixture) -> None:
+    """Ensure cleaning happens after exceptions."""
+    # Mock build functions
+    build = mocker.patch(
+        "etest.build.docker.image.build",
+        return_value=True,
+    )
+
+    # Raise a ContainerError
+    error = docker.errors.ContainerError(
+        container=True,
+        exit_status=1,
+        command="ls",
+        image="ebuildtest/etest",
+        stderr=None,
+    )
+    run = mocker.patch(
+        "etest.build.docker.container.run",
+        side_effect=error,
+    )
+
+    # Mock cleanup functions
+    image_remove = mocker.patch("etest.build.docker.image.remove")
+    container_remove = mocker.patch("etest.build.docker.container.remove")
+
+    # Run the program
     runner = click.testing.CliRunner()
-    client = docker.APIClient(base_url="unix://var/run/docker.sock")
-    result = runner.invoke(sut.main, ["--arch", "amd64", "--libc", "uclibc"])
+    result = runner.invoke(sut.main, ["--verbosity", "DEBUG"])
 
-    assert result.exit_code == 0
+    # Check if it triggered an error
+    assert result.exit_code == 1
 
-    image_data = client.inspect_image("ebuildtest/etest:amd64-uclibc-vanilla")
-
-    assert image_data["Architecture"] == "amd64"
-    assert image_data["Os"] == "linux"
-
-    assert image_data["ContainerConfig"]["Cmd"] == [
-        "/bin/bash",
-        "-c",
-        textwrap.dedent(sut._libc_commands["uclibc"].value)[13:],
-    ]
-
-    assert image_data["ContainerConfig"]["Image"] == "etest/stage1:amd64-uclibc-vanilla"
+    # Assert all functions have been called
+    build.assert_called_once()
+    run.assert_called_once()
+    image_remove.assert_called_once()
+    container_remove.assert_called_once()
 
 
-# @pytest.mark.skip("Invalid. Rewrite")
-# def test_image_cleanup(capfd: pytest.CaptureFixture[str]) -> None:
-# """Ensure the stage1 image is cleaned."""
-# profile_ = profile.Profile(False, "amd64", "glibc", False, True, False)
-# profile_.profile = profile_.docker = "twitter"  # Garbage in
-
-# client = docker.from_env()
-
-# try:
-# sut._build_image(profile_, ".")
-# except docker.errors.BuildError:
-# pass
-
-# image = None
-# try:
-# image = client.images.get(f"etest/stage1:{profile_.profile}")
-# except docker.errors.NotFound:
-# pass
-
-# assert image is None
-
-# captured = capfd.readouterr()
-# error = [e for e in captured.err.splitlines() if "error: " in e]
-
-# assert len(error) > 3
-
-
-# @pytest.mark.skip("Invalid. Rewrite")
-# def test_container_cleanup(capfd: pytest.CaptureFixture[str]) -> None:
-# """Ensure the stage2 container is cleaned."""
-# profile_ = profile.Profile(False, "amd64", "uclibc", False, True, False)
-# profile_.libc = "glibc"  # Garbage in
-
-# client = docker.from_env()
-
-# try:
-# sut._build_image(profile_, ".")
-# except docker.errors.ContainerError:
-# pass
-
-# container = None
-# try:
-# container = client.containers.get(f"stage2-{profile_.profile}")
-# except docker.errors.NotFound:
-# pass
-
-# assert container is None
-
-# captured = capfd.readouterr()
-# error = [e for e in captured.err.splitlines() if "error: " in e]
-
-# assert len(error) > 2
-
-
-@pytest.mark.slow
-def test_push() -> None:
+def test_push(mocker: MockerFixture) -> None:
     """Ensure etest-build can push."""
+    # Mock push functions
+    push = mocker.patch(
+        "etest.build.docker.image.push",
+        return_value="pushing...\nfinished.",
+    )
+
+    # Run the program
     runner = click.testing.CliRunner()
     result = runner.invoke(sut.main, ["--no-build", "--push", "--verbosity", "DEBUG"])
 
+    # Check for errors
     assert result.exit_code == 0
 
-    out = [o for o in result.output.splitlines() if "debug" not in o]
+    # Check if logging is handled correctly
     out_debug = [o for o in result.output.splitlines() if "debug" in o]
 
-    assert len(out) == 4
-    assert "error" not in out_debug
+    assert "debug: pushing..." in out_debug
+    assert "debug: finished." in out_debug
+
+    # Check if the program tried pushing
+    assert push.asssert_called_once()

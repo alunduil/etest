@@ -48,6 +48,7 @@ docker = "^6.0.1"
 ply = "^3.11"
 python = "^3.8"
 click-log = "^0.3.2"
+pytest-mock = "^3.6.1"
 
 [tool.poetry.group.dev.dependencies]
 coveralls = "^3.3.1"
