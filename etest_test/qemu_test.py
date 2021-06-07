@@ -4,20 +4,41 @@ import logging
 
 import docker
 import pytest
+from pytest_mock import MockerFixture
 
 import etest.qemu as sut
 
 
-def test_non_amd64() -> None:
-    """Ensure QEMU only opens on non-amd64 architectures."""
-    assert sut.qemu("amd64").enabled is False
+@pytest.mark.parametrize("arch", ["x86", "armv5", "armv6", "armv7", "arm64", "ppc64"])
+def test_non_amd64(arch: str, mocker: MockerFixture) -> None:
+    """Ensure QEMU starts on different architectures."""
+    # Mock the docker API
+    pull = mocker.patch("etest.qemu.docker.pull")
+    create = mocker.patch(
+        "etest.qemu.docker.container.create",
+        return_value=True,
+    )
+    start = mocker.patch("etest.qemu.docker.container.start")
+    remove = mocker.patch(
+        "etest.qemu.docker.container.remove",
+        return_value=True,
+    )
 
-    for arch in ["x86", "armv5", "armv6", "armv7", "arm64", "ppc64"]:
-        assert sut.qemu(arch).enabled
+    # Start QEMU
+    qemu = sut.qemu(arch)
+    qemu.__enter__()
+    assert qemu.enabled
+    qemu.__exit__()
+
+    # Assert all the functions have been called
+    pull.assert_called_once()
+    create.assert_called_once()
+    start.assert_called_once()
+    remove.assert_called_once()
 
 
 @pytest.mark.slow
-def test_qemu_works(caplog: pytest.LogCaptureFixture) -> None:
+def test_qemu_integration(caplog: pytest.LogCaptureFixture) -> None:
     """Ensure QEMU is working."""
     client = docker.from_env()
     image = "arm64v8/alpine"
