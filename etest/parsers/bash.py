@@ -339,7 +339,7 @@ class BashParser(object):
             logger.debug("function_body: p[%d]: %s", _, p[_])
 
     def p_subshell(self, p: ply.yacc.YaccProduction) -> None:
-        """subshell : '(' compound_list ')' """
+        """subshell : '(' compound_list ')'"""
 
         for _ in range(len(p)):
             logger.debug("subshell: p[%d]: %s", _, p[_])
@@ -367,7 +367,7 @@ class BashParser(object):
             logger.debug("subshell: p[%d]: %s", _, p[_])
 
     def p_group_command(self, p: ply.yacc.YaccProduction) -> None:
-        """group_command : LBRACE compound_list '}' """
+        """group_command : LBRACE compound_list '}'"""
 
         for _ in range(len(p)):
             logger.debug("group_command: p[%d]: %s", _, p[_])
