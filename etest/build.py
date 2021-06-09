@@ -39,6 +39,7 @@ class _libc_commands(Enum):
 @click.command(name="etest-build")
 @click.option("-q", "--quiet", is_flag=True, default=False, help="Suppress all output.")
 @click.option("-v", "--verbose", is_flag=True, default=False, help="Provide more output.")
+@click.option("-s", "--strict", is_flag=True, default=False, help="Fail on warnings.")
 @click.option("--hardened/--no-hardened", default=False, help="Use a hardened profile.")
 @click.option("--multilib/--no-multilib", default=True, help="Use a multilib profile.")
 @click.option("--systemd/--no-systemd", default=False, help="Use a systemd profile.")
@@ -64,6 +65,7 @@ class _libc_commands(Enum):
 def main(
     quiet: bool,
     verbose: bool,
+    strict: bool,
     hardened: bool,
     multilib: bool,
     systemd: bool,
@@ -72,7 +74,7 @@ def main(
     path: str,
 ) -> None:
     """Build the etest images."""
-    profile = Profile(quiet, architecture, libc, hardened, multilib, systemd)
+    profile = Profile(quiet, strict, architecture, libc, hardened, multilib, systemd)
 
     if verbose:
         click.echo(f"Current profile: {profile.profile}")

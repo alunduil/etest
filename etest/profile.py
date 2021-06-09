@@ -19,9 +19,19 @@ class InvalidProfileError(ValueError):
 class Profile:
     """Getting profile string and information from cli options."""
 
-    def __init__(self, quiet: bool, arch: str, libc: str, hardened: bool, multilib: bool, systemd: bool) -> None:
+    def __init__(
+        self,
+        quiet: bool,
+        strict: bool,
+        arch: str,
+        libc: str,
+        hardened: bool,
+        multilib: bool,
+        systemd: bool,
+    ) -> None:
         """Initialize parameters."""
         self.quiet = quiet
+        self.strict = strict
 
         self.arch = arch
         self.docker_arch = arch
@@ -36,6 +46,13 @@ class Profile:
 
         self._standarize()
         self._build()
+
+    def _warn(self, message: str) -> None:
+        """Give a warning to the user."""
+        if not self.strict and not self.quiet:
+            print(f"WARNING: {message}")
+        else:
+            raise InvalidProfileError(message)
 
     def _standarize(self) -> None:
         """Sanitize profile settings."""
@@ -61,9 +78,8 @@ class Profile:
                 raise InvalidProfileError("The PPC64 architecture doesn't support hardened glibc.")
 
         if self.arch != "amd64" and not self.multilib:
-            self.multilib = False
-            if not self.quiet:
-                print("WARNING: --no-multilib is specific to AMD64.")
+            self.multilib = True
+            self._warn("--no-multilib is specific to AMD64.")
 
         if self.libc != "glibc" and not self.multilib:
             raise InvalidProfileError("Alternative libcs dont support no-multilib.")
