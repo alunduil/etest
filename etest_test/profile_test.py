@@ -1,218 +1,150 @@
 """Tests for etest.profile."""
 
-from typing import Any
+from typing import Any, Dict
+
+import pytest
+from hypothesis import assume, given
+from hypothesis import strategies as st
+from pytest_mock import MockerFixture
 
 import etest.profile as sut
 
 
-def test_base_arch() -> None:
-    """Ensure base arches work."""
-    for arch in ["amd64", "x86", "arm64"]:
-        result = sut.Profile(False, arch, "glibc", False, True, False)
-
-        # Check profile strings
-        assert result.profile == arch
-        assert result.docker_profile == arch
-
-        # Check arch values
-        assert result.arch == arch
-        assert result.pkg_arch == arch
-        assert result.docker_arch == arch
-
-        # Check profile options
-        assert result.hardened is False
-        assert result.multilib is True
-        assert result.systemd is False
-
-        # Check libc
-        assert result.libc == "glibc"
+_valid_architectures = ["amd64", "x86", "armv5", "armv6", "armv7", "arm64", "ppc64"]
+_valid_systemd_architectures = ["amd64", "x86", "arm64", "ppc64"]
+_libc_value = ["glibc", "musl", "uclibc"]
 
 
-def test_base_ppc64() -> None:
-    """Ensure the ppc64 base arch works."""
-    arch = "ppc64"
-    docker_arch = "ppc64le"
+@st.composite
+def non_base_profiles(draw: Any) -> Dict[str, Any]:
+    """Strategy for generating non-base profiles."""
+    # Draw values
+    profile = {}
+    profile["libc"] = draw(st.sampled_from(_libc_value))
+    profile["hardened"] = draw(st.booleans())
+    profile["multilib"] = draw(st.booleans())
+    profile["systemd"] = draw(st.booleans())
 
+    # Ensure it isn't a base profile
+    assume(profile != {"libc": "glibc", "hardened": False, "multilib": True, "systemd": False})
+
+    return profile
+
+
+@pytest.mark.parametrize("arch", _valid_architectures)
+def test_base_arch(arch: str) -> None:
+    """Ensure the base profiles work."""
     result = sut.Profile(False, arch, "glibc", False, True, False)
 
     # Check profile strings
     assert result.profile == arch
-    assert result.docker_profile == docker_arch
-
-    # Check arch values
-    assert result.arch == arch
-    assert result.pkg_arch == "ppc64"
-    assert result.docker_arch == docker_arch
-
-    # Check profile options
-    assert result.hardened is False
-    assert result.multilib is True
-    assert result.systemd is False
-
-    # Check libc
-    assert result.libc == "glibc"
 
 
-def test_base_arm() -> None:
-    """Ensure ARM base arches work."""
-    docker_profile_arm_mappings = {"armv5": "armv5tel", "armv6": "armv6j_hardfp", "armv7": "armv7a_hardfp"}
-
-    for arch in ["armv5", "armv6", "armv7"]:
-        result = sut.Profile(False, arch, "glibc", False, True, False)
-
-        # Check profile strings
-        assert result.profile == arch
-        assert result.docker_profile == docker_profile_arm_mappings[arch]
-
-        # Check arch values
-        assert result.arch == arch
-        assert result.pkg_arch == "arm"
-        assert result.docker_arch == docker_profile_arm_mappings[arch]
-
-        # Check profile options
-        assert result.hardened is False
-        assert result.multilib is True
-        assert result.systemd is False
-
-        # Check libc
-        assert result.libc == "glibc"
-
-
-def test_libc() -> None:
-    """Ensure alternative libcs work."""
+@pytest.mark.parametrize("libc", ["musl", "uclibc"])
+@pytest.mark.parametrize("hardened", [True, False])
+def test_amd64_libc(libc: str, hardened: bool) -> None:
+    """Ensure alternative libcs work on amd64."""
     arch = "amd64"
 
-    for libc in ["musl", "uclibc"]:
-        result_vanilla = sut.Profile(False, arch, libc, False, True, False)
-        result_hardened = sut.Profile(False, arch, libc, True, True, False)
+    result = sut.Profile(True, arch, libc, hardened, True, False)
 
-        # Check profile strings
-        assert result_vanilla.profile == f"{arch}-{libc}-vanilla"
-        assert result_vanilla.docker_profile == f"{arch}-{libc}-vanilla"
-        assert result_hardened.profile == f"{arch}-{libc}-hardened"
-        assert result_hardened.docker_profile == f"{arch}-{libc}-hardened"
-
-        # Check arch values
-        assert result_vanilla.arch == result_hardened.arch == arch
-        assert result_vanilla.pkg_arch == result_hardened.pkg_arch == arch
-        assert result_vanilla.docker_arch == result_hardened.docker_arch == arch
-
-        # Check profile options
-        assert result_vanilla.hardened is False
-        assert result_hardened.hardened is True
-        assert result_vanilla.multilib is True
-        assert result_hardened.multilib is True
-        assert result_vanilla.systemd is False
-        assert result_hardened.systemd is False
-
-        # Check libc
-        assert result_vanilla.libc == result_hardened.libc == libc
+    # Check the profile string
+    result_suffix = "hardened" if hardened else "vanilla"
+    assert result.profile == f"{arch}-{libc}-{result_suffix}"
 
 
-def try_invalid_profile(*args: Any, **kwargs: Any) -> bool:
-    """Try an invalid profile."""
-    e = False
-
-    try:
-        sut.Profile(*args, **kwargs)
-    except sut.InvalidProfileError:
-        e = True
-
-    return e
+@pytest.mark.parametrize("arch", ["armv5", "armv6", "armv7"])
+@given(profile=non_base_profiles())
+def test_invalid_arm_profiles(arch: str, profile: Dict[str, Any]) -> None:
+    """Ensure non-base ARM profiles raise exceptions."""
+    with pytest.raises(sut.InvalidProfileError):
+        sut.Profile(True, arch, profile["libc"], profile["hardened"], profile["multilib"], profile["systemd"])
 
 
-def test_invalid_arm_profiles() -> None:
-    """Ensure invalid ARM profiles raise exceptions."""
-    for arch in ["armv5", "armv6", "armv7"]:
-        # Alternative libcs
-        for libc in ["musl", "uclibc"]:
-            assert try_invalid_profile(False, arch, libc, False, True, False)
-
-        # Hardened
-        assert try_invalid_profile(False, arch, "glibc", True, True, False)
-
-        # Systemd
-        assert try_invalid_profile(False, arch, "glibc", False, True, True)
-
-
-def test_invalid_arm64_profiles() -> None:
-    """Ensure invalid ARM profiles raise exceptions."""
+@given(profile=non_base_profiles())
+def test_invalid_arm64_profiles(profile: Dict[str, Any]) -> None:
+    """Ensure invalid ARM64 profiles raise exceptions."""
     arch = "arm64"
 
-    # Alternative libcs
-    for libc in ["musl", "uclibc"]:
-        assert try_invalid_profile(False, arch, libc, False, True, False)
+    # Dont test arm64-systemd, as it is a valid profile
+    assume(profile != {"libc": "glibc", "hardened": False, "multilib": True, "systemd": True})
 
-    # Hardened
-    assert try_invalid_profile(False, arch, "glibc", True, True, False)
+    with pytest.raises(sut.InvalidProfileError):
+        sut.Profile(True, arch, profile["libc"], profile["hardened"], profile["multilib"], profile["systemd"])
 
 
-def test_invalid_x86_profiles() -> None:
+@given(profile=non_base_profiles())
+def test_invalid_x86_profiles(profile: Dict[str, Any]) -> None:
     """Ensure invalid x86 profiles raise exceptions."""
     arch = "x86"
 
-    # Hardened musl
-    assert try_invalid_profile(False, arch, "musl", True, True, False)
+    # Dont test: x86-hardened, x86-musl-vanilla, x86-systemd, x86-uclibc-vanilla, x86-uclibc-hardened
+    assume(profile != {"libc": "glibc", "hardened": True, "multilib": True, "systemd": False})
+    assume(profile != {"libc": "musl", "hardened": False, "multilib": True, "systemd": False})
+    assume(profile != {"libc": "glibc", "hardened": False, "multilib": True, "systemd": True})
+    assume(profile != {"libc": "uclibc", "hardened": False, "multilib": True, "systemd": False})
+    assume(profile != {"libc": "uclibc", "hardened": True, "multilib": True, "systemd": False})
+
+    with pytest.raises(sut.InvalidProfileError):
+        sut.Profile(True, arch, profile["libc"], profile["hardened"], profile["multilib"], profile["systemd"])
 
 
-def test_invalid_ppc64_profiles() -> None:
+@given(profile=non_base_profiles())
+def test_invalid_ppc64_profiles(profile: Dict[str, Any]) -> None:
     """Ensure invalid ppc64 profiles raise exceptions."""
     arch = "ppc64"
 
-    # uclibc
-    assert try_invalid_profile(False, arch, "uclibc", False, True, False)
+    # Dont test ppc64-systemd or ppc64-musl-vanilla
+    assume(profile != {"libc": "glibc", "hardened": False, "multilib": True, "systemd": True})
+    assume(profile != {"libc": "musl", "hardened": True, "multilib": True, "systemd": False})
 
-    # Vanilla musl
-    assert try_invalid_profile(False, arch, "musl", False, True, False)
-
-    # Hardened
-    assert try_invalid_profile(False, arch, "glibc", True, True, False)
+    with pytest.raises(sut.InvalidProfileError):
+        sut.Profile(True, arch, profile["libc"], profile["hardened"], profile["multilib"], profile["systemd"])
 
 
-def test_systemd() -> None:
+@pytest.mark.parametrize("arch", _valid_systemd_architectures)
+def test_systemd(arch: str) -> None:
     """Ensure systemd profiles work correctly."""
-    for arch in ["amd64", "x86", "arm64", "ppc64"]:
-        # Base
-        result = sut.Profile(False, arch, "glibc", False, True, True)
-        assert result.profile == f"{arch}-systemd"
-
-        # Alternative libcs
-        for libc in ["musl", "uclibc"]:
-            assert try_invalid_profile(False, arch, libc, False, True, True)
-
-        # Hardened
-        assert try_invalid_profile(False, arch, "glibc", True, True, True)
-
-    # No multilib
-    assert try_invalid_profile(False, "amd64", "glibc", False, False, True)
+    result = sut.Profile(False, arch, "glibc", False, True, True)
+    assert result.profile == f"{arch}-systemd"
 
 
-def test_no_multilib() -> None:
-    """Ensure no-multilib only affects AMD64."""
-    # Other arches
-    for arch in ["x86", "armv5", "armv6", "armv7", "arm64", "ppc64"]:
-        assert try_invalid_profile(True, arch, "glibc", False, False, False)
+@pytest.mark.parametrize("arch", _valid_systemd_architectures)
+@given(profile=non_base_profiles())
+def test_invalid_systemd(arch: str, profile: Dict[str, Any]) -> None:
+    """Ensure invalid systemd profiles raise exceptions."""
+    # We could generate valid systemd profiles, so remove every profile with systemd enabled
+    assume(profile["systemd"] is False)
 
+    # Ensure it raises an InvalidProfileError
+    with pytest.raises(sut.InvalidProfileError):
+        sut.Profile(True, arch, profile["libc"], profile["hardened"], profile["multilib"], True)
+
+
+@pytest.mark.parametrize("arch", [a for a in _valid_architectures if a != "amd64"])
+def test_no_multilib_warnings(arch: str, mocker: MockerFixture) -> None:
+    """Ensure warnings happen when using no-multilib outside amd64."""
+    # Peek into usage of the logging functions
+    warning = mocker.spy(sut._LOGGER, "warning")
+    error = mocker.spy(sut._LOGGER, "error")
+
+    # Check for warnings when not using --strict
+    sut.Profile(False, arch, "glibc", False, False, False)
+    warning.assert_called_once()
+
+    # Check for errors when using --strict
+    with pytest.raises(sut.InvalidProfileError):
+        sut.Profile(True, arch, "glibc", False, False, False)
+    error.assert_called_once()
+
+
+@pytest.mark.parametrize("hardened", [True, False])
+def test_no_multilib_amd64(hardened: bool) -> None:
+    """Ensure no-multilib works on amd64."""
     arch = "amd64"
 
-    # Base
-    result = sut.Profile(False, arch, "glibc", False, False, False)
-    assert result.profile == f"{arch}-nomultilib"
+    result = sut.Profile(True, arch, "glibc", hardened, False, False)
 
-    # Hardened
-    result = sut.Profile(False, arch, "glibc", True, False, False)
-    assert result.profile == f"{arch}-hardened-nomultilib"
-
-    # Alternative libcs
-    for libc in ["musl", "uclibc"]:
-        assert try_invalid_profile(False, arch, libc, False, False, False)
-
-    # Systemd
-    assert try_invalid_profile(False, arch, "glibc", False, False, True)
-
-
-def test_warnings() -> None:
-    """Ensure warnings happen correctly."""
-    # No multilib warning
-    assert try_invalid_profile(False, "armv7", "glibc", False, False, False) is False
-    assert try_invalid_profile(True, "armv7", "glibc", False, False, False)
+    # Check the profile string
+    hardened_ = "-hardened" if hardened else ""
+    assert result.profile == f"{arch}{hardened_}-nomultilib"
