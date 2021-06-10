@@ -1,5 +1,5 @@
 ---
-name: python checks
+name: slow python checks
 on: [push, pull_request] # yamllint disable-line
 jobs:
     build:
@@ -7,9 +7,7 @@ jobs:
         strategy:
             matrix:
                 python-version:
-                    - '3.8'  # EOL 2024-10
                     - '3.9'  # EOL 2025-10
-                    - 3.x
 
         steps:
             - uses: actions/checkout@v2
@@ -51,7 +49,8 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  poetry run pytest
+                  poetry run pytest --runslow
+                  poetry run coveralls
             - name: poetry build
               run: |
                   poetry build
