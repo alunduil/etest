@@ -75,3 +75,12 @@ def stop(container: Container, *args: Any, **kwargs: Any) -> Any:
 def wait(*args: Any, **kwargs: Any) -> Any:
     """Wait for Docker container."""
     return common.API_CLIENT.wait(*args, **kwargs)
+
+
+def run(name: str, *args, **kwargs):
+    """Run a Docker container."""
+    logs = common.CLIENT.containers.run(name=name, **kwargs)
+    container = common.CLIENT.containers.get(name)
+    CONTAINERS.append(container)
+
+    return {"Container": container, "Logs": logs}

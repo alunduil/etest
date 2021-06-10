@@ -1,12 +1,8 @@
-FROM gentoo/stage3:amd64
+ARG PROFILE=amd64
+FROM gentoo/stage3:${PROFILE}
 MAINTAINER Alex Brandt <alunduil@gmail.com>
 
-# Set a locale
-RUN echo en_US.UTF8 UTF-8 >> /etc/locale.gen
-RUN echo en_US ISO-8859-1 >> /etc/locale.gen
-RUN locale-gen
-RUN eselect locale set en_US.utf8
-
+# Set environment variables
 ENV DISTDIR /tmp/distfiles.d
 ENV EMERGE_LOG_DIR /tmp/etest.logs.d
 ENV EPAUSE_IGNORE TRUE
@@ -35,4 +31,4 @@ RUN mkdir /overlay
 
 RUN mkdir /etc/portage/package.accept_keywords
 
-RUN emerge --sync
+RUN mkdir -p /etc/portage/repos.conf
