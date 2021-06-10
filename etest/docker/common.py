@@ -25,5 +25,5 @@ if len(os.environ.get("DOCKER_TLS_VERIFY", "")):
         ca_cert=os.path.join(CERT_PATH, "ca.pem"),
     )
 
-CLIENT = docker.from_env()
-API_CLIENT = docker.APIClient(base_url=BASE_URL, tls=TLS_CONFIG)
+CLIENT = docker.from_env(timeout=600)
+API_CLIENT = docker.APIClient(base_url=BASE_URL, tls=TLS_CONFIG, timeout=600)
