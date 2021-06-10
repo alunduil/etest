@@ -20,7 +20,7 @@ class qemu:
         if self.__enabled:
             docker.pull("multiarch/qemu-user-static:latest")
 
-            self.container = docker.container.create_simple(
+            self.container = docker.container.create(
                 image="multiarch/qemu-user-static",
                 privileged=True,
                 command="--reset -p yes",

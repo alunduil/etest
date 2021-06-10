@@ -1,28 +1,24 @@
 """Build command for etest Docker images."""
-import os
+from enum import Enum
 from pathlib import Path
 
 import click  # pylint: disable=E0401
 
-from etest import docker
+from etest import docker, qemu
 from etest.profile import Profile
 
-commands = {}
 
-commands[
-    "glibc"
-] = """
+class __commands(Enum):
+    glibc = """
 /bin/bash -c \
 'emerge-webrsync && \
 echo en_US.UTF8 UTF-8 >> /etc/locale.gen && \
 echo en_US ISO-8859-1 >> /etc/locale.gen && \
 locale-gen && \
 eselect locale set en_US.utf8'
-"""
+    """
 
-commands[
-    "musl"
-] = """
+    musl = """
 bin/bash -c \
 'touch /etc/portage/repos.conf/musl.conf && \
 echo \
@@ -33,9 +29,9 @@ sync-uri = https://github.com/gentoo-mirror/musl.git" >> /etc/portage/repos.conf
 emerge-webrsync && \
 emerge dev-vcs/git && \
 emerge --sync musl'
-"""
+    """
 
-commands["uclibc"] = "/bin/bash -c emerge-webrsync"
+    uclibc = "/bin/bash -c emerge-webrsync"
 
 
 @click.command(name="etest-build")
@@ -67,7 +63,12 @@ commands["uclibc"] = "/bin/bash -c emerge-webrsync"
     default="glibc",
     help="libc for the built image.",
 )
-@click.option("--path", type=Path, default=os.getcwd(), help="Path to the directory containing the Dockerfile.")
+@click.option(
+    "--path",
+    type=click.Path(exists=True),
+    default=str(Path.cwd() / "Dockerfile"),
+    help="Path to the Dockerfile.",
+)
 def main(
     quiet: bool,
     verbose: bool,
@@ -77,37 +78,39 @@ def main(
     architecture: str,
     environment: List[str],
     libc: str,
-    path: Path,
+    path: str,
 ) -> None:
     """Build the etest image/s."""
-    if not (path / "Dockerfile").is_file():
-        raise FileNotFoundError(f"No Dockerfile found on {path}")
+    path_ = Path(path)
 
     profile = Profile(quiet, architecture, libc, hardened, multilib, systemd)
-    profile.build()
 
     if verbose:
         click.echo(f"Current profile: {profile.profile}")
 
-    build(quiet, verbose, profile, path)
+    with qemu.qemu(profile.arch):
+        build_image(quiet, verbose, profile, path_)
 
 
-def build(quiet: bool, verbose: bool, profile: Profile, path: Path) -> None:
+def build_image(quiet: bool, verbose: bool, profile: Profile, path: Path) -> None:
     """Build the image."""
-    docker.image.build(
-        path=str(path),
-        buildargs={"PROFILE": profile.docker_profile},
-        tag=f"etest/stage1:{profile.profile}",
-    )
+    try:
+        docker.image.build(
+            path=path,
+            buildargs={"PROFILE": profile.docker},
+            tag=f"etest/stage1:{profile.profile}",
+        )
 
-    stage2 = docker.container.run(
-        image=f"etest/stage1:{profile.profile}",
-        command=commands[profile.libc],
-        privileged=True,
-        name=f"stage2-{profile.profile}",
-    )["Container"]
+        stage2 = docker.container.run(
+            image=f"etest/stage1:{profile.profile}",
+            command=__commands[profile.libc].value,
+            privileged=True,
+            name=f"stage2-{profile.profile}",
+        )[0]
 
-    docker.container.commit(container=stage2, repository="alunduil/etest", tag=profile.profile)
+        docker.container.commit(container=stage2, repository="alunduil/etest", tag=profile.profile)
+    finally:
+        docker.image.remove(image=f"etest/stage1:{profile.profile}", force=True)
 
-    docker.container.remove(container=stage2)
-    docker.image.remove(image=f"etest/stage1:{profile.profile}")
+        stage2 = docker.common.CLIENT.containers.get(f"stage2-{profile.profile}")
+        docker.container.remove(container=stage2, force=True)

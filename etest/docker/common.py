@@ -1,4 +1,6 @@
 """Common Docker components."""
+
+import datetime
 import os
 import ssl
 
@@ -28,5 +30,7 @@ if len(os.environ.get("DOCKER_TLS_VERIFY", "")):
         ca_cert=os.path.join(CERT_PATH, "ca.pem"),
     )
 
-CLIENT = docker.from_env(timeout=600)
-API_CLIENT = docker.APIClient(base_url=BASE_URL, tls=TLS_CONFIG, timeout=600)
+TIMEOUT = int(datetime.timedelta(minutes=10).total_seconds())
+
+CLIENT = docker.from_env(timeout=TIMEOUT)
+API_CLIENT = docker.APIClient(base_url=BASE_URL, tls=TLS_CONFIG, timeout=TIMEOUT)

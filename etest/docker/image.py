@@ -1,14 +1,18 @@
 """Docker Image."""
 from typing import Any
 
+from pathlib import Path
+
 import docker
 
 from etest.docker import common
 
 
-def build(*args, **kwargs):
+def build(path: Path, *args, **kwargs):
     """Build a docker image."""
-    return common.CLIENT.images.build(*args, **kwargs)
+    path_dir = str(path).rsplit("/", 1)[0]
+
+    return common.CLIENT.images.build(path=path_dir, *args, **kwargs)
 
 
 def remove(*args: Any, **kwargs: Any) -> Any:
