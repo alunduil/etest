@@ -28,7 +28,7 @@ class _libc_commands(Enum):
     """
 
     musl = """
-        bin/bash -c \
+        /bin/bash -c \
         'touch /etc/portage/repos.conf/musl.conf && \
         echo \
             "[musl]
