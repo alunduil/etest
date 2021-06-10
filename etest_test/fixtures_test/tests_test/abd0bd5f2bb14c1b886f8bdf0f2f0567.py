@@ -6,7 +6,7 @@ _ = {
     "uuid": "abd0bd5f-2bb1-4c1b-886f-8bdf0f2f0567",
     "ebuild": ebuild,
     "with_test_phase": True,
-    "base_docker_image": "alunduil/etest:latest",
+    "base_docker_image": "ebuildtest/etest:amd64",
     "use_flags": (),
     "name": "=app-portage_etest-9999[test]",
     "commands": [

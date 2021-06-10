@@ -20,7 +20,7 @@ class Test(object):
         self,
         ebuild: etest.ebuild.Ebuild,
         with_test_phase: bool = False,
-        base_docker_image: str = "alunduil/etest:latest",
+        base_docker_image: str = "ebuildtest/etest:amd64",
         **kwargs: Any
     ) -> None:
         """Construct a test."""

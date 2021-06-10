@@ -1,0 +1,169 @@
+---
+name: Build docker images
+on:  # yamllint disable-line
+    push:
+    workflow_dispatch:
+    schedule:
+        - cron: 0 0 15 * *  # every ~15th-day at midnight
+
+jobs:
+    build:
+        strategy:
+            fail-fast: false
+            matrix:
+                profiles:
+                    - arch: amd64
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: amd64
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: systemd
+                    - arch: amd64
+                      libc: glibc
+                      hardened: hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: amd64
+                      libc: glibc
+                      hardened: hardened
+                      multilib: no-multilib
+                      systemd: no-systemd
+                    - arch: amd64
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: no-multilib
+                      systemd: no-systemd
+                    - arch: amd64
+                      libc: musl
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: amd64
+                      libc: musl
+                      hardened: hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: amd64
+                      libc: uclibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: amd64
+                      libc: uclibc
+                      hardened: hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: x86
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: x86
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: systemd
+                    - arch: x86
+                      libc: glibc
+                      hardened: hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: x86
+                      libc: musl
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: x86
+                      libc: uclibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: x86
+                      libc: uclibc
+                      hardened: hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: arm64
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: arm64
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: systemd
+                    - arch: armv5
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: armv6
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: armv7
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: ppc64
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: no-systemd
+                    - arch: ppc64
+                      libc: glibc
+                      hardened: no-hardened
+                      multilib: multilib
+                      systemd: systemd
+                    - arch: ppc64
+                      libc: musl
+                      hardened: hardened
+                      multilib: multilib
+                      systemd: no-systemd
+        name: >-
+            ${{ matrix.profiles.arch }}
+            ${{ matrix.profiles.libc }}
+            ${{ matrix.profiles.hardened }}
+            ${{ matrix.profiles.systemd }}
+            ${{ matrix.profiles.multilib }}
+        runs-on: ubuntu-latest
+        env:
+            ARGS: >-
+                --arch ${{ matrix.profiles.arch }}
+                --libc ${{ matrix.profiles.libc }}
+                --${{ matrix.profiles.hardened }}
+                --${{ matrix.profiles.systemd }}
+                --${{ matrix.profiles.multilib }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+              with:
+                  token: ${{ github.token }}
+            - name: Set up python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: '3.9'
+            - name: Install poetry
+              run: pip install poetry
+            - name: Set up etest
+              run: |
+                  poetry build
+                  poetry install
+            - name: Set up QEMU
+              uses: docker/setup-qemu-action@v1
+            - name: Build image
+              run: poetry run etest-build -vs $ARGS
+            - name: Login to DockerHub
+              uses: docker/login-action@v1
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_PASSWORD }}
+            - name: Push image
+              run: poetry run etest-build -vps --nobuild $ARGS
