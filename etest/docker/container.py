@@ -14,12 +14,20 @@ def commit(container: Container, tag: str, repository: str, *args: Any, **kwargs
     repo = "".join([c for c in repository if c not in "=[],"]).lower()
 
     container.commit(repository=repo, tag=tag, *args, **kwargs)
-
+    
     return repo + ":" + tag
 
 
 def create(overlay: str, *args: Any, **kwargs: Any) -> Container:
-    """Create a Docker container."""
+    """Create a docker container."""
+    if overlay:
+        return create_low_level(overlay, *args, **kwargs)
+    else:
+        return create_high_level(*args, **kwargs)
+
+
+def create_low_level(overlay: str, *args, **kwargs):
+    """Create a Docker container via the low-level API."""
     container_data = common.API_CLIENT.create_container(
         *args,
         **kwargs,
@@ -39,6 +47,14 @@ def create(overlay: str, *args: Any, **kwargs: Any) -> Container:
     )
 
     container = common.CLIENT.containers.get(container_data["Id"])
+
+    CONTAINERS.append(container)
+    return container
+
+
+def create_high_level(*args, **kwargs):
+    """Create a Docker container via the high-level API."""
+    container = common.CLIENT.containers.create(*args, **kwargs)
 
     CONTAINERS.append(container)
     return container
@@ -81,4 +97,4 @@ def run(name: str, *args, **kwargs):
     container = common.CLIENT.containers.get(name)
     CONTAINERS.append(container)
 
-    return {"Container": container, "Logs": logs}
+    return (container, logs)

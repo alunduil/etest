@@ -1,11 +1,13 @@
 """Profile definitions and builders."""
 
+from enum import Enum
 
-arm_versions = {
-    "armv5": "armv5tel",
-    "armv6": "armv6j_hardfp",
-    "armv7": "armv7a_hardfp",
-}
+
+class _arm_mappings(Enum):
+    armv5 = "armv5tel"
+    armv6 = "armv6j_hardfp"
+    armv7 = "armv7a_hardfp"
+    arm64 = "arm64"
 
 
 class InvalidProfileError(Exception):
@@ -15,7 +17,7 @@ class InvalidProfileError(Exception):
 
 
 class Profile:
-    """A profile."""
+    """A custom profile."""
 
     def __init__(self, quiet: bool, arch: str, libc: str, hardened: bool, multilib: bool, systemd: bool) -> None:
         """Initialize parameters."""
@@ -32,12 +34,16 @@ class Profile:
 
         self.systemd = systemd
 
-    def sanitize(self) -> None:
+        self.standarize()
+        self.build()
+
+    def standarize(self) -> None:
         """Sanitize profile settings."""
         if "arm" in self.arch:
+            self.docker_arch = _arm_mappings[self.arch].value
+
             if "armv" in self.arch:
                 self.pkg_arch = "arm"
-                self.docker_arch = arm_versions[self.arch]
 
             if self.hardened or self.libc != "glibc":
                 raise InvalidProfileError("The ARM architecture can't use a different libc or hardened profiles.")
@@ -69,8 +75,6 @@ class Profile:
 
     def build(self) -> None:
         """Build profile information."""
-        self.sanitize()
-
         self.profile = ""
 
         if self.libc != "glibc":
@@ -87,5 +91,5 @@ class Profile:
         if self.systemd:
             self.profile += "-systemd"
 
-        self.docker_profile = self.docker_arch + self.profile
+        self.docker = self.docker_arch + self.profile
         self.profile = self.arch + self.profile
