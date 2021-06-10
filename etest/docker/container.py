@@ -1,8 +1,9 @@
 """Docker container."""
+
+from pathlib import Path
 from typing import Any, List
 
 from docker.models.containers import Container
-
 from etest.docker import common
 
 CONTAINERS: List[Container] = []
@@ -20,22 +21,22 @@ def commit(
     return repo + ":" + tag
 
 
-def create(overlay: str, *args: Any, **kwargs: Any) -> Container:
+def create(overlay: Path = None, *args: Any, **kwargs: Any) -> Container:
     """Create a docker container."""
     if overlay:
-        return create_low_level(overlay, *args, **kwargs)
+        return _create_low_level(overlay, *args, **kwargs)
     else:
-        return create_high_level(*args, **kwargs)
+        return _create_high_level(*args, **kwargs)
 
 
-def create_low_level(overlay: str, *args, **kwargs):
+def _create_low_level(overlay: Path, *args, **kwargs):
     """Create a Docker container via the low-level API."""
     container_data = common.API_CLIENT.create_container(
         *args,
         **kwargs,
         host_config=common.API_CLIENT.create_host_config(
             binds={
-                overlay: {
+                str(overlay): {
                     "bind": "/overlay",
                     "ro": True,
                 },
@@ -54,7 +55,7 @@ def create_low_level(overlay: str, *args, **kwargs):
     return container
 
 
-def create_high_level(*args, **kwargs):
+def _create_high_level(*args, **kwargs):
     """Create a Docker container via the high-level API."""
     container = common.CLIENT.containers.create(*args, **kwargs)
 

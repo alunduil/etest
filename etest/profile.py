@@ -10,14 +10,14 @@ class _arm_mappings(Enum):
     arm64 = "arm64"
 
 
-class InvalidProfileError(Exception):
+class InvalidProfileError(ValueError):
     """The profile is invalid."""
 
     pass
 
 
 class Profile:
-    """A custom profile."""
+    """Getting profile string and information from cli options."""
 
     def __init__(self, quiet: bool, arch: str, libc: str, hardened: bool, multilib: bool, systemd: bool) -> None:
         """Initialize parameters."""
@@ -34,10 +34,10 @@ class Profile:
 
         self.systemd = systemd
 
-        self.standarize()
-        self.build()
+        self._standarize()
+        self._build()
 
-    def standarize(self) -> None:
+    def _standarize(self) -> None:
         """Sanitize profile settings."""
         if "arm" in self.arch:
             self.docker_arch = _arm_mappings[self.arch].value
@@ -55,12 +55,10 @@ class Profile:
 
             if self.libc == "uclibc":
                 raise InvalidProfileError("The PPC64 architecture doesn't support uclibc.")
-            if self.libc == "musl":
-                raise InvalidProfileError("There are no musl base images available for PPC64.")
+            if self.libc == "musl" and not self.hardened:
+                raise InvalidProfileError("The PPC64 architecture doesn't support vanilla musl.")
             if self.libc == "glibc" and self.hardened:
                 raise InvalidProfileError("The PPC64 architecture doesn't support hardened glibc.")
-            if self.systemd:
-                raise InvalidProfileError("The PPC64 architecture doesn't support systemd.")
 
         if self.arch != "amd64" and not self.multilib:
             self.multilib = False
@@ -73,7 +71,7 @@ class Profile:
         if self.systemd and (self.hardened or not self.multilib or self.libc != "glibc"):
             raise InvalidProfileError("Systemd profiles doesn't support alternative libcs, hardening or no multilib.")
 
-    def build(self) -> None:
+    def _build(self) -> None:
         """Build profile information."""
         self.profile = ""
 
