@@ -1,4 +1,6 @@
 """Build command for etest Docker images."""
+
+import textwrap
 from enum import Enum
 from pathlib import Path
 
@@ -8,27 +10,27 @@ from etest import docker, qemu
 from etest.profile import Profile
 
 
-class __commands(Enum):
+class _libc_commands(Enum):
     glibc = """
-/bin/bash -c \
-'emerge-webrsync && \
-echo en_US.UTF8 UTF-8 >> /etc/locale.gen && \
-echo en_US ISO-8859-1 >> /etc/locale.gen && \
-locale-gen && \
-eselect locale set en_US.utf8'
+        /bin/bash -c \
+        'emerge-webrsync && \
+        echo en_US.UTF8 UTF-8 >> /etc/locale.gen && \
+        echo en_US ISO-8859-1 >> /etc/locale.gen && \
+        locale-gen && \
+        eselect locale set en_US.utf8'
     """
 
     musl = """
-bin/bash -c \
-'touch /etc/portage/repos.conf/musl.conf && \
-echo \
-"[musl]
-location = /var/db/repos/musl
-sync-type = git
-sync-uri = https://github.com/gentoo-mirror/musl.git" >> /etc/portage/repos.conf/musl.conf && \
-emerge-webrsync && \
-emerge dev-vcs/git && \
-emerge --sync musl'
+        bin/bash -c \
+        'touch /etc/portage/repos.conf/musl.conf && \
+        echo \
+            "[musl]
+            location = /var/db/repos/musl
+            sync-type = git
+            sync-uri = https://github.com/gentoo-mirror/musl.git" >> /etc/portage/repos.conf/musl.conf && \
+        emerge-webrsync && \
+        emerge dev-vcs/git && \
+        emerge --sync musl'
     """
 
     uclibc = "/bin/bash -c emerge-webrsync"
@@ -69,35 +71,33 @@ def main(
     libc: str,
     path: str,
 ) -> None:
-    """Build the etest image/s."""
-    path_ = Path(path)
-
+    """Build the etest images."""
     profile = Profile(quiet, architecture, libc, hardened, multilib, systemd)
 
     if verbose:
         click.echo(f"Current profile: {profile.profile}")
 
-    with qemu.qemu(profile.arch):
-        build_image(quiet, verbose, profile, path_)
+    _build_image(quiet, verbose, profile, path)
 
 
-def build_image(quiet: bool, verbose: bool, profile: Profile, path: Path) -> None:
+def _build_image(quiet: bool, verbose: bool, profile: Profile, path: str) -> None:
     """Build the image."""
     try:
-        docker.image.build(
-            path=path,
-            buildargs={"PROFILE": profile.docker},
-            tag=f"etest/stage1:{profile.profile}",
-        )
+        with qemu.qemu(profile.arch):
+            docker.image.build(
+                path=Path(path),
+                buildargs={"PROFILE": profile.docker},
+                tag=f"etest/stage1:{profile.profile}",
+            )
 
-        stage2 = docker.container.run(
-            image=f"etest/stage1:{profile.profile}",
-            command=__commands[profile.libc].value,
-            privileged=True,
-            name=f"stage2-{profile.profile}",
-        )[0]
+            stage2 = docker.container.run(
+                image=f"etest/stage1:{profile.profile}",
+                command=textwrap.dedent(_libc_commands[profile.libc].value),
+                privileged=True,
+                name=f"stage2-{profile.profile}",
+            )[0]
 
-        docker.container.commit(container=stage2, repository="alunduil/etest", tag=profile.profile)
+            docker.container.commit(container=stage2, repository="alunduil/etest", tag=profile.profile)
     finally:
         docker.image.remove(image=f"etest/stage1:{profile.profile}", force=True)
 

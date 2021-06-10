@@ -10,9 +10,7 @@ from etest.docker import common
 
 def build(path: Path, *args, **kwargs):
     """Build a docker image."""
-    path_dir = str(path).rsplit("/", 1)[0]
-
-    return common.CLIENT.images.build(path=path_dir, *args, **kwargs)
+    return common.CLIENT.images.build(path=str(path.parent), *args, **kwargs)
 
 
 def remove(*args: Any, **kwargs: Any) -> Any:
