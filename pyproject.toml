@@ -45,7 +45,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-click = "^7.1.2"
+click = "^8.0.1"
 docker = "^5.0.0"
 ply = "^3.11"
 python = "^3.8"
