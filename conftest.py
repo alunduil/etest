@@ -17,7 +17,7 @@ def pytest_addoption(parser: Any) -> None:
 
 def pytest_configure(config: Any) -> None:
     """Configure pytest."""
-    config.addinivalue_line("markers", "slow: mark test as slow to run")
+    config.addinivalue_line("markers", "slow() -> None: mark test as slow to run")
 
 
 def pytest_collection_modifyitems(config: Any, items: Any) -> None:

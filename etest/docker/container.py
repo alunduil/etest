@@ -1,9 +1,10 @@
 """Docker container."""
 
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Optional
 
 from docker.models.containers import Container
+
 from etest.docker import common
 
 CONTAINERS: List[Container] = []
@@ -15,7 +16,7 @@ def commit(container: Container, tag: str, repository: str, *args: Any, **kwargs
     repo = "".join([c for c in repository if c not in "=[],"]).lower()
 
     container.commit(repository=repo, tag=tag, *args, **kwargs)
-    
+
     return repo + ":" + tag
 
 
@@ -68,7 +69,9 @@ def logs(*args: Any, **kwargs: Any) -> Any:
 
 def remove(container: Container, *args: Any, **kwargs: Any) -> Any:
     """Remove a Docker container."""
-    CONTAINERS.remove(container)
+    if container in CONTAINERS:
+        CONTAINERS.remove(container)
+
     return container.remove(**kwargs)
 
 
