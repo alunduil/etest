@@ -21,7 +21,7 @@ def commit(
     return repo + ":" + tag
 
 
-def create(overlay: Path = None, *args: Any, **kwargs: Any) -> Container:
+def create(overlay: Optional[Path] = None, *args: Any, **kwargs: Any) -> Container:
     """Create a docker container."""
     if overlay:
         return _create_low_level(overlay, *args, **kwargs)

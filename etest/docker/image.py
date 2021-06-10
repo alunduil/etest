@@ -1,8 +1,6 @@
 """Docker Image."""
 from typing import Any
 
-from pathlib import Path
-
 import docker
 
 from etest.docker import common
@@ -43,6 +41,6 @@ def pull(image_name: str) -> None:
                 raise error
 
 
-def push(tag: str, repository: str = "alunduil/etest", *args, **kwargs):
+def push(tag: str, repository: str = "ebuildtest/etest", *args: Any, **kwargs: Any) -> Any:
     """Push a built image to dockerhub."""
     return common.CLIENT.images.push(repository=repository, tag=tag, *args, **kwargs)

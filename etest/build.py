@@ -3,6 +3,7 @@
 import textwrap
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 import click  # pylint: disable=E0401
 
@@ -117,7 +118,7 @@ def _build_image(quiet: bool, verbose: bool, profile: Profile, path: str) -> Non
                 name=f"stage2-{profile.profile}",
             )[0]
 
-            docker.container.commit(container=stage2, repository="alunduil/etest", tag=profile.profile)
+            docker.container.commit(container=stage2, repository="ebuildtest/etest", tag=profile.profile)
     finally:
         docker.image.remove(image=f"etest/stage1:{profile.profile}", force=True)
 
@@ -125,6 +126,6 @@ def _build_image(quiet: bool, verbose: bool, profile: Profile, path: str) -> Non
         docker.container.remove(container=stage2, force=True)
 
 
-def _push_image(profile: Profile) -> None:
+def _push_image(profile: Profile) -> Any:
     """Push the built image."""
     return docker.image.push(tag=profile.profile)
