@@ -1,7 +1,6 @@
 """Tests for etest.qemu."""
 
 import logging
-from typing import Any
 
 import docker
 import pytest
@@ -20,7 +19,7 @@ def test_init() -> None:
 
 
 @pytest.mark.slow
-def test_qemu_works(caplog: Any) -> None:
+def test_qemu_works(caplog: pytest.LogCaptureFixture) -> None:
     """Ensure QEMU is working."""
     client = docker.from_env()
     image = "arm64v8/alpine"
@@ -38,7 +37,7 @@ def test_qemu_works(caplog: Any) -> None:
     caplog.clear()
 
 
-def test_function_pass(caplog: Any) -> None:
+def test_function_pass(caplog: pytest.LogCaptureFixture) -> None:
     """Ensure __enter__ and __exit__ skip execution when necessary."""
     qemu = sut.qemu(logger, "amd64")
     caplog.set_level(logging.DEBUG)
