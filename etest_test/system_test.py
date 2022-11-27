@@ -2,11 +2,12 @@
 import functools
 import logging
 import os
+import textwrap
 import traceback
 import unittest
 
-import click.testing
-import pytest
+import click.testing  # pylint: disable=E0401
+import pytest  # pylint: disable=E0401
 
 from etest import etest, information
 from etest_test.fixtures_test import FIXTURES_DIRECTORY
@@ -56,7 +57,7 @@ class TestEtestCliEbuild(unittest.TestCase):
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(os.path.join(FIXTURES_DIRECTORY, "overlay"))
 
-    @pytest.mark.skip("Takes far too long to run.")
+    @pytest.mark.skip("Takes far too long to run.")  # type: ignore[misc]
     def test_etest_quiet_ebuild(self) -> None:
         """Run etest --quiet."""
         _ = self.runner.invoke(etest, ["--quiet"])
@@ -68,7 +69,7 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertEqual(0, _.exit_code)
 
-    @pytest.mark.skip("Takes far too long to run.")
+    @pytest.mark.skip("Takes far too long to run.")  # type: ignore[misc]
     def test_etest_verbose_ebuild(self) -> None:
         """Run etest --verbose."""
         _ = self.runner.invoke(etest, ["--verbose"])
@@ -86,7 +87,7 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertEqual(0, _.exit_code)
 
-    @pytest.mark.skip("Fails due to mismatched output.")
+    @pytest.mark.skip("Fails due to mismatched output.")  # type: ignore[misc]
     def test_etest_parallel_ebuild(self) -> None:
         """Run etest -j2."""
         _ = self.runner.invoke(etest, ["-j", "2"])
@@ -96,12 +97,18 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertRegex(
             _.output,
-            r"··\n" r"-+\n" r"2 tests ran in \d+(?:\.\d+)? seconds\n",
+            textwrap.dedent(
+                r"""\
+                ··
+                -+
+                2 tests ran in \d+(?:\.\d+)? seconds
+                """
+            ),
         )
 
         self.assertEqual(0, _.exit_code)
 
-    @pytest.mark.skip("Takes far too long to run.")
+    @pytest.mark.skip("Takes far too long to run.")  # type: ignore[misc]
     def test_etest_ebuild(self) -> None:
         """Run etest."""
         _ = self.runner.invoke(etest, [])
@@ -111,12 +118,18 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertRegex(
             _.output,
-            r"··\n" r"-+\n" r"2 tests ran in \d+(?:\.\d+)? seconds\n",
+            textwrap.dedent(
+                r"""\
+                ··
+                -+
+                2 tests ran in \d+(?:\.\d+)? seconds
+                """
+            ),
         )
 
         self.assertEqual(0, _.exit_code)
 
-    @pytest.mark.skip("Takes far too long to run.")
+    @pytest.mark.skip("Takes far too long to run.")  # type: ignore[misc]
     def test_etest_specific_ebuild(self) -> None:
         """Run etest app-portage/etest."""
         _ = self.runner.invoke(etest, ["app-portage/etest"])
@@ -126,7 +139,13 @@ class TestEtestCliEbuild(unittest.TestCase):
 
         self.assertRegex(
             _.output,
-            r"··\n" r"-+\n" r"2 tests ran in \d+(?:\.\d+)? seconds\n",
+            textwrap.dedent(
+                r"""\
+                ··
+                -+
+                2 tests ran in \d+(?:\.\d+)? seconds
+                """
+            ),
         )
 
         self.assertEqual(0, _.exit_code)

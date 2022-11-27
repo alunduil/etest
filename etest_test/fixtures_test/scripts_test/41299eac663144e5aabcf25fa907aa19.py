@@ -1,4 +1,5 @@
 """For over a list of numbers."""
+# pylint: disable=C0103
 
 import textwrap
 

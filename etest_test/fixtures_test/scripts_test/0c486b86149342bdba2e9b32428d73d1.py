@@ -1,4 +1,5 @@
 """Single full line comment."""
+# pylint: disable=C0103
 
 import textwrap
 

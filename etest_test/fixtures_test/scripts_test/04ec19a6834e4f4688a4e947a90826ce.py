@@ -1,4 +1,5 @@
 """Plus operator to find arguments."""
+# pylint: disable=C0103
 
 import textwrap
 

@@ -11,17 +11,20 @@ if len(os.environ.get("DOCKER_TLS_VERIFY", "")):
     if BASE_URL is None:
         raise RuntimeError("DOCKER_HOST not set.")
 
-    BASE_URL = "https://{}".format(BASE_URL.split("://", 1)[-1])
+    BASE_URL = f"https://{BASE_URL.split('://', 1)[-1]}"
 
     CERT_PATH = os.environ.get("DOCKER_CERT_PATH", "")
-    if not len(CERT_PATH):
+    if not CERT_PATH:
         CERT_PATH = os.path.join(os.environ.get("HOME", ""), ".docker")
 
     TLS_CONFIG = docker.tls.TLSConfig(
-        ssl_version=ssl.PROTOCOL_TLSv1,
+        ssl_version=ssl.PROTOCOL_TLS,
         verify=True,
         assert_hostname=False,
-        client_cert=(os.path.join(CERT_PATH, "cert.pem"), os.path.join(CERT_PATH, "key.pem")),
+        client_cert=(
+            os.path.join(CERT_PATH, "cert.pem"),
+            os.path.join(CERT_PATH, "key.pem"),
+        ),
         ca_cert=os.path.join(CERT_PATH, "ca.pem"),
     )
 

@@ -1,4 +1,5 @@
 """Empty text."""
+# pylint: disable=C0103
 
 import textwrap
 

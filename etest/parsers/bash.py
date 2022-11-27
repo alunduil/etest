@@ -48,7 +48,9 @@ def expand_word(word: str) -> Tuple[Any, ...]:
 
     logger.debug("rest: %s", rest)
 
-    suffix = "".join(re.split(r"(?:(?:\\\\)*\\)?}", word)[-max(prefix.count("${"), 1) :])
+    suffix = "".join(
+        re.split(r"(?:(?:\\\\)*\\)?}", word)[-max(prefix.count("${"), 1) :]
+    )
     logger.debug("suffix: %s", suffix)
 
     rest = rest[: rest.rindex(suffix) - 1].lstrip("\\}")
@@ -313,7 +315,9 @@ class BashParser(object):
         for _ in range(len(p)):
             logger.debug("function_def: p[%d]: %s", _, p[_])
 
-    def p_function_def_with_keyword_and_parens(self, p: ply.yacc.YaccProduction) -> None:
+    def p_function_def_with_keyword_and_parens(
+        self, p: ply.yacc.YaccProduction
+    ) -> None:
         """function_def : FUNCTION WORD '(' ')' newline_list function_body"""
 
         p[0] = (p[1], p[2], p[6])

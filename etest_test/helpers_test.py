@@ -8,7 +8,9 @@ import sys
 logger = logging.getLogger(__name__)
 
 
-def import_directory(module_basename: str, directory: str, update_path: bool = False) -> None:
+def import_directory(
+    module_basename: str, directory: str, update_path: bool = False
+) -> None:
     """Load all modules in a given directory recursively.
 
     All python modules in the given directory will be imported.
@@ -28,7 +30,11 @@ def import_directory(module_basename: str, directory: str, update_path: bool = F
     logger.info("loading modules from %s", directory)
 
     filenames = itertools.chain(
-        *[[os.path.join(_[0], filename) for filename in _[2]] for _ in os.walk(directory) if len(_[2])]
+        *[
+            [os.path.join(_[0], filename) for filename in _[2]]
+            for _ in os.walk(directory)
+            if len(_[2])
+        ]
     )
 
     module_names = []
@@ -42,15 +48,21 @@ def import_directory(module_basename: str, directory: str, update_path: bool = F
             name = name.replace("/", ".")
             name = name.strip(".")
 
-            if not len(name):
+            if not name:
                 continue
 
             name = module_basename + "." + name
 
             known_symbols = set()
-            name = ".".join([_ for _ in name.split(".") if _ not in known_symbols and not known_symbols.add(_)])  # type: ignore
+            name = ".".join(
+                [
+                    _
+                    for _ in name.split(".")
+                    if _ not in known_symbols and not known_symbols.add(_)  # type: ignore[func-returns-value]
+                ]
+            )
 
-            if len(name):
+            if name:
                 module_names.append(name)
 
     logger.debug("modules found: %s", list(module_names))
@@ -60,9 +72,8 @@ def import_directory(module_basename: str, directory: str, update_path: bool = F
 
         try:
             importlib.import_module(module_name)
-        except ImportError as e:
-            logger.warning("failed loading %s", module_name)
-            logger.exception(e)
+        except ImportError:
+            logger.exception("failed loading %s", module_name)
         else:
             logger.info("successfully loaded %s", module_name)
 

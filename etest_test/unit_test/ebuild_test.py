@@ -20,38 +20,40 @@ class BaseEbuildMetaTest(type):
         """Construct a base Ebuild meta test."""
         super(BaseEbuildMetaTest, cls).__init__(name, bases, dct)
 
-        def gen_constructor_case(ebuild: Dict[str, Any]) -> Callable[["EbuildUnitTest"], None]:
+        def gen_constructor_case(
+            ebuild: Dict[str, Any]
+        ) -> Callable[["EbuildUnitTest"], None]:
             def case(self: "EbuildUnitTest") -> None:
-                e = Ebuild(
+                result = Ebuild(
                     path=ebuild["path"],
                     overlay=self.mocked_overlay,
                 )
 
-                self.assertEqual(e.path, ebuild["path"])
-                self.assertEqual(e.overlay, self.mocked_overlay)
+                self.assertEqual(result.path, ebuild["path"])
+                self.assertEqual(result.overlay, self.mocked_overlay)
 
             case.__name__ = "test_constructor_" + str(ebuild["uuid"])
-            case.__doc__ = "ebuild.Ebuild(path = '{0[path]}', overlay = mocked_overlay)".format(ebuild)
+            case.__doc__ = (
+                f"ebuild.Ebuild(path = '{ebuild['path']}', overlay = mocked_overlay)"
+            )
 
             return case
 
-        def gen_property_case(ebuild: Dict[str, Any], prop: str) -> Callable[["EbuildUnitTest"], None]:
+        def gen_property_case(
+            ebuild: Dict[str, Any], prop: str
+        ) -> Callable[["EbuildUnitTest"], None]:
             def case(self: "EbuildUnitTest") -> None:
-                e = Ebuild(
+                result = Ebuild(
                     path=ebuild["path"],
                     overlay=self.mocked_overlay,
                 )
 
-                e.parse = unittest.mock.MagicMock(return_value=ebuild["symbols"])
+                result.parse = unittest.mock.MagicMock(return_value=ebuild["symbols"])
 
-                self.assertEqual(getattr(e, prop), ebuild[prop])
+                self.assertEqual(getattr(result, prop), ebuild[prop])
 
             case.__name__ = "test_property_" + prop + "_" + str(ebuild["uuid"])
-            case.__doc__ = "ebuild.Ebuild(path = '{0[path]}', overlay = mocked_overlay).{1} == '{2}'".format(
-                ebuild,
-                prop,
-                ebuild[prop],
-            )
+            case.__doc__ = f"ebuild.Ebuild(path = '{ebuild['path']}', overlay = mocked_overlay).{prop} == '{ebuild[prop]}'"  # noqa: E501 # pylint: disable=C0301
 
             return case
 
@@ -60,7 +62,14 @@ class BaseEbuildMetaTest(type):
             logger.info("adding %s", _.__name__)
             setattr(cls, _.__name__, _)
 
-            for prop in ("compat", "cpv", "name", "use_flags", "version", "restrictions"):
+            for prop in (
+                "compat",
+                "cpv",
+                "name",
+                "use_flags",
+                "version",
+                "restrictions",
+            ):
                 _ = gen_property_case(ebuild, prop)
                 logger.info("adding %s", _.__name__)
                 setattr(cls, _.__name__, _)

@@ -38,11 +38,13 @@ repos:
     rev: v2.15.6
     hooks:
       - id: pylint
+        exclude: etest/(lexers|parsers)/bash.py
         language: system
   - repo: https://github.com/PyCQA/pydocstyle
     rev: 6.1.1
     hooks:
       - id: pydocstyle
+        exclude: etest/(lexers|parsers)/bash.py
         additional_dependencies: [toml]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.991
@@ -58,10 +60,6 @@ repos:
       - id: python-no-eval
       - id: python-no-log-warn
       - id: python-use-type-annotations
-  - repo: https://github.com/asottile/dead
-    rev: v1.5.0
-    hooks:
-      - id: dead
   - repo: https://github.com/asottile/yesqa
     rev: v1.4.0
     hooks:

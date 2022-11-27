@@ -1,4 +1,5 @@
 """Single variable assignment."""
+# pylint: disable=C0103
 
 import textwrap
 

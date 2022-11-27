@@ -1,4 +1,5 @@
 """Function definition."""
+# pylint: disable=C0103
 
 import textwrap
 

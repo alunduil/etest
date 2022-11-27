@@ -1,4 +1,5 @@
 """Dangling double quote."""
+# pylint: disable=C0103
 
 import textwrap
 

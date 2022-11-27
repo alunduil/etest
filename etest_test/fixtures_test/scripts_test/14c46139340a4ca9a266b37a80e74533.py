@@ -1,4 +1,5 @@
 """Escaped character as a word."""
+# pylint: disable=C0103
 
 import textwrap
 

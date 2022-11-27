@@ -1,4 +1,5 @@
 """For loop with unencapsulated word list."""
+# pylint: disable=C0103
 
 import textwrap
 

@@ -1,13 +1,15 @@
 """Main etest module."""
 import datetime
 import logging
+import shutil
 import signal
 import sys
 import threading
+import typing
 from types import FrameType
 from typing import Optional, Tuple
 
-import click
+import click  # pylint: disable=E0401
 
 from etest import docker, information, tests
 
@@ -38,15 +40,28 @@ def echo_check_verbose(check: tests.Test) -> None:
     click.echo()
 
 
-@click.command()
-@click.option("-d", "--dry-run", is_flag=True, default=False, help="report actions but do not run tests")
-@click.option("-f", "--fast", is_flag=True, default=False, help="stop at first failure")
-@click.option("-j", "--jobs", default=1, help="number of test to run simultaneously")
-@click.option("-q", "--quiet", is_flag=True, default=False, help="suppress all output")
-@click.option("-v", "--verbose", is_flag=True, default=False, help="provide more output")
-@click.version_option(information.VERSION)
-@click.argument("ebuilds", nargs=-1)
-def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, ebuilds: Optional[Tuple[str]]) -> None:
+@click.command()  # type: ignore[misc]
+@click.option(  # type: ignore[misc]
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="report actions but do not run tests",
+)
+@click.option("-f", "--fast", is_flag=True, default=False, help="stop at first failure")  # type: ignore[misc]
+@click.option("-j", "--jobs", default=1, help="number of test to run simultaneously")  # type: ignore[misc]
+@click.option("-q", "--quiet", is_flag=True, default=False, help="suppress all output")  # type: ignore[misc]
+@click.option("-v", "--verbose", is_flag=True, default=False, help="provide more output")  # type: ignore[misc]
+@click.version_option(information.VERSION)  # type: ignore[misc]
+@click.argument("ebuilds", nargs=-1)  # type: ignore[misc]
+def etest(  # pylint: disable=R0913
+    dry_run: bool,
+    fast: bool,
+    jobs: int,
+    quiet: bool,
+    verbose: bool,
+    ebuilds: Optional[Tuple[str]],
+) -> None:
     """Test one or more ebuilds."""
     signal.signal(signal.SIGINT, sigint_handler)
 
@@ -77,9 +92,9 @@ def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, ebui
         jobs_limit_sem.release()
 
     for check in tests.Tests(ebuilds):
-        jobs_limit_sem.acquire()
+        jobs_limit_sem.acquire()  # pylint: disable=R1732
 
-        if fast and len(failures):
+        if fast and failures:
             jobs_limit_sem.release()
             break
 
@@ -94,27 +109,29 @@ def etest(dry_run: bool, fast: bool, jobs: int, quiet: bool, verbose: bool, ebui
         for check in failures:
             click.echo()
             click.echo()
-            click.echo("=" * min(click.get_terminal_size()[0], 72))
+            click.echo("=" * min(shutil.get_terminal_size()[0], 72))
             click.secho(check.name, bold=True)
             click.echo(check.failed_command)
-            click.echo("-" * min(click.get_terminal_size()[0], 72))
+            click.echo("-" * min(shutil.get_terminal_size()[0], 72))
             click.echo(check.output)
             click.echo()
 
         if not verbose:
             click.echo()
 
-        click.echo("-" * min(click.get_terminal_size()[0], 72))
-        click.echo("{} tests ran in {} seconds".format(len(elapsed_times), elapsed_time.total_seconds()))
-        if len(failures):
-            click.secho("{} tests FAILED".format(len(failures)), fg="red")
+        click.echo("-" * min(shutil.get_terminal_size()[0], 72))
+        click.echo(
+            f"{len(elapsed_times)} tests ran in {elapsed_time.total_seconds()} seconds"
+        )
+        if failures:
+            click.secho(f"{len(failures)} tests FAILED", fg="red")
 
     sys.exit(len(failures))
 
 
-def sigint_handler(signals: signal.Signals, frame: FrameType) -> None:
+def sigint_handler(_signal: int, _frame: typing.Optional[FrameType] = None) -> None:
     """Interrupt signal handler."""
     docker.container.CREATE = False
 
-    while len(docker.container.CONTAINERS):
+    while docker.container.CONTAINERS:
         docker.container.stop(docker.container.CONTAINERS[0])

@@ -11,7 +11,7 @@ from etest_test.fixtures_test.scripts_test import SCRIPTS
 
 logger = logging.getLogger(__name__)
 
-TC = TypeVar("TC", bound=unittest.TestCase)
+TestCase = TypeVar("TestCase", bound=unittest.TestCase)
 
 
 class BaseParserMetaTest(type):
@@ -23,8 +23,8 @@ class BaseParserMetaTest(type):
 
         def gen_script_case(
             script: Mapping[str, Any],
-        ) -> Callable[[TC], None]:
-            def case(self: TC) -> None:
+        ) -> Callable[[TestCase], None]:
+            def case(self: TestCase) -> None:
                 lexer = BashLexer()
                 lexer.build()
 
@@ -35,13 +35,13 @@ class BaseParserMetaTest(type):
                     debuglog=None,
                 )
 
-                assert parser.parser is not None
+                assert parser.parser is not None  # nosec
 
                 if "correct" in script:
                     logger.debug("script[text]: %r", script["text"])
 
-                    assert parser is not None
-                    assert parser.parser is not None
+                    assert parser is not None  # nosec
+                    assert parser.parser is not None  # nosec
 
                     parser.parser.parse(
                         debug=logger,
@@ -67,5 +67,3 @@ class BaseParserMetaTest(type):
 
 class BashParserUnitTest(unittest.TestCase, metaclass=BaseParserMetaTest):
     """Unit tests for Bash Parser."""
-
-    pass

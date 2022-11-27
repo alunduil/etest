@@ -2,6 +2,9 @@
 requires = [ "poetry-core",]
 build-backend = "poetry.core.masonry.api"
 
+[tool.isort]
+profile = "black"
+
 [tool.poetry]
 name = "etest"
 version = "1.1.0"
@@ -45,12 +48,14 @@ docker = "^6.0.1"
 ply = "^3.11"
 python = "^3.8"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 coveralls = "^3.3.1"
 hypothesis = "^6.58.1"
 pre-commit = "^2.20.0"
 pytest = "^7.2.0"
 pytest-cov = "^4.0.0"
+sphinx-rtd-theme = "^1.1.1"
+pylint = "^2.15.6"
 
 [tool.poetry.scripts]
 etest = "etest:etest"
@@ -61,3 +66,8 @@ addopts = "--doctest-modules --cov=etest --cov-report=term-missing"
 testpaths = [
   "etest_test",
 ]
+
+[tool.vulture]
+paths = ["etest"]
+min_confidence = 61
+exclude = ["etest/__init__.py"]

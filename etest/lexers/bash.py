@@ -33,7 +33,13 @@ class BashLexer(object):
         self.lexer: Optional[ply.lex.Lexer] = None
 
     def build(self, *args: Any, **kwargs: Any) -> None:
-        self.lexer = ply.lex.lex(module=self, outputdir=os.path.dirname(__file__), errorlog=logger, *args, **kwargs)
+        self.lexer = ply.lex.lex(
+            module=self,
+            outputdir=os.path.dirname(__file__),
+            errorlog=logger,
+            *args,
+            **kwargs
+        )
         self.lexer.assignment = True
         self.lexer.curly = True
 
@@ -171,7 +177,10 @@ class BashLexer(object):
             t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != "=",
         )
 
-        assignment = t.lexer.assignment and t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != "="
+        assignment = (
+            t.lexer.assignment
+            and t.lexer.lexdata[t.lexer.lexpos - len(t.value) - 1] != "="
+        )
 
         logger.debug("assignment: %s", assignment)
 
@@ -304,7 +313,9 @@ class BashLexer(object):
 
             elif t.lexer.lexmatch.string[pos] == "=":
                 if assignment:
-                    t.lexer.lexpos = t.lexer.lexdata.find("=", t.lexer.lexpos - len(t.value))
+                    t.lexer.lexpos = t.lexer.lexdata.find(
+                        "=", t.lexer.lexpos - len(t.value)
+                    )
                     break
                 else:
                     value += t.lexer.lexmatch.string[pos]
@@ -397,5 +408,5 @@ class BashLexer(object):
     t_conditional_error = t_error
 
 
-class BashSyntaxError(click.ClickException):
+class BashSyntaxError(click.ClickException):  # type: ignore[misc]
     pass

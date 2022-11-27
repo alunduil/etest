@@ -9,7 +9,9 @@ CONTAINERS: List[Container] = []
 CREATE = True
 
 
-def commit(container: Container, tag: str, repository: str, *args: Any, **kwargs: Any) -> str:
+def commit(
+    container: Container, tag: str, repository: str, *args: Any, **kwargs: Any
+) -> str:
     """Commit a Docker container."""
     repo = "".join([c for c in repository if c not in "=[],"]).lower()
 
@@ -29,7 +31,7 @@ def create(overlay: str, *args: Any, **kwargs: Any) -> Container:
                     "bind": "/overlay",
                     "ro": True,
                 },
-                # TODO: Retrieve this from environment.
+                # Retrieve this from environment.
                 "/usr/portage": {
                     "bind": "/usr/portage",
                     "ro": True,
@@ -49,7 +51,7 @@ def logs(*args: Any, **kwargs: Any) -> Any:
     return common.API_CLIENT.logs(*args, **kwargs)
 
 
-def remove(container: Container, *args: Any, **kwargs: Any) -> Any:
+def remove(container: Container, *_args: Any, **kwargs: Any) -> Any:
     """Remove a Docker container."""
     CONTAINERS.remove(container)
     return container.remove(**kwargs)

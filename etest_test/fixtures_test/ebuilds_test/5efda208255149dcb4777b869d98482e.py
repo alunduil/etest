@@ -1,4 +1,5 @@
 """dev-python/pyrax ebuild test."""
+# pylint: disable=C0103
 from etest_test.fixtures_test.ebuilds_test import EBUILDS
 
 _ = {
