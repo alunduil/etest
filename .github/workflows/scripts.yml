@@ -34,3 +34,5 @@ jobs:
           cache: poetry
       - name: etest --help
         run: poetry run -- etest --help
+      - name: etest-build --help
+        run: poetry run -- etest-build --help
