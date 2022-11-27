@@ -15,8 +15,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          # TODO When 3.7 is removed add dead to pre-commit-config.yaml
-          - "3.7"  # EOL 2023-06-27
           - "3.8"  # EOL 2024-10
           - "3.9"  # EOL 2025-10
           - "3.10"  # EOL 2026-10
