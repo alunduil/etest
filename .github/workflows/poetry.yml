@@ -35,6 +35,6 @@ jobs:
       - name: poetry build
         run: |
           poetry build
-          tar -zvtf dist/etest-*.tar.gz | grep templatise
+          tar -zvtf dist/etest-*.tar.gz | grep etest
       - name: poetry check
         run: poetry check
