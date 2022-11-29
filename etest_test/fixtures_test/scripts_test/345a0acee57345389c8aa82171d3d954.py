@@ -1,4 +1,5 @@
 """If statement with else."""
+# pylint: disable=C0103
 
 import textwrap
 

@@ -2,6 +2,7 @@
 import functools
 import logging
 import os
+import pathlib
 import tempfile
 import unittest.mock
 
@@ -44,10 +45,9 @@ class ValidEmptyOverlayUnitTest(BaseOverlayTest):
         os.mkdir(_)
         self.addCleanup(os.rmdir, _)
 
-        _ = os.path.join(self.mocked_directory, "metadata", "layout.conf")
-        with open(_, "w") as fh:
-            fh.write("masters = gentoo")
-        self.addCleanup(os.remove, _)
+        layout_conf = pathlib.Path(self.mocked_directory) / "metadata" / "layout.conf"
+        layout_conf.write_text("masters = gentoo")
+        self.addCleanup(os.remove, layout_conf)
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
@@ -90,7 +90,9 @@ class ValidNonEmptyOverlaySubdirectoryUnitTest(BaseOverlayTest):
         super().setUp()
 
         self.mocked_overlay_directory = os.path.join(FIXTURES_DIRECTORY, "overlay")
-        self.mocked_directory = os.path.join(self.mocked_overlay_directory, "app-portage", "etest")
+        self.mocked_directory = os.path.join(
+            self.mocked_overlay_directory, "app-portage", "etest"
+        )
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)

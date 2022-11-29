@@ -9,7 +9,7 @@ from etest import ebuild
 logger = logging.getLogger(__name__)
 
 
-class Overlay(object):
+class Overlay:
     """A portage defined overlay."""
 
     @functools.cached_property
@@ -36,10 +36,10 @@ class Overlay(object):
 
             for _ in files:
                 if _.endswith(".ebuild"):
-                    yield ebuild.Ebuild(os.path.relpath(os.path.join(path, _), self.directory), self)
+                    yield ebuild.Ebuild(
+                        os.path.relpath(os.path.join(path, _), self.directory), self
+                    )
 
 
 class InvalidOverlayError(RuntimeError):
     """Overlay is invalid."""
-
-    pass

@@ -1,4 +1,5 @@
 """Array without padded parentheses."""
+# pylint: disable=C0103
 
 import textwrap
 

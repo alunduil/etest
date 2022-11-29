@@ -1,4 +1,5 @@
 """Arguments to functions starting with bang."""
+# pylint: disable=C0103
 
 import textwrap
 

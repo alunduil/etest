@@ -2,7 +2,9 @@
 import functools
 import logging
 import os
+import pathlib
 import re
+import textwrap
 from typing import Any, Dict, List
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
@@ -11,7 +13,7 @@ from etest.parsers.bash import BashParser
 logger = logging.getLogger(__name__)
 
 
-class Ebuild(object):
+class Ebuild:
     """Ebuild."""
 
     def __init__(self, path: str, overlay: Any) -> None:
@@ -40,7 +42,11 @@ class Ebuild(object):
     @functools.cached_property
     def compat(self) -> Dict[str, str]:
         """COMPAT for ebuild."""
-        return {k.replace("_COMPAT", "").lower(): v for k, v in self.parse().items() if "_COMPAT" in k}
+        return {
+            k.replace("_COMPAT", "").lower(): v
+            for k, v in self.parse().items()
+            if "_COMPAT" in k
+        }
 
     @functools.cached_property
     def restrictions(self) -> List[str]:
@@ -66,21 +72,25 @@ class Ebuild(object):
         parser = BashParser()
         parser.build()
 
-        assert parser.parser is not None
+        assert parser.parser is not None  # nosec
 
         lexer = BashLexer()
         lexer.build()
 
-        ebuild_filename = os.path.join(self.overlay.directory, self.path)
+        ebuild_path = pathlib.Path(self.overlay.directory) / self.path
 
-        with open(ebuild_filename, "r") as fh:
-            try:
-                parser.parser.parse(
-                    input=fh.read(),
-                    lexer=lexer.lexer,
-                )
-            except BashSyntaxError as error:
-                error.message = ebuild_filename + "\n" + error.message
-                raise
+        try:
+            parser.parser.parse(
+                input=ebuild_path.read_text(),
+                lexer=lexer.lexer,
+            )
+        except BashSyntaxError as error:
+            error.message = textwrap.dedent(
+                f"""\
+                {ebuild_path}
+                {error.message}
+                """
+            )
+            raise
 
         return parser.symbols

@@ -1,6 +1,3 @@
 [flake8]
-count = True
-exclude = docs/,etest/lexers/bashtab.py,etest/parsers/bashtab.py,etest/parsers/bash.py
-format = pylint
-ignore = E201,E202,E251,E501
+exclude = etest/lexers/bash.py,etest/parsers/bash.py
 max-line-length = 120
