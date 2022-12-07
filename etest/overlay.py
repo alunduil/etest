@@ -2,44 +2,38 @@
 import functools
 import logging
 import os
-from typing import Generator
+import pathlib
+import typing
 
-from etest import ebuild
+import etest.ebuild as _ebuild
 
-logger = logging.getLogger(__name__)
-
-
-class Overlay:
-    """A portage defined overlay."""
-
-    @functools.cached_property
-    def directory(self) -> str:
-        """Directory containing overlay."""
-        path = os.getcwd()
-
-        while path != "/":
-            if os.path.exists(os.path.join(path, "metadata", "layout.conf")):
-                break
-
-            path = os.path.dirname(path)
-        else:
-            raise InvalidOverlayError("not in a valid ebuild repository directory")
-
-        return path
-
-    @property
-    def ebuilds(self) -> Generator[ebuild.Ebuild, None, None]:
-        """Contained ebuilds in overlay."""
-        for path, directories, files in os.walk(self.directory):
-            if "files" in directories:
-                directories.remove("files")
-
-            for _ in files:
-                if _.endswith(".ebuild"):
-                    yield ebuild.Ebuild(
-                        os.path.relpath(os.path.join(path, _), self.directory), self
-                    )
+_LOGGER = logging.getLogger(__name__)
 
 
 class InvalidOverlayError(RuntimeError):
     """Overlay is invalid."""
+
+
+@functools.lru_cache
+def root(path: pathlib.Path = pathlib.Path(os.getcwd())) -> pathlib.Path:
+    """Find root directory of ebuild repository containing path."""
+    _LOGGER.info("searching for ebuild repository root containing %s.", path)
+
+    result = path
+    while result != result.root:
+        if (result / "metadata" / "layout.conf").exists():
+            break
+        result = result.parent
+    else:
+        raise InvalidOverlayError(f"{path} is not in a valid ebuild repository.")
+
+    return result
+
+
+def ebuilds(
+    path: pathlib.Path = root(),
+) -> typing.Generator[_ebuild.Ebuild, None, None]:
+    """Find all ebuilds in the overlay containing path."""
+    yield from (
+        _ebuild.Ebuild(ebuild, root(path)) for ebuild in root(path).rglob("*.ebuild")
+    )

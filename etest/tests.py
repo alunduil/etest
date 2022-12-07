@@ -129,7 +129,7 @@ class Test:  # pylint: disable=R0902
             container_name = str(uuid.uuid4())
 
             container = docker.container.create(
-                overlay=self.ebuild.overlay.directory,
+                overlay=str(self.ebuild.overlay),
                 image=image_name,
                 name=container_name,
                 environment=self.environment,
@@ -183,10 +183,10 @@ class Tests:  # pylint: disable=R0903
 
     def __init__(self, ebuild_selector: Optional[Tuple[str]] = None):
         """Construct a collection of tests."""
-        self.overlay = overlay.Overlay()
+        self.overlay = overlay.root()
 
         # NOTE: raises InvalidOverlayError when necessary
-        logger.debug("self.overlay.directory: %s", self.overlay.directory)
+        logger.debug("self.overlay.directory: %s", self.overlay)
 
         if ebuild_selector:
             self.ebuild_selector = [_.replace(".ebuild", "") for _ in ebuild_selector]
@@ -194,16 +194,16 @@ class Tests:  # pylint: disable=R0903
             self.ebuild_selector = []
 
         if not self.ebuild_selector:
-            _ = os.path.relpath(self.overlay.directory)
+            _ = os.path.relpath(self.overlay)
 
             if _.startswith(".."):
                 self.ebuild_selector.append(
-                    os.getcwd().replace(self.overlay.directory, "").strip("/")
+                    os.getcwd().replace(str(self.overlay), "").strip("/")
                 )
 
     def __iter__(self) -> Generator[Test, None, None]:
         """Iterate over the contained tests."""
-        for ebuild in self.overlay.ebuilds:
+        for ebuild in overlay.ebuilds(self.overlay):
             if not self.ebuild_selector or any(
                 _ in ebuild.cpv for _ in self.ebuild_selector
             ):

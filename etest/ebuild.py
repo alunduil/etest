@@ -5,7 +5,7 @@ import os
 import pathlib
 import re
 import textwrap
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Ebuild:
     """Ebuild."""
 
-    def __init__(self, path: str, overlay: Any) -> None:
+    def __init__(self, path: pathlib.Path, overlay: pathlib.Path) -> None:
         """Construct an ebuild."""
         self.path = path
         self.overlay = overlay
@@ -34,7 +34,7 @@ class Ebuild:
     @functools.cached_property
     def version(self) -> str:
         """Version of ebuild."""
-        result = self.path.replace(".ebuild", "")
+        result = str(self.path).replace(".ebuild", "")
         result = re.sub(r".*?" + re.escape(self.name.split("/")[-1]) + "-", "", result)
 
         return result
