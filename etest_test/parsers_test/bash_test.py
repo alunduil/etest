@@ -20,7 +20,9 @@ def test_golden_bash_correct_parses(
 
     assert parser.parser is not None  # nosec
 
-    parser.parser.parse(input=golden["text"], lexer=lexer.lexer, debug=_LOGGER)
+    parser.parser.parse(
+        input=golden["text"], lexer=lexer.lexer, debug=_LOGGER, tracking=True
+    )
 
     assert parser.symbols == golden.out["symbols"]  # nosec
 
@@ -36,4 +38,6 @@ def test_golden_bash_error_parses(
     assert parser.parser is not None  # nosec
 
     with pytest.raises(sut.BashSyntaxError):
-        parser.parser.parse(input=golden["text"], lexer=lexer.lexer, debug=_LOGGER)
+        parser.parser.parse(
+            input=golden["text"], lexer=lexer.lexer, debug=_LOGGER, tracking=True
+        )
