@@ -16,11 +16,11 @@ def test_golden_bash_correct_parses(
 ) -> None:
     """Test golden corrects in BashParser."""
     parser = sut.BashParser()
-    parser.build(debug=1, debuglog=_LOGGER)
+    parser.build(debug=True, debuglog=_LOGGER)
 
     assert parser.parser is not None  # nosec
 
-    parser.parser.parse(debug=_LOGGER, input=golden["text"], lexer=lexer)
+    parser.parser.parse(input=golden["text"], lexer=lexer.lexer, debug=_LOGGER)
 
     assert parser.symbols == golden.out["symbols"]  # nosec
 
@@ -31,9 +31,9 @@ def test_golden_bash_error_parses(
 ) -> None:
     """Test golden errors in BashParser."""
     parser = sut.BashParser()
-    parser.build(debug=1, debuglog=_LOGGER)
+    parser.build(debug=True, debuglog=_LOGGER)
 
     assert parser.parser is not None  # nosec
 
     with pytest.raises(sut.BashSyntaxError):
-        parser.parser.parse(debug=_LOGGER, input=golden["text"], lexer=lexer)
+        parser.parser.parse(input=golden["text"], lexer=lexer.lexer, debug=_LOGGER)
