@@ -1,6 +1,6 @@
 text: |
-    FOO=python{2_7,3_3}
+  FOO=python{2_7,3_3}
 symbols:
-    "FOO":
-        - "python2_7"
-        - "python3_3"
+  FOO:
+  - python2_7
+  - python3_3

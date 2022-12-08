@@ -1,5 +1,5 @@
 text: |
-    python_test() {
-        nosetests || die "Tests failed under ${EPYTHON}"
-    }
+  python_test() {
+      nosetests || die "Tests failed under ${EPYTHON}"
+  }
 symbols: {}

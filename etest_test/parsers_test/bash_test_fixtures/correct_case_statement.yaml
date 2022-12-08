@@ -1,9 +1,9 @@
 text: |
-    case ${EBUILD_PHASE} in
-    prepare|configure|compile|install)
-        pushd python > /dev/null || die
-        distutils_src_${EBUILD_PHASE}
-        popd > /dev/null
-        ;;
-    esac
+  case ${EBUILD_PHASE} in
+  prepare|configure|compile|install)
+      pushd python > /dev/null || die
+      distutils_src_${EBUILD_PHASE}
+      popd > /dev/null
+      ;;
+  esac
 symbols: {}

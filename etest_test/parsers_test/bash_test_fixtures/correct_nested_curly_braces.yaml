@@ -1,4 +1,4 @@
 text: |
-    local CTARGET=${CTARGET:-${CHOST}}
+  local CTARGET=${CTARGET:-${CHOST}}
 symbols:
-    "CTARGET": "${CTARGET:-${CHOST}}"
+  CTARGET: ${CTARGET:-${CHOST}}

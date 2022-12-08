@@ -1,4 +1,4 @@
 text: |
-    FOO=bar
+  FOO=bar
 symbols:
-    "FOO": "bar"
+  FOO: bar

@@ -1,4 +1,4 @@
 text: |
-    MY_PN=${PN/-/.}
+  MY_PN=${PN/-/.}
 symbols:
-    "MY_PN": "${PN/-/.}"
+  MY_PN: ${PN/-/.}

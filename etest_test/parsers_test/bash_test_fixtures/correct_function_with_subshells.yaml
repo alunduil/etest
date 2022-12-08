@@ -1,7 +1,7 @@
 text: |
-    src_configure() {
-        econf \
-            $(use_enable python) \
-            $(use_enable java)
-    }
+  src_configure() {
+      econf \
+          $(use_enable python) \
+          $(use_enable java)
+  }
 symbols: {}

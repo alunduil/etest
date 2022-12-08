@@ -1,6 +1,7 @@
 text: |
-    local FOO=(
-        bar
-    )
+  local FOO=(
+      bar
+  )
 symbols:
-    "FOO": ("bar",),
+  FOO:
+  - bar

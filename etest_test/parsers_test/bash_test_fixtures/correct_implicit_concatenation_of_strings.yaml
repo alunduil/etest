@@ -1,4 +1,4 @@
 text: |
-    FOO="bar"baz
+  FOO="bar"baz
 symbols:
-    "FOO": "barbaz"
+  FOO: barbaz
