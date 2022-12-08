@@ -1,0 +1,4 @@
+text: |
+    local CTARGET=${CTARGET:-${CHOST}}
+symbols:
+    "CTARGET": "${CTARGET:-${CHOST}}"

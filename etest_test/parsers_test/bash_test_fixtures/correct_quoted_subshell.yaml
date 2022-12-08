@@ -1,0 +1,4 @@
+text: |
+    currentamanda="$(set | egrep "^AMANDA_" | grep -v '^AMANDA_ENV_SETTINGS' | xargs)"
+symbols:
+    "currentamanda": "$(set | egrep \"^AMANDA_\" | grep -v '^AMANDA_ENV_SETTINGS' | xargs)"

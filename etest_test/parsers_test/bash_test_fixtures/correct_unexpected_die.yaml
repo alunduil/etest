@@ -1,0 +1,4 @@
+text: |
+    die
+    mv "${WORKDIR}"/${P}-${lang}.po po/${lang}.po || die
+symbols: {}

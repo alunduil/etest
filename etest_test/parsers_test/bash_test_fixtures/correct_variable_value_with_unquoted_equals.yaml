@@ -1,0 +1,4 @@
+text: |
+    FOO=bar=baz
+symbols:
+    "FOO": "bar=baz"

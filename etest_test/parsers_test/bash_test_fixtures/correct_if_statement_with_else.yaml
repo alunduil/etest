@@ -1,0 +1,25 @@
+text: |
+    src_configure() {
+        local mycmakeargs=(
+            $(cmake-utils_use_with semantic-desktop Soprano)
+            $(cmake-utils_use_with kipi)
+        )
+        # Workaround for bug #479510
+        if [[ -e ${EPREFIX}/usr/include/${CHOST}/jconfig.h ]]; then
+            mycmakeargs+=( -DJCONFIG_H="${EPREFIX}/usr/include/${CHOST}/jconfig.h" )
+        fi
+
+        if use semantic-desktop; then
+            mycmakeargs+=(-DGWENVIEW_SEMANTICINFO_BACKEND=Nepomuk)
+        else
+            mycmakeargs+=(-DGWENVIEW_SEMANTICINFO_BACKEND=None)
+        fi
+
+        kde4-base_src_configure
+    }
+symbols:
+    "mycmakeargs":
+        - "$(cmake-utils_use_with semantic-desktop Soprano)"
+        - "$(cmake-utils_use_with kipi)"
+    "mycmakeargs+":
+        - "-DGWENVIEW_SEMANTICINFO_BACKEND=None"

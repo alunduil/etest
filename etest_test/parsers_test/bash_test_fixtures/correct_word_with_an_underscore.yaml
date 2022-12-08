@@ -1,0 +1,4 @@
+text: |
+    MY_P=${PN}_${PV}
+symbols:
+    "MY_P": "${PN}_${PV}"

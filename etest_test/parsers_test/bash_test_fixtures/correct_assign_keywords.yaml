@@ -1,0 +1,18 @@
+text: |
+    IUSE_LINGUAS=( en da de es fi fr it ja ko nl no pt_BR se zh_CN )
+symbols:
+    "IUSE_LINGUAS":
+        - "en"
+        - "da"
+        - "de"
+        - "es"
+        - "fi"
+        - "fr"
+        - "it"
+        - "ja"
+        - "ko"
+        - "nl"
+        - "no"
+        - "pt_BR"
+        - "se"
+        - "zh_CN"
