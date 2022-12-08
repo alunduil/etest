@@ -33,7 +33,7 @@ def split_expansion(text: str) -> Generator[str, None, None]:
     yield expansion
 
 
-def expand_word(word: str) -> Tuple[Any, ...]:
+def expand_word(word: str) -> List[Any]:
     """Expand any BASH expansions and return the resulting tuple of words."""
 
     logger.debug("word: %s", word)
@@ -41,7 +41,7 @@ def expand_word(word: str) -> Tuple[Any, ...]:
     if not re.search(r"(?:(?:\\\\)*\\)?(?<!\$){", word):
         logger.debug("words: %s", (word,))
 
-        return (word,)
+        return [word]
 
     prefix, rest = re.split(r"(?:(?:\\\\)*\\)?(?<!\$){", word, 1)
     logger.debug("prefix: %s", prefix)
@@ -62,9 +62,9 @@ def expand_word(word: str) -> Tuple[Any, ...]:
     for expansion in split_expansion(rest):
         words.extend([prefix + _ + suffix for _ in expand_word(expansion)])
 
-    logger.debug("words: %s", tuple(words))
+    logger.debug("words: %s", ", ".join(words))
 
-    return tuple(words)
+    return words
 
 
 class BashParser(object):
