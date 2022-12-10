@@ -1,65 +1,46 @@
 """Ebuild."""
-import functools
+import dataclasses
 import logging
-import os
 import pathlib
 import re
-import textwrap
-from typing import Any, Dict, List
+import typing
 
 from etest.lexers.bash import BashLexer, BashSyntaxError
 from etest.parsers.bash import BashParser
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 
-class Ebuild:
+@dataclasses.dataclass
+class Ebuild:  # pylint: disable=R0902
     """Ebuild."""
 
-    def __init__(self, path: str, overlay: Any) -> None:
-        """Construct an ebuild."""
-        self.path = path
-        self.overlay = overlay
+    overlay: pathlib.Path
+    path: pathlib.Path
+    symbols: typing.Dict[str, typing.Any]
+    name: str = dataclasses.field(init=False)
+    version: str = dataclasses.field(init=False)
+    cpv: str = dataclasses.field(init=False)
+    compat: typing.Dict[str, typing.Any] = dataclasses.field(init=False)
+    restrictions: typing.List[str] = dataclasses.field(init=False)
+    use_flags: typing.List[str] = dataclasses.field(init=False)
 
-    @functools.cached_property
-    def name(self) -> str:
-        """Name of ebuild."""
-        return os.path.dirname(self.path)
-
-    @functools.cached_property
-    def cpv(self) -> str:
-        """Category package version."""
-        return "=" + self.name + "-" + self.version
-
-    @functools.cached_property
-    def version(self) -> str:
-        """Version of ebuild."""
-        result = self.path.replace(".ebuild", "")
-        result = re.sub(r".*?" + re.escape(self.name.split("/")[-1]) + "-", "", result)
-
-        return result
-
-    @functools.cached_property
-    def compat(self) -> Dict[str, str]:
-        """COMPAT for ebuild."""
-        return {
-            k.replace("_COMPAT", "").lower(): v
-            for k, v in self.parse().items()
-            if "_COMPAT" in k
+    def __post_init__(self) -> None:
+        """Post initialisation of Ebuild properties."""
+        category = str(self.path.parent.parent.name)
+        self.name = f"{category}/" + re.sub(r"-\d.*", "", self.path.stem, 1)
+        self.version = re.sub(r".*-(?=\d)", "", self.path.stem, 1)
+        self.cpv = f"={category}/{self.path.stem}"
+        self.compat = {
+            key.replace("_COMPAT", "").lower(): value
+            for key, value in self.symbols.items()
+            if "_COMPAT" in key
         }
+        self.restrictions = self.symbols.get("RESTRICT", "").split()
+        self.use_flags = [re.sub(r"^[+-]", "", i) for i in self.symbols["IUSE"].split()]
 
-    @functools.cached_property
-    def restrictions(self) -> List[str]:
-        """Ebuild Restrictions."""
-        return self.parse().get("RESTRICT", "").split()
-
-    @functools.cached_property
-    def use_flags(self) -> List[str]:
-        """USE flags for ebuild."""
-        return [re.sub(r"^[+-]", "", _) for _ in self.parse()["IUSE"].split()]
-
-    @functools.lru_cache(1)
-    def parse(self) -> Dict[str, str]:
+    @classmethod
+    def from_file(cls, path: pathlib.Path, overlay: pathlib.Path) -> "Ebuild":
         """Convert ebuild file into a dictionary, mapping variables to values.
 
         Parses the ebuild file and constructs a dictionary that maps the
@@ -69,6 +50,8 @@ class Ebuild:
         -------
         Dictionary whose keys are variables in the associated ebuild.
         """
+        _LOGGER.info("reading ebuild from %s", path)
+
         parser = BashParser()
         parser.build()
 
@@ -77,20 +60,16 @@ class Ebuild:
         lexer = BashLexer()
         lexer.build()
 
-        ebuild_path = pathlib.Path(self.overlay.directory) / self.path
-
         try:
             parser.parser.parse(
-                input=ebuild_path.read_text(),
-                lexer=lexer.lexer,
+                input=path.read_text(), lexer=lexer.lexer, debug=_LOGGER, tracking=True
             )
         except BashSyntaxError as error:
-            error.message = textwrap.dedent(
-                f"""\
-                {ebuild_path}
-                {error.message}
-                """
-            )
+            error.message = f"{path}: {error.message}"
             raise
 
-        return parser.symbols
+        return cls(
+            overlay=overlay,
+            path=path.relative_to(overlay),
+            symbols=parser.symbols,
+        )

@@ -1,9 +1,16 @@
 """app-portage/etest ebuild test."""
+import pathlib
+
+import etest_test.overlay as _overlay
 from etest_test.fixtures_test.tests_test import TESTS
 
 _ = {
     "uuid": "abd0bd5f-2bb1-4c1b-886f-8bdf0f2f0567",
-    "ebuild_path": "app-portage/etest/etest-9999.ebuild",
+    "ebuild": {
+        "path": pathlib.Path("app-portage/etest/etest-9999.ebuild"),
+        "overlay": _overlay.PATH,
+        "symbols": {"IUSE": "test", "PYTHON_COMPAT": ["python3_3", "python3_4"]},
+    },
     "with_test_phase": True,
     "base_docker_image": "alunduil/etest:latest",
     "use_flags": (),

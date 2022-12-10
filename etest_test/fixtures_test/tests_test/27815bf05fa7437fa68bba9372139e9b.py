@@ -1,10 +1,17 @@
 """app-portage/etest ebuild test."""
 # pylint: disable=C0103
+import pathlib
+
+import etest_test.overlay as _overlay
 from etest_test.fixtures_test.tests_test import TESTS
 
 _ = {
     "uuid": "27815bf0-5fa7-437f-a68b-ba9372139e9b",
-    "ebuild_path": "app-portage/etest/etest-9999.ebuild",
+    "ebuild": {
+        "path": pathlib.Path("app-portage/etest/etest-9999.ebuild"),
+        "overlay": _overlay.PATH,
+        "symbols": {"IUSE": "test", "PYTHON_COMPAT": ["python3_3", "python3_4"]},
+    },
     "with_test_phase": False,
     "base_docker_image": "alunduil/etest:latest",
     "use_flags": (),

@@ -25,9 +25,7 @@ def ebuilds(
     """Contained ebuilds in overlay."""
     repository_path = root(path)
     yield from (
-        _ebuild.Ebuild(
-            path=str(p.relative_to(repository_path)), overlay=repository_path
-        )
+        _ebuild.Ebuild.from_file(path=p, overlay=repository_path)
         for p in repository_path.rglob("*.ebuild")
     )
 

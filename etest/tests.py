@@ -130,7 +130,7 @@ class Test:  # pylint: disable=R0902
             container_name = str(uuid.uuid4())
 
             container = docker.container.create(
-                overlay=self.ebuild.overlay.directory,
+                overlay=str(self.ebuild.overlay),
                 image=image_name,
                 name=container_name,
                 environment=self.environment,
@@ -184,7 +184,7 @@ class Tests:  # pylint: disable=R0903
 
     def __init__(self, ebuild_selector: Optional[Tuple[str]] = None):
         """Construct a collection of tests."""
-        self.overlay = overlay.root()
+        self.overlay = overlay.root(path=pathlib.Path.cwd())
 
         # NOTE: raises InvalidOverlayError when necessary
         logger.debug("self.overlay.directory: %s", self.overlay)

@@ -64,7 +64,7 @@ etest = "etest:etest"
 etest-build = "etest.build:main"
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules --cov=etest --cov-report=term-missing -n logical"
+addopts = "--doctest-modules --cov=etest --cov-report=term-missing --log-level debug -n logical"
 testpaths = [
   "etest_test",
 ]
