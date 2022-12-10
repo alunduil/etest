@@ -1,13 +1,10 @@
 """app-portage/etest ebuild test."""
 # pylint: disable=C0103
-from etest_test.fixtures_test.ebuilds_test.eab5f11185a74264acb98eeb95b3238f import (
-    _ as ebuild,
-)
 from etest_test.fixtures_test.tests_test import TESTS
 
 _ = {
     "uuid": "27815bf0-5fa7-437f-a68b-ba9372139e9b",
-    "ebuild": ebuild,
+    "ebuild_path": "app-portage/etest/etest-9999.ebuild",
     "with_test_phase": False,
     "base_docker_image": "alunduil/etest:latest",
     "use_flags": (),
