@@ -1,0 +1,4 @@
+text: |
+  MY_PN=${PN/-/.}
+symbols:
+  MY_PN: ${PN/-/.}

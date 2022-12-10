@@ -1,0 +1,11 @@
+text: |
+  local mycmakeargs=(
+      -DVALA_EXECUTABLE="${VALAC}"
+      -DGSETTINGS_COMPILE=OFF
+      -DMINIMAL_FLAGS=ON
+  )
+symbols:
+  mycmakeargs:
+  - -DVALA_EXECUTABLE=${VALAC}
+  - -DGSETTINGS_COMPILE=OFF
+  - -DMINIMAL_FLAGS=ON

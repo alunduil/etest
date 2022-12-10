@@ -1,0 +1,3 @@
+text: |
+  find "${D}" -name '*.la' -exec rm -f '{}' +
+symbols: {}

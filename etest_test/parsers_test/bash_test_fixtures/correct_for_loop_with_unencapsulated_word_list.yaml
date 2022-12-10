@@ -1,0 +1,5 @@
+text: |
+  for test in test.py selftest.py selftest2.py; do
+      echo foo
+  done
+symbols: {}

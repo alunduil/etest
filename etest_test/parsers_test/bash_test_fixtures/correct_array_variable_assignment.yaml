@@ -1,0 +1,5 @@
+text: |
+  FOO=( bar )
+symbols:
+  FOO:
+  - bar

@@ -1,0 +1,3 @@
+text: |
+  find "${ED}" -name '*.la' -exec rm -f {} +
+symbols: {}

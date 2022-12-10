@@ -1,0 +1,7 @@
+text: |
+  local FOO=(
+      bar
+  )
+symbols:
+  FOO:
+  - bar
