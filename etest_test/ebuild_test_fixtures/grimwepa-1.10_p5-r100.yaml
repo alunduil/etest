@@ -1,0 +1,15 @@
+path: "net-wireless/grimwepa/grimwepa-1.10_p5-r100.ebuild"
+symbols:
+    IUSE: "+wep +extra"
+properties:
+    compat: {}
+    cpv: "=net-wireless/grimwepa-1.10_p5-r100"
+    name: "net-wireless/grimwepa"
+    restrictions: []
+    use_flags: ["wep", "extra"]
+    version: "1.10_p5-r100"
+    use_flag_sets:
+        - []
+        - ["wep"]
+        - ["extra"]
+        - ["wep", "extra"]

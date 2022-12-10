@@ -1,0 +1,16 @@
+path: "app-admin/fleet/fleet-9999.ebuild"
+symbols:
+    IUSE: "doc examples"
+    RESTRICT: "test"
+properties:
+    compat: {}
+    cpv: "=app-admin/fleet-9999"
+    name: "app-admin/fleet"
+    restrictions: ["test"]
+    use_flags: ["doc", "examples"]
+    version: "9999"
+    use_flag_sets:
+        - []
+        - ["doc"]
+        - ["examples"]
+        - ["doc", "examples"]

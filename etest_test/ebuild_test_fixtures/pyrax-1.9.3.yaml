@@ -1,0 +1,16 @@
+path:  dev-python/pyrax/pyrax-1.9.3.ebuild
+symbols:
+    IUSE: ""
+    PYTHON_COMPAT:
+        - "python2_7"
+properties:
+    compat:
+        "python":
+            - "python2_7"
+    cpv: "=dev-python/pyrax-1.9.3"
+    name: "dev-python/pyrax"
+    restrictions: []
+    use_flags: []
+    version: "1.9.3"
+    use_flag_sets:
+     - []

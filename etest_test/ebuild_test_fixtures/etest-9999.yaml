@@ -1,0 +1,18 @@
+path: "app-portage/etest/etest-9999.ebuild"
+symbols:
+    IUSE: "test"
+    PYTHON_COMPAT:
+        - "python3_3"
+        - "python3_4"
+properties:
+    compat:
+        python:
+            - "python3_3"
+            - "python3_4"
+    cpv: "=app-portage/etest-9999"
+    name: "app-portage/etest"
+    restrictions: []
+    use_flags: ["test"]
+    version: "9999"
+    use_flag_sets:
+      - []
