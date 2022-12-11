@@ -5,21 +5,18 @@ import typing
 
 import etest.ebuild as _ebuild
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 
 def root(path: pathlib.Path = pathlib.Path.cwd()) -> pathlib.Path:
     """Directory containing overlay."""
-    result = path
+    if path.is_dir() and (path / "metadata" / "layout.conf").exists():
+        return path
+    for parent in path.parents:
+        if (parent / "metadata" / "layout.conf").exists():
+            return parent
 
-    while result != result.root:
-        if (result / "metadata" / "layout.conf").exists():
-            break
-        result = result.parent
-    else:
-        raise InvalidOverlayError(f"{path} not in a valid ebuild repository directory.")
-
-    return result
+    raise InvalidOverlayError(f"{path} not in a valid ebuild repository directory.")
 
 
 def ebuilds(
