@@ -13,7 +13,7 @@ import unittest.mock
 from typing import Any, Callable, Dict, Tuple
 
 import etest.tests as sut
-from etest_test.fixtures_test import FIXTURES_DIRECTORY
+import etest_test.overlay as _overlay
 from etest_test.fixtures_test.ebuilds_test import EBUILDS
 from etest_test.fixtures_test.tests_test import TESTS
 
@@ -135,7 +135,7 @@ class TestsUnitTest(unittest.TestCase):
         """Set Up Test Case."""
         super().setUp()
 
-        self.mocked_directory = os.path.join(FIXTURES_DIRECTORY, "overlay")
+        self.mocked_directory = _overlay.PATH
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
