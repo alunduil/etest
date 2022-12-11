@@ -32,11 +32,6 @@ class TestRoot:
 class TestEbuilds:
     """Test listing ebuilds."""
 
-    def test_invalid(self, tmp_path: pathlib.Path) -> None:
-        """Test listing of a non-overlay."""
-        with pytest.raises(sut.InvalidOverlayError):
-            sut.ebuilds(tmp_path)
-
     def test_empty(self, tmp_path: pathlib.Path) -> None:
         """Test listing of an empty overlay."""
         (tmp_path / "metadata").mkdir()
