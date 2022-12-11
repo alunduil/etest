@@ -144,13 +144,6 @@ class TestsUnitTest(unittest.TestCase):
         self.mocked_overlay = patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.mocked_overlay_overlay = unittest.mock.MagicMock()
-        self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay
-
-        type(self.mocked_overlay_overlay).directory = unittest.mock.PropertyMock(
-            return_value=self.mocked_directory
-        )
-
         ebuilds = []
 
         self.test_calls = []
@@ -177,7 +170,7 @@ class TestsUnitTest(unittest.TestCase):
                     )
                 )
 
-        type(self.mocked_overlay_overlay).ebuilds = unittest.mock.PropertyMock(
+        type(self.mocked_overlay).ebuilds = unittest.mock.MagicMock(
             return_value=ebuilds
         )
 
