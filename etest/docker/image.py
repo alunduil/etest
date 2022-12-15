@@ -5,13 +5,14 @@ from pathlib import Path
 from typing import Any
 
 import docker
+from docker.models.images import Image
 
 from etest.docker import common
 
 _LOGGER = logging.getLogger()
 
 
-def build(path: Path, *args, **kwargs):
+def build(path: Path, *args: Any, **kwargs: Any) -> Image:
     """Build a docker image."""
     image, logs = common.CLIENT.images.build(path=str(path.parent), *args, **kwargs)
 

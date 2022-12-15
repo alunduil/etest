@@ -43,7 +43,7 @@ class _libc_commands(Enum):
 
 
 @click.command(name="etest-build")
-@click_log.simple_verbosity_option(_LOGGER)  # type: ignore
+@click_log.simple_verbosity_option(_LOGGER)
 @click.option("-s", "--strict", is_flag=True, default=False, help="Fail on warnings.")
 @click.option("--hardened/--no-hardened", default=False, help="Use a hardened profile.")
 @click.option("--multilib/--no-multilib", default=True, help="Use a multilib profile.")

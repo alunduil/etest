@@ -33,7 +33,7 @@ def create(overlay: Optional[Path] = None, *args: Any, **kwargs: Any) -> Contain
         return _create_high_level(*args, **kwargs)
 
 
-def _create_low_level(overlay: Path, *args, **kwargs):
+def _create_low_level(overlay: Path, *args: Any, **kwargs: Any) -> Container:
     """Create a Docker container via the low-level API."""
     container_data = common.API_CLIENT.create_container(
         *args,
@@ -59,7 +59,7 @@ def _create_low_level(overlay: Path, *args, **kwargs):
     return container
 
 
-def _create_high_level(*args, **kwargs):
+def _create_high_level(*args: Any, **kwargs: Any) -> Container:
     """Create a Docker container via the high-level API."""
     container = common.CLIENT.containers.create(*args, **kwargs)
 

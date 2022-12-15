@@ -129,7 +129,7 @@ def etest(  # pylint: disable=R0913
     sys.exit(len(failures))
 
 
-def sigint_handler(_signal: int, _frame: typing.Optional[FrameType] = None) -> None:
+def sigint_handler(signal: int, frame: Optional[FrameType]) -> None:
     """Interrupt signal handler."""
     docker.container.CREATE = False
 
