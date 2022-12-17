@@ -4,6 +4,7 @@ import functools
 import itertools
 import logging
 import os
+import pathlib
 import typing
 import uuid
 from typing import Any, Dict, Generator, List, Optional, Tuple
@@ -183,10 +184,10 @@ class Tests:  # pylint: disable=R0903
 
     def __init__(self, ebuild_selector: Optional[Tuple[str]] = None):
         """Construct a collection of tests."""
-        self.overlay = overlay.Overlay()
+        self.overlay = overlay.root()
 
         # NOTE: raises InvalidOverlayError when necessary
-        logger.debug("self.overlay.directory: %s", self.overlay.directory)
+        logger.debug("self.overlay.directory: %s", self.overlay)
 
         if ebuild_selector:
             self.ebuild_selector = [_.replace(".ebuild", "") for _ in ebuild_selector]
@@ -194,16 +195,16 @@ class Tests:  # pylint: disable=R0903
             self.ebuild_selector = []
 
         if not self.ebuild_selector:
-            _ = os.path.relpath(self.overlay.directory)
+            _ = os.path.relpath(self.overlay)
 
             if _.startswith(".."):
                 self.ebuild_selector.append(
-                    os.getcwd().replace(self.overlay.directory, "").strip("/")
+                    pathlib.Path.cwd().relative_to(self.overlay)
                 )
 
     def __iter__(self) -> Generator[Test, None, None]:
         """Iterate over the contained tests."""
-        for ebuild in self.overlay.ebuilds:
+        for ebuild in overlay.ebuilds(self.overlay):
             if not self.ebuild_selector or any(
                 _ in ebuild.cpv for _ in self.ebuild_selector
             ):

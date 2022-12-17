@@ -1,44 +1,35 @@
 """Overlay."""
-import functools
 import logging
-import os
-from typing import Generator
+import pathlib
+import typing
 
-from etest import ebuild
+import etest.ebuild as _ebuild
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 
-class Overlay:
-    """A portage defined overlay."""
-
-    @functools.cached_property
-    def directory(self) -> str:
-        """Directory containing overlay."""
-        path = os.getcwd()
-
-        while path != "/":
-            if os.path.exists(os.path.join(path, "metadata", "layout.conf")):
-                break
-
-            path = os.path.dirname(path)
-        else:
-            raise InvalidOverlayError("not in a valid ebuild repository directory")
-
+def root(path: pathlib.Path = pathlib.Path.cwd()) -> pathlib.Path:
+    """Directory containing overlay."""
+    if path.is_dir() and (path / "metadata" / "layout.conf").exists():
         return path
+    for parent in path.parents:
+        if (parent / "metadata" / "layout.conf").exists():
+            return parent
 
-    @property
-    def ebuilds(self) -> Generator[ebuild.Ebuild, None, None]:
-        """Contained ebuilds in overlay."""
-        for path, directories, files in os.walk(self.directory):
-            if "files" in directories:
-                directories.remove("files")
+    raise InvalidOverlayError(f"{path} not in a valid ebuild repository directory.")
 
-            for _ in files:
-                if _.endswith(".ebuild"):
-                    yield ebuild.Ebuild(
-                        os.path.relpath(os.path.join(path, _), self.directory), self
-                    )
+
+def ebuilds(
+    path: pathlib.Path = pathlib.Path.cwd(),
+) -> typing.Generator[_ebuild.Ebuild, None, None]:
+    """Contained ebuilds in overlay."""
+    repository_path = root(path)
+    yield from (
+        _ebuild.Ebuild(
+            path=str(p.relative_to(repository_path)), overlay=repository_path
+        )
+        for p in repository_path.rglob("*.ebuild")
+    )
 
 
 class InvalidOverlayError(RuntimeError):

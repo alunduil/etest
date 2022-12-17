@@ -13,7 +13,7 @@ import unittest.mock
 from typing import Any, Callable, Dict, Tuple
 
 import etest.tests as sut
-from etest_test.fixtures_test import FIXTURES_DIRECTORY
+import etest_test.overlay as _overlay
 from etest_test.fixtures_test.ebuilds_test import EBUILDS
 from etest_test.fixtures_test.tests_test import TESTS
 
@@ -135,7 +135,7 @@ class TestsUnitTest(unittest.TestCase):
         """Set Up Test Case."""
         super().setUp()
 
-        self.mocked_directory = os.path.join(FIXTURES_DIRECTORY, "overlay")
+        self.mocked_directory = _overlay.PATH
 
         self.addCleanup(functools.partial(os.chdir, os.getcwd()))
         os.chdir(self.mocked_directory)
@@ -143,13 +143,6 @@ class TestsUnitTest(unittest.TestCase):
         patcher = unittest.mock.patch.object(sut, "overlay")
         self.mocked_overlay = patcher.start()
         self.addCleanup(patcher.stop)
-
-        self.mocked_overlay_overlay = unittest.mock.MagicMock()
-        self.mocked_overlay.Overlay.return_value = self.mocked_overlay_overlay
-
-        type(self.mocked_overlay_overlay).directory = unittest.mock.PropertyMock(
-            return_value=self.mocked_directory
-        )
 
         ebuilds = []
 
@@ -177,7 +170,7 @@ class TestsUnitTest(unittest.TestCase):
                     )
                 )
 
-        type(self.mocked_overlay_overlay).ebuilds = unittest.mock.PropertyMock(
+        type(self.mocked_overlay).ebuilds = unittest.mock.MagicMock(
             return_value=ebuilds
         )
 

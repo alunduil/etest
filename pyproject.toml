@@ -67,6 +67,7 @@ addopts = "--doctest-modules --cov=etest --cov-report=term-missing"
 testpaths = [
   "etest_test",
 ]
+enable_assertion_pass_hook = true
 
 [tool.vulture]
 paths = ["etest"]
