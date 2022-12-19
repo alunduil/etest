@@ -57,13 +57,14 @@ pytest-cov = "^4.0.0"
 sphinx-rtd-theme = "^1.1.1"
 pylint = "^2.15.6"
 pytest-golden = "^0.2.2"
+pytest-xdist = {extras = ["psutil"], version = "^3.1.0"}
 
 [tool.poetry.scripts]
 etest = "etest:etest"
 etest-build = "etest.build:main"
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules --cov=etest --cov-report=term-missing"
+addopts = "--doctest-modules --cov=etest --cov-report=term-missing -n logical"
 testpaths = [
   "etest_test",
 ]
