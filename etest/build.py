@@ -2,8 +2,8 @@
 
 import logging
 import textwrap
-from enum import Enum
 from pathlib import Path
+from typing import List
 
 import click
 import click_log
@@ -16,17 +16,16 @@ _LOGGER = logging.getLogger()
 click_log.basic_config(_LOGGER)
 
 
-class _libc_commands(Enum):
-    glibc = """
+_libc_commands = {
+    "glibc": """
         /bin/bash -c \
         'emerge-webrsync && \
         echo en_US.UTF8 UTF-8 >> /etc/locale.gen && \
         echo en_US ISO-8859-1 >> /etc/locale.gen && \
         locale-gen && \
         eselect locale set en_US.utf8'
-    """
-
-    musl = """
+    """,
+    "musl": """
         /bin/bash -c \
         'touch /etc/portage/repos.conf/musl.conf && \
         echo \
@@ -37,9 +36,9 @@ class _libc_commands(Enum):
         emerge-webrsync && \
         emerge dev-vcs/git && \
         emerge --sync musl'
-    """
-
-    uclibc = "/bin/bash -c emerge-webrsync"
+    """,
+    "uclibc": "/bin/bash -c emerge-webrsync",
+}
 
 
 @click.command(name="etest-build")
@@ -59,7 +58,7 @@ class _libc_commands(Enum):
     default="amd64",
     help="Architecture for the built image.",
 )
-@click.option(  # type: ignore[misc]
+@click.option(
     "--environment",
     "--env",
     multiple=True,
@@ -67,7 +66,7 @@ class _libc_commands(Enum):
 )
 @click.option(
     "--libc",
-    type=click.Choice([libc.name for libc in _libc_commands], case_sensitive=False),
+    type=click.Choice(_libc_commands.keys(), case_sensitive=False),
     default="glibc",
     help="libc for the built image.",
 )
@@ -78,14 +77,16 @@ class _libc_commands(Enum):
     help="Path to the Dockerfile.",
 )
 @click.option("--build/--no-build", is_flag=True, default=True, help="Build an image.")
-@click.option("-p", "--push", is_flag=True, default=False, help="Push an image after its built.")
-def main(
+@click.option(
+    "-p", "--push", is_flag=True, default=False, help="Push an image after its built."
+)
+def main(  # pylint: disable=too-many-arguments
     strict: bool,
     hardened: bool,
     multilib: bool,
     systemd: bool,
     architecture: str,
-    environment: List[str],
+    environment: List[str],  # pylint: disable=unused-argument
     libc: str,
     path: str,
     build: bool,
@@ -94,9 +95,9 @@ def main(
     """Build the etest images."""
     profile = Profile(strict, architecture, libc, hardened, multilib, systemd)
 
-    _LOGGER.debug(f"Package architecture: {profile.pkg_arch}.")
-    _LOGGER.debug(f"Docker image: {profile.docker_profile}.")
-    _LOGGER.debug(f"Current profile: {profile.profile}.")
+    _LOGGER.debug("Package architecture: %s.", profile.pkg_arch)
+    _LOGGER.debug("Docker image: %s.", profile.docker_profile)
+    _LOGGER.debug("Current profile: %s.", profile.profile)
 
     if build:
         _build_image(profile, path)
@@ -127,34 +128,37 @@ def _build_image(profile: Profile, path: str) -> None:
             _LOGGER.debug("Stage2 logs:")
             stage2 = docker.container.run(
                 image=f"etest/stage1:{profile.profile}",
-                command=textwrap.dedent(_libc_commands[profile.libc].value),
+                command=textwrap.dedent(_libc_commands[profile.libc]),
                 privileged=True,
                 name=f"stage2-{profile.profile}",
             )
 
             _LOGGER.info("Committing the final image.")
-            docker.container.commit(container=stage2, repository="ebuildtest/etest", tag=profile.profile)
-    except BuildError as e:
+            docker.container.commit(
+                container=stage2, repository="ebuildtest/etest", tag=profile.profile
+            )
+    except BuildError as err:
         _LOGGER.error("Etest encountered an error while building the stage1 image.")
-        _LOGGER.error(f"Reason: {e.msg}")
+        _LOGGER.error("Reason: %s", err.msg)
 
         _LOGGER.error("Logs:")
 
-        for line in e.build_log:
+        for line in err.build_log:
             _LOGGER.error(line.get("stream", line.get("error")))
-        raise e
-    except ContainerError as e:
+
+        raise err
+    except ContainerError as err:
         _LOGGER.error("Etest encountered an error while running the stage2 container.")
 
-        msg = f"Reason: Command '{e.command}' in image '{e.image}'"
-        msg += f" returned non-zero exit status {e.exit_status}:"
+        msg = f"Reason: Command '{err.command}' in image '{err.image}'"
+        msg += f" returned non-zero exit status {err.exit_status}:"
 
         _LOGGER.error(msg)
-        _LOGGER.error(f"{e.stderr}")
+        _LOGGER.error(err.stderr)
 
-        stage2 = e.container
+        stage2 = err.container
 
-        raise e
+        raise err
     finally:
         if stage1:
             _LOGGER.info("Cleaning up stage1 image.")

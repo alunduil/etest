@@ -5,7 +5,6 @@ import shutil
 import signal
 import sys
 import threading
-import typing
 from types import FrameType
 from typing import Optional, Tuple
 
@@ -40,20 +39,22 @@ def echo_check_verbose(check: tests.Test) -> None:
     click.echo()
 
 
-@click.command()  # type: ignore[misc]
-@click.option(  # type: ignore[misc]
+@click.command()
+@click.option(
     "-d",
     "--dry-run",
     is_flag=True,
     default=False,
     help="report actions but do not run tests",
 )
-@click.option("-f", "--fast", is_flag=True, default=False, help="stop at first failure")  # type: ignore[misc]
-@click.option("-j", "--jobs", default=1, help="number of test to run simultaneously")  # type: ignore[misc]
-@click.option("-q", "--quiet", is_flag=True, default=False, help="suppress all output")  # type: ignore[misc]
-@click.option("-v", "--verbose", is_flag=True, default=False, help="provide more output")  # type: ignore[misc]
-@click.version_option(information.VERSION)  # type: ignore[misc]
-@click.argument("ebuilds", nargs=-1)  # type: ignore[misc]
+@click.option("-f", "--fast", is_flag=True, default=False, help="stop at first failure")
+@click.option("-j", "--jobs", default=1, help="number of test to run simultaneously")
+@click.option("-q", "--quiet", is_flag=True, default=False, help="suppress all output")
+@click.option(
+    "-v", "--verbose", is_flag=True, default=False, help="provide more output"
+)
+@click.version_option(information.VERSION)
+@click.argument("ebuilds", nargs=-1)
 def etest(  # pylint: disable=R0913
     dry_run: bool,
     fast: bool,
@@ -129,7 +130,7 @@ def etest(  # pylint: disable=R0913
     sys.exit(len(failures))
 
 
-def sigint_handler(signal: int, frame: Optional[FrameType]) -> None:
+def sigint_handler(_signal: int, _frame: Optional[FrameType]) -> None:
     """Interrupt signal handler."""
     docker.container.CREATE = False
 

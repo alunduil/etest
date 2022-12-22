@@ -12,11 +12,14 @@ import etest.build as sut
 sink_mock = MagicMock()
 
 
-@patch("etest.build.docker.image.build")
-@patch("etest.build.docker.container.run")
-@patch("etest.build.docker.container.commit")
-@patch("etest.build.docker.image.remove")
+# Note for future me: Python decorators are applied from the bottom up
+
+
 @patch("etest.build.docker.container.remove")
+@patch("etest.build.docker.image.remove")
+@patch("etest.build.docker.container.commit")
+@patch("etest.build.docker.container.run")
+@patch("etest.build.docker.image.build")
 def test_nobuild(
     build_mock: MagicMock,
     run_mock: MagicMock,
@@ -30,7 +33,7 @@ def test_nobuild(
     result = runner.invoke(sut.main, ["--no-build", "--verbosity", "DEBUG"])
 
     # Check for errors
-    assert result.exit_code == 0
+    assert result.exit_code == 0  # nosec
 
     # Assert all functions have not been called
     build_mock.assert_not_called()
@@ -40,15 +43,15 @@ def test_nobuild(
     container_remove_mock.assert_not_called()
 
 
-@patch("etest.build.docker.image.build")
-@patch("etest.build.docker.container.run")
-@patch("etest.build.docker.container.commit")
-@patch("etest.build.docker.image.remove")
-@patch("etest.build.docker.container.remove")
-@patch("etest.build.docker.container.create", new=sink_mock)
 @patch("etest.build.docker.pull", new=sink_mock)
-@pytest.mark.parametrize("arch", ["amd64", "x86", "armv5", "armv6", "armv7", "arm64", "ppc64"])
-def test_base_build(
+@patch("etest.build.docker.container.create", new=sink_mock)
+@patch("etest.build.docker.container.remove")
+@patch("etest.build.docker.image.remove")
+@patch("etest.build.docker.container.commit")
+@patch("etest.build.docker.container.run")
+@patch("etest.build.docker.image.build")
+@pytest.mark.parametrize("arch", ["amd64", "x86", "armv5", "armv7", "arm64", "ppc64"])
+def test_base_build(  # pylint: disable=too-many-arguments
     build_mock: MagicMock,
     run_mock: MagicMock,
     commit_mock: MagicMock,
@@ -62,7 +65,7 @@ def test_base_build(
     result = runner.invoke(sut.main, ["--arch", arch, "--verbosity", "DEBUG"])
 
     # Check for errors
-    assert result.exit_code == 0
+    assert result.exit_code == 0  # nosec
 
     # Assert all functions have been called
     build_mock.assert_called_once()
@@ -72,14 +75,14 @@ def test_base_build(
     container_remove_mock.assert_called()
 
 
-@patch("etest.build.docker.image.build")
-@patch("etest.build.docker.container.run")
-@patch("etest.build.docker.container.commit")
-@patch("etest.build.docker.image.remove")
 @patch("etest.build.docker.container.remove")
+@patch("etest.build.docker.image.remove")
+@patch("etest.build.docker.container.commit")
+@patch("etest.build.docker.container.run")
+@patch("etest.build.docker.image.build")
 @pytest.mark.parametrize("libc", ["glibc", "musl", "uclibc"])
 @pytest.mark.parametrize("hardened_option", ["--hardened", "--no-hardened"])
-def test_alternate_libc_build(
+def test_alternate_libc_build(  # pylint: disable=too-many-arguments
     build_mock: MagicMock,
     run_mock: MagicMock,
     commit_mock: MagicMock,
@@ -91,10 +94,12 @@ def test_alternate_libc_build(
     """Ensure images with alternate libcs build correctly."""
     # Run the program
     runner = click.testing.CliRunner()
-    result = runner.invoke(sut.main, ["--libc", libc, hardened_option, "--verbosity", "DEBUG"])
+    result = runner.invoke(
+        sut.main, ["--libc", libc, hardened_option, "--verbosity", "DEBUG"]
+    )
 
     # Check for errors
-    assert result.exit_code == 0
+    assert result.exit_code == 0  # nosec
 
     # Assert all functions have been called
     build_mock.assert_called_once()
@@ -109,7 +114,7 @@ def test_help() -> None:
     runner = click.testing.CliRunner()
     result = runner.invoke(sut.main, ["--help"])
 
-    assert result.exit_code == 0
+    assert result.exit_code == 0  # nosec
 
 
 def test_builderror() -> None:
@@ -124,16 +129,20 @@ def test_builderror() -> None:
         result = runner.invoke(sut.main, ["--verbosity", "DEBUG"])
 
         # Check if it triggered an error
-        assert result.exit_code == 1
+        assert result.exit_code == 1  # nosec
 
         # Assert all functions have been called
         build_mock.assert_called_once()
 
 
-@patch("etest.build.docker.image.build")
-@patch("etest.build.docker.image.remove")
 @patch("etest.build.docker.container.remove")
-def test_cleanup(build_mock: MagicMock, image_remove_mock: MagicMock, container_remove_mock: MagicMock) -> None:
+@patch("etest.build.docker.image.remove")
+@patch("etest.build.docker.image.build")
+def test_cleanup(
+    build_mock: MagicMock,
+    image_remove_mock: MagicMock,
+    container_remove_mock: MagicMock,
+) -> None:
     """Ensure cleaning happens after exceptions."""
     # Raise a ContainerError
     error = docker.errors.ContainerError(
@@ -152,7 +161,7 @@ def test_cleanup(build_mock: MagicMock, image_remove_mock: MagicMock, container_
         result = runner.invoke(sut.main, ["--verbosity", "DEBUG"])
 
         # Check if it triggered an error
-        assert result.exit_code == 1
+        assert result.exit_code == 1  # nosec
 
         # Assert all functions have been called
         build_mock.assert_called_once()
@@ -169,13 +178,7 @@ def test_push(push_mock: MagicMock) -> None:
     result = runner.invoke(sut.main, ["--no-build", "--push", "--verbosity", "DEBUG"])
 
     # Check for errors
-    assert result.exit_code == 0
-
-    # Check if logging is handled correctly
-    # out_debug = [o for o in result.output.splitlines() if "debug" in o]
-
-    # assert "debug: pushing..." in out_debug
-    # assert "debug: finished." in out_debug
+    assert result.exit_code == 0  # nosec
 
     # Check if the program tried pushing
-    assert push_mock.asssert_called_once()
+    assert push_mock.asssert_called_once()  # nosec
