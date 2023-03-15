@@ -208,7 +208,6 @@ class Tests:  # pylint: disable=R0903
             if not self.ebuild_selector or any(
                 _ in ebuild.cpv for _ in self.ebuild_selector
             ):
-
                 use_flags = list(ebuild.use_flags)
                 if "test" in use_flags:
                     use_flags.remove("test")
